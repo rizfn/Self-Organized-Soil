@@ -18,6 +18,6 @@ Possible avenues for exploration include:
 The top-level directory contains two folders of interest:
 
 * `src`, which contains all the source code used for the simulations
-* `docs`, which contains code for the visualizations (and perhaps documentation?) on the [webpage](rizfn.github.io/Masters-Thesis/)
+* `docs`, which contains code for the visualizations (and perhaps documentation?) on the [webpage](https://rizfn.github.io/Masters-Thesis/)
 
 
