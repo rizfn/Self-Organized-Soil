@@ -13,5 +13,11 @@ Possible avenues for exploration include:
 * Power-laws in cell-genomics (and perhaps metabolism too)
 * Ubiquity of log-normal distribution in biology
 
+## Directory Structure
+
+The top-level directory contains two folders of interest:
+
+* `src`, which contains all the source code used for the simulations
+* `docs`, which contains code for the visualizations (and perhaps documentation?) on the [webpage](rizfn.github.io/Masters-Thesis/)
 
 
