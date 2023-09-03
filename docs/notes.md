@@ -1,5 +1,3 @@
-
-<script type="module" src="https://md-block.verou.me/md-block.js"></script>
 ## Meeting 1: 1st September, 2023
 
 Two species of cellular automata: one which is big (2x2) and one which is (1x1)
@@ -19,3 +17,4 @@ Calculate the density and fraction of soil-vacant walls.
 Tuesday afternoon: Group meetings
 
 Wednesday 10:30: Guest Lectures
+
