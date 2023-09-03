@@ -1,5 +1,6 @@
 import numpy as np
 from numba import njit
+from tqdm import tqdm
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
@@ -78,16 +79,17 @@ def update(soil_lattice, L, r, d, s):
     None
     """
 
+    # fill every empty lattice site with soil
+    empty_sites = np.argwhere(soil_lattice == 0)
+    for empty_site in empty_sites:
+        if np.random.rand() < s:
+            soil_lattice[empty_site[0], empty_site[1]] = 1
+    
     # find bacteria sites
     bacteria_sites = np.argwhere(soil_lattice == 2)
 
     # check if there are no bacteria left
     if len(bacteria_sites) == 0:
-        # fill every empty lattice site with soil
-        empty_sites = np.argwhere(soil_lattice == 0)
-        for empty_site in empty_sites:
-            if np.random.rand() < s:
-                soil_lattice[empty_site[0], empty_site[1]] = 1
         return
 
     # choose a random bacteria site
@@ -120,31 +122,32 @@ def update(soil_lattice, L, r, d, s):
 
     # NOTE: when the new site is a bacteria, nothing happens
     #       in effect, the bacteria overwrite each other, like they're "eating" each other
-
-    # fill every empty lattice site with soil
-    empty_sites = np.argwhere(soil_lattice == 0)
-    for empty_site in empty_sites:
-        if np.random.rand() < s:
-            soil_lattice[empty_site[0], empty_site[1]] = 1
     
 
 def main():
 
     # initialize the parameters
-    n_steps = 1000  # number of bacteria moves
+    n_steps = 1_000_000  # number of bacteria moves
     L = 10  # side length of the square lattice
     N = 10  # initial number of bacteria
     r = 1  # reproduction rate
     d = 1  # death rate
-    s = 0.01  # soil filling rate
+    s = 0.02  # soil filling rate
     soil_lattice = init_lattice(L, N)
-    soil_lattice_data = np.zeros((n_steps+1, L, L), dtype=np.int8)
+
+    n_frames = 100  # number of potential frames in the animation (will be less in practice because only unique frames are saved)
+    datasteps = np.geomspace(1, n_steps, n_frames, dtype=np.int32)  # steps at which to save the data
+    datasteps = np.unique(datasteps)  # remove duplicates
+    n_frames = len(datasteps)  # update the number of frames
+
+    soil_lattice_data = np.zeros((len(datasteps), L, L), dtype=np.int8)
     soil_lattice_data[0] = soil_lattice
 
     # run the simulation
-    for step in range(1, n_steps+1):
+    for step in tqdm(range(1, n_steps+1)):
         update(soil_lattice, L, r, d, s)
-        soil_lattice_data[step] = soil_lattice
+        if step in datasteps:
+            soil_lattice_data[np.where(datasteps == step)] = soil_lattice
 
     # animate the lattice
     fig, ax = plt.subplots()
@@ -153,12 +156,16 @@ def main():
     ax.set_xticklabels([])
     ax.set_yticklabels([])
     ax.grid(which='minor', linewidth=2)
+    ax.set_title(f"{L=}, {r=:.2f}, {d=:.2f}, {s=:.2f}\nstep {datasteps[0]}")
     im = ax.imshow(soil_lattice_data[0], cmap="cubehelix_r", vmin=0, vmax=2)
     def animate(i):
+        ax.set_title(f"{L=}, {r=:.2f}, {d=:.2f}, {s=:.2f}\nstep {datasteps[i]}")
         im.set_data(soil_lattice_data[i])
         return im,
-    ani = animation.FuncAnimation(fig, animate, frames=n_steps+1, interval=1000, blit=True)
-    ani.save("src/single_species_RW/single_species_RW.gif", fps=4)
+    ani = animation.FuncAnimation(fig, animate, frames=n_frames, interval=1000, blit=True)
+    ani.save("src/single_species_RW/single_species_logspace.gif", fps=1)
+
+    
 
 if __name__ == "__main__":
     main()
