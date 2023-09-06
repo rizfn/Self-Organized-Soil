@@ -1,19 +1,33 @@
-.body {
+body {
     margin: 0;
     padding: 0;
 }
 
-svg {
-    margin: 0;
-}
-
-div {
+.viz-section {
     display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #raster {
-    display: flex;
     flex-direction: column;
+}
+
+.popup {
+    opacity: 0;
+    position: absolute;
+    left: innerWidth/2 - 50px;
+    top: innerHeight/2 - 50px;
+    width: 200px;
+    height: 100px;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 50px;
+    text-align: center;
+    font-size: 50px;
+    font-family: sans-serif;
+    line-height: 100px;
+    z-index: 1;
 }
 
 .tooltip {

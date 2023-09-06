@@ -1,6 +1,13 @@
 const { default: data } = await import("../data/soil_lattice_data.json", { assert: { type: "json" } });
 
 
+// on spacebar, call refilterdata
+document.addEventListener('keydown', function(event) {
+	if (event.code === 'Space') {
+		refilter_data()
+	}
+});
+
 function calculateNeighbours(c, L) {
 	return [[(c[0]-1+L)%L, c[1]], [(c[0]+1)%L, c[1]], [c[0], (c[1]-1+L)%L], [c[0], (c[1]+1)%L]];
 }
@@ -36,9 +43,9 @@ data.forEach((d) => {
 console.log(data);
 
 
+let step = 1000
 
-
-const filtereddata = data.filter(function(d){ return d.step == 1000 });
+let filtereddata = data.filter(function(d){ return d.step == step });
 
 console.log(filtereddata);
 
@@ -181,7 +188,7 @@ svg_soil.selectAll(".cell")
 		.on("mousedown", mousedown);
 
 
-const soil_lattice_size = innerWidth/2.1
+const soil_lattice_size = Math.min(innerWidth/2.1, innerHeight)
 
 var svg_lattice = d3.select("div#lattice")
 	.append("svg")
@@ -211,10 +218,11 @@ function color_lattice(d) {
 	}
 }
 
+const init_lattice = Array(10).fill().map(() => Array(10).fill(0));
 
 
 svg_lattice.selectAll("g.row")
-	.data(filtereddata[0].soil_lattice)
+	.data(init_lattice)
 	.enter()
 	.append("g")
 	.attr("class", "row")
@@ -243,7 +251,55 @@ function update_soil_lattice(soil_lattice) {
 	svg_lattice.selectAll("g.row")
 		.data(soil_lattice)
 		.selectAll("rect")
-		.data(function(d, i) {console.log(d, i);return d;})
+		.data(function(d, i) {return d;})
 		.transition(t)
 		.attr("fill", function(d){return color_lattice(d);});
+}
+
+function refilter_data() {
+	
+	const t = d3.transition().duration(750)
+
+	console.log('Refiltering data')
+
+	if (step == 100) {
+		step = 1000
+	}
+	else if (step == 1000) {
+		step = 10000
+	}
+	else if (step == 10000) {
+		step = 100000
+	}
+	else if (step == 100000) {
+		step = 100
+	}
+
+	filtereddata = data.filter(function(d){ return d.step == step });
+
+	// add a 0.5s popup window  to show the current step
+	var popup = d3.select("div#visualization")
+		.append("div")
+		.attr("class", "popup")	
+		.html(step)
+		.transition(t)
+		.style("opacity", 1)
+		.transition(t)
+		.style("opacity", 0)
+		.remove();
+
+	// update the heatmap
+	svg.selectAll(".cell")
+		.data(filtereddata)
+		.transition(t)
+		.style("fill", function(d) { return colors(d.soil_boundaries)} )
+
+	// update the rgb heatmap
+	svg_soil.selectAll(".cell")
+		.data(filtereddata)
+		.transition(t)
+		.style("fill", function(d) { return "rgb(" + d.soil*255 + "," + d.vacancy*255 + "," + d.bacteria*255 + ")" } )
+
+
+	// todo: update the lattice
 }
