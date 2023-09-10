@@ -119,6 +119,13 @@ def update(soil_lattice, L, r, d, s):
                 if np.random.rand() < r:
                     soil_lattice[empty_site[0], empty_site[1]] = 2
 
+    # # check if the new site is a bacteria
+    # elif new_site_value == 2:
+    #     # keep both with bacteria
+    #     soil_lattice[new_site[0], new_site[1]] = 2
+    #     soil_lattice[site[0], site[1]] = 2
+
+
     # NOTE: when the new site is a bacteria, nothing happens
     #       in effect, the bacteria overwrite each other, like they're "eating" each other
     
@@ -129,9 +136,9 @@ def main():
     n_steps = 100_000  # number of bacteria moves
     L = 10  # side length of the square lattice
     N = 10  # initial number of bacteria
-    r = 1  # reproduction rate
+    r = 0.5  # reproduction rate
     d = np.linspace(0, 1, 100)  # death rate
-    s = np.linspace(0, 1, 100)  # soil filling rate
+    s = np.linspace(0, 0.5, 100)  # soil filling rate
     soil_lattice_data = []
 
     for d_i in tqdm(d):
@@ -145,7 +152,7 @@ def main():
     soil_lattice_data = pd.DataFrame(soil_lattice_data)
 
     # save the data
-    soil_lattice_data.to_json("docs/data/soil_lattice_data.json", orient="records")
+    soil_lattice_data.to_json(f"docs/data/soil_lattice_data_{r=}.json", orient="records")
     
 
 if __name__ == "__main__":

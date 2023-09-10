@@ -1,4 +1,4 @@
-const { default: data } = await import("../data/soil_lattice_data.json", { assert: { type: "json" } });
+const { default: data } = await import("../data/soil_lattice_data_r=0.5.json", { assert: { type: "json" } });
 
 
 // on spacebar, call refilterdata
