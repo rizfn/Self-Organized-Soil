@@ -45,12 +45,6 @@ def init_lattice(L, N):
     #   0 = empty
     #   1 = soil
     #   2 = bacteria
-    # set half the sites to 0
-    empty_sites = np.random.choice(L*L, size=L*L//2, replace=False)
-    for site in empty_sites:
-        row = site // L
-        col = site % L
-        soil_lattice[row, col] = 0
     # choose random sites to place N bacteria
     sites = np.random.choice(L*L, size=N, replace=False)
     # place bacteria on the lattice
@@ -85,28 +79,11 @@ def update(soil_lattice, L, r, d, s):
     None
     """
 
-    # NEW SOIL FILLING MECHANICS
-    n_sites_to_fill = s * L**2
-    # randomly choose n_sites_to_fill on the lattice
-    sites_to_fill = np.random.choice(L*L, size=int(n_sites_to_fill), replace=False)
-    # fill the sites
-    for site in sites_to_fill:
-        row = site // L
-        col = site % L
-        if soil_lattice[row, col] == 0:
-            soil_lattice[row, col] = 1
-
-    # NEW DEATH MECHANICS
-    n_sites_to_kill = d * L**2
-    # randomly choose n_sites_to_fill on the lattice
-    sites_to_kill = np.random.choice(L*L, size=int(n_sites_to_kill), replace=False)
-    # kill the sites
-    for site in sites_to_kill:
-        row = site // L
-        col = site % L
-        if soil_lattice[row, col] == 2:
-            soil_lattice[row, col] = 0
-
+    # fill every empty lattice site with soil
+    empty_sites = np.argwhere(soil_lattice == 0)
+    for empty_site in empty_sites:
+        if np.random.rand() < s:
+            soil_lattice[empty_site[0], empty_site[1]] = 1
     
     # find bacteria sites
     bacteria_sites = np.argwhere(soil_lattice == 2)
@@ -117,7 +94,7 @@ def update(soil_lattice, L, r, d, s):
 
     # choose a random bacteria site
     site = bacteria_sites[np.random.randint(len(bacteria_sites))]
-    # select a random neighbour
+    # move to a random neighbour
     new_site = neighbours(site, L)[np.random.randint(4)]
     # check the value of the new site
     new_site_value = soil_lattice[new_site[0], new_site[1]]
@@ -125,22 +102,26 @@ def update(soil_lattice, L, r, d, s):
     soil_lattice[new_site[0], new_site[1]] = 2
     soil_lattice[site[0], site[1]] = 0
 
+    # check if the new site was empty
+    if new_site_value == 0:
+        # check if the bacteria dies
+        if np.random.rand() < d:
+            soil_lattice[new_site[0], new_site[1]] = 0
+
     # check if the new site is soil
-    if new_site_value == 1:
+    elif new_site_value == 1:
         # find neighbouring sites
         neighbours_sites = neighbours(new_site, L)
-        for nbr in neighbours_sites:  # todo: Optimize
-            if (nbr[0], nbr[1]) != (site[0], site[1]):
-                if soil_lattice[nbr[0], nbr[1]] == 0:
-                    if np.random.rand() < r:
-                        soil_lattice[nbr[0], nbr[1]] = 2
-                        break
+        # filter for empty sites
+        empty_sites = [[nbr[0], nbr[1]] if soil_lattice[nbr[0], nbr[1]] == 0 else None for nbr in neighbours_sites]
+        # for each empty site, check if a new bacteria is born
+        for empty_site in empty_sites:
+            if empty_site is not None:
+                if np.random.rand() < r:
+                    soil_lattice[empty_site[0], empty_site[1]] = 2
 
-    # check if the new site is a bacteria
-    elif new_site_value == 2:
-        # keep both with bacteria (undo the vacant space in original site)
-        soil_lattice[site[0], site[1]] = 2
-
+    # NOTE: when the new site is a bacteria, nothing happens
+    #       in effect, the bacteria overwrite each other, like they're "eating" each other
     
 
 def main():
@@ -148,10 +129,10 @@ def main():
     # initialize the parameters
     n_steps = 1_000_000  # number of bacteria moves
     L = 10  # side length of the square lattice
-    N = int(L**2 / 10)  # initial number of bacteria
+    N = 10  # initial number of bacteria
     r = 1  # reproduction rate
-    d = 0.02  # death rate
-    s = 0.1  # soil filling rate
+    d = 1  # death rate
+    s = 0.02  # soil filling rate
     soil_lattice = init_lattice(L, N)
 
     n_frames = 100  # number of potential frames in the animation (will be less in practice because only unique frames are saved)
@@ -182,7 +163,7 @@ def main():
         im.set_data(soil_lattice_data[i])
         return im,
     ani = animation.FuncAnimation(fig, animate, frames=n_frames, interval=1000, blit=True)
-    ani.save("src/single_species_RW/single_species_logspace.gif", fps=1)
+    ani.save("src/single_species_RW/old_RW_anim.gif", fps=1)
 
     
 
