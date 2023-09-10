@@ -18,3 +18,9 @@ Tuesday afternoon: Group meetings
 
 Wednesday 10:30: Guest Lectures
 
+
+## Meeting 2:
+
+Do a plot of characteristics over time to look for oscillation.
+
+Do it with random connections, and then you can use a mean-field comparison. Compare DEs to the solution.
