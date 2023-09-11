@@ -1,7 +1,7 @@
 const { default: data } = await import("../data/single_species/soil_lattice_data_r=1.json", { assert: { type: "json" } });
 
 // check if mobile
-if (typeof screen.orientation == 'undefined') {
+if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
 	// add a button to run refilterdata
 	var button = d3.select("div#lattice")
 		.append("button")
