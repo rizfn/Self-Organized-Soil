@@ -144,7 +144,7 @@ def main():
     N = int(L**2 / 10)  # initial number of bacteria
     r = 1  # reproduction rate
     d = 0.02  # death rate
-    s = 0.05  # soil filling rate
+    s = 0.02  # soil filling rate
     soil_lattice = init_lattice(L, N)
 
     n_frames = 100  # number of potential frames in the animation (will be less in practice because only unique frames are saved)
@@ -161,21 +161,21 @@ def main():
         if step in datasteps:
             soil_lattice_data[np.where(datasteps == step)] = soil_lattice
 
-    # animate the lattice
-    fig, ax = plt.subplots()
-    ax.set_xticks(np.arange(-.5, L, 1), minor=True)
-    ax.set_yticks(np.arange(-.5, L, 1), minor=True)
-    ax.set_xticklabels([])
-    ax.set_yticklabels([])
-    ax.grid(which='minor', linewidth=1)
-    ax.set_title(f"{L=}, {r=:.2f}, {d=:.2f}, {s=:.2f}\nstep {datasteps[0]}")
-    im = ax.imshow(soil_lattice_data[0], cmap="cubehelix_r", vmin=0, vmax=2)
-    def animate(i):
-        ax.set_title(f"{L=}, {r=:.2f}, {d=:.2f}, {s=:.2f}\nstep {datasteps[i]}")
-        im.set_data(soil_lattice_data[i])
-        return im,
-    ani = animation.FuncAnimation(fig, animate, frames=n_frames, interval=1000, blit=True)
-    ani.save("src/single_species_RW/single_species_logspace.gif", fps=1)
+    # # animate the lattice
+    # fig, ax = plt.subplots()
+    # ax.set_xticks(np.arange(-.5, L, 1), minor=True)
+    # ax.set_yticks(np.arange(-.5, L, 1), minor=True)
+    # ax.set_xticklabels([])
+    # ax.set_yticklabels([])
+    # ax.grid(which='minor', linewidth=1)
+    # ax.set_title(f"{L=}, {r=:.2f}, {d=:.2f}, {s=:.2f}\nstep {datasteps[0]}")
+    # im = ax.imshow(soil_lattice_data[0], cmap="cubehelix_r", vmin=0, vmax=2)
+    # def animate(i):
+    #     ax.set_title(f"{L=}, {r=:.2f}, {d=:.2f}, {s=:.2f}\nstep {datasteps[i]}")
+    #     im.set_data(soil_lattice_data[i])
+    #     return im,
+    # ani = animation.FuncAnimation(fig, animate, frames=n_frames, interval=1000, blit=True)
+    # ani.save("src/single_species_RW/single_species_logspace.gif", fps=1)
 
     # plot the number of bacteria, soil, and empty sites as a function of time
     n_bacteria = np.zeros(n_frames, dtype=np.int32)
