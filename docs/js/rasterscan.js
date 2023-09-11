@@ -118,8 +118,12 @@ var Tooltip = d3.select("div#raster")
 		.style("stroke", "none")
 	}
 
+let current_soil_lattice_state = {"d": 0, "s": 0};
+
 // create a heatmap on mouseclick
 var mousedown = function(event, d) {
+	current_soil_lattice_state = {"d": d.d, "s": d.s};
+	console.log(current_soil_lattice_state);
 	update_soil_lattice(d.soil_lattice)
 }
 
@@ -302,6 +306,7 @@ function refilter_data() {
 		.transition(t)
 		.style("fill", function(d) { return "rgb(" + d.soil*255 + "," + d.vacancy*255 + "," + d.bacteria*255 + ")" } )
 
-
-	// todo: update the lattice
+	const soil_lattice = filtereddata.filter(function(d) {return d.d == current_soil_lattice_state.d && d.s == current_soil_lattice_state.s})[0].soil_lattice
+	// update the lattice
+	update_soil_lattice(soil_lattice)
 }
