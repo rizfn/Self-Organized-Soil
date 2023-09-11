@@ -1,4 +1,4 @@
-const { default: data } = await import("../data/soil_lattice_data_r=0.5.json", { assert: { type: "json" } });
+const { default: data } = await import("../data/single_species/soil_lattice_data_r=1.json", { assert: { type: "json" } });
 
 
 // on spacebar, call refilterdata
@@ -188,6 +188,8 @@ svg_soil.selectAll(".cell")
 		.on("mousedown", mousedown);
 
 
+const L = filtereddata[0].soil_lattice.length;
+
 const soil_lattice_size = Math.min(innerWidth/2.1, innerHeight)
 
 var svg_lattice = d3.select("div#lattice")
@@ -198,13 +200,13 @@ var svg_lattice = d3.select("div#lattice")
 
 var x_lattice = d3.scaleBand()
 	.range([0, soil_lattice_size])
-	.domain([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+	.domain(Array.from(Array(L).keys()))
 	.padding(0.05);
 	
 
 var y_lattice = d3.scaleBand()
 	.range([soil_lattice_size, 0])
-	.domain([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+	.domain(Array.from(Array(L).keys()))
 	.padding(0.05);
 
 
@@ -218,7 +220,7 @@ function color_lattice(d) {
 	}
 }
 
-const init_lattice = Array(10).fill().map(() => Array(10).fill(0));
+const init_lattice = Array(L).fill().map(() => Array(L).fill(0));
 
 
 svg_lattice.selectAll("g.row")

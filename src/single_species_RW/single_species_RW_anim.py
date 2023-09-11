@@ -86,28 +86,21 @@ def update(soil_lattice, L, r, d, s):
     """
 
     # NEW SOIL FILLING MECHANICS
-    n_sites_to_fill = s * L**2
-    # randomly choose n_sites_to_fill on the lattice
-    sites_to_fill = np.random.choice(L*L, size=int(n_sites_to_fill), replace=False)
-    # fill the sites
-    for site in sites_to_fill:
-        row = site // L
-        col = site % L
-        if soil_lattice[row, col] == 0:
-            soil_lattice[row, col] = 1
+    empty_sites = np.argwhere(soil_lattice == 0)
+    should_be_filled = np.random.rand(len(empty_sites)) < s
+    for i, site in enumerate(empty_sites):
+        if should_be_filled[i]:
+            soil_lattice[site[0], site[1]] = 1
 
     # NEW DEATH MECHANICS
-    n_sites_to_kill = d * L**2
-    # randomly choose n_sites_to_fill on the lattice
-    sites_to_kill = np.random.choice(L*L, size=int(n_sites_to_kill), replace=False)
-    # kill the sites
-    for site in sites_to_kill:
-        row = site // L
-        col = site % L
-        if soil_lattice[row, col] == 2:
-            soil_lattice[row, col] = 0
-
+    # find all sites which have bacteria
+    bacteria_sites = np.argwhere(soil_lattice == 2)
+    should_be_killed = np.random.rand(len(bacteria_sites)) < d
+    for i, site in enumerate(bacteria_sites):
+        if should_be_killed[i]:
+            soil_lattice[site[0], site[1]] = 0
     
+
     # find bacteria sites
     bacteria_sites = np.argwhere(soil_lattice == 2)
 
@@ -147,11 +140,11 @@ def main():
 
     # initialize the parameters
     n_steps = 1_000_000  # number of bacteria moves
-    L = 10  # side length of the square lattice
+    L = 20  # side length of the square lattice
     N = int(L**2 / 10)  # initial number of bacteria
     r = 1  # reproduction rate
     d = 0.02  # death rate
-    s = 0.1  # soil filling rate
+    s = 0.05  # soil filling rate
     soil_lattice = init_lattice(L, N)
 
     n_frames = 100  # number of potential frames in the animation (will be less in practice because only unique frames are saved)
@@ -174,7 +167,7 @@ def main():
     ax.set_yticks(np.arange(-.5, L, 1), minor=True)
     ax.set_xticklabels([])
     ax.set_yticklabels([])
-    ax.grid(which='minor', linewidth=2)
+    ax.grid(which='minor', linewidth=1)
     ax.set_title(f"{L=}, {r=:.2f}, {d=:.2f}, {s=:.2f}\nstep {datasteps[0]}")
     im = ax.imshow(soil_lattice_data[0], cmap="cubehelix_r", vmin=0, vmax=2)
     def animate(i):
@@ -183,6 +176,26 @@ def main():
         return im,
     ani = animation.FuncAnimation(fig, animate, frames=n_frames, interval=1000, blit=True)
     ani.save("src/single_species_RW/single_species_logspace.gif", fps=1)
+
+    # plot the number of bacteria, soil, and empty sites as a function of time
+    n_bacteria = np.zeros(n_frames, dtype=np.int32)
+    n_soil = np.zeros(n_frames, dtype=np.int32)
+    n_empty = np.zeros(n_frames, dtype=np.int32)
+    for i, step in enumerate(datasteps):
+        n_bacteria[i] = np.count_nonzero(soil_lattice_data[i] == 2)
+        n_soil[i] = np.count_nonzero(soil_lattice_data[i] == 1)
+        n_empty[i] = np.count_nonzero(soil_lattice_data[i] == 0)
+    fig, ax = plt.subplots()
+    ax.plot(datasteps, n_bacteria, label="bacteria")
+    ax.plot(datasteps, n_soil, label="soil")
+    ax.plot(datasteps, n_empty, label="empty")
+    ax.set_title(f"{L=}, {r=:.2f}, {d=:.2f}, {s=:.2f}")
+    ax.set_xscale("log")
+    ax.set_xlabel("step")
+    ax.set_ylabel("number of sites")
+    ax.legend()
+    # save figure
+    fig.savefig("src/single_species_RW/single_species_time_ev.png", dpi=300)
 
     
 

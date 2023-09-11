@@ -13,13 +13,13 @@ In the animation:
 
 Every time step:
 
+* select all empty sites, and fill each one with a probability $s$
+* select all bacteria sites, and kill each one with a probability $d$
 * select a bacteria, and select an adjacent location
 * if the adjacent location is another bacteria, do nothing
 * if the adjacent location is space, move the bacteria
 * if the adjacent location is soil, move the bacteria
 * if the soil had at least one vacant neighbour before the move, attempt to reproduce into that neighbour with probability $r$
-* randomly select $d$% of lattice sites, and if they're bacteria kill them off
-* randomly select $s$% of lattice sites, and if they're vacant fill them with soil
 
 
 

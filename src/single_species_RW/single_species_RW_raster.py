@@ -22,6 +22,7 @@ def neighbours(c, L):
 
     return np.array([[(c[0]-1)%L, c[1]], [(c[0]+1)%L, c[1]], [c[0], (c[1]-1)%L], [c[0], (c[1]+1)%L]])
 
+
 @njit
 def init_lattice(L, N):
     """Initialize the lattice with N bacteria randomly placed on the lattice.
@@ -44,6 +45,12 @@ def init_lattice(L, N):
     #   0 = empty
     #   1 = soil
     #   2 = bacteria
+    # set half the sites to 0
+    empty_sites = np.random.choice(L*L, size=L*L//2, replace=False)
+    for site in empty_sites:
+        row = site // L
+        col = site % L
+        soil_lattice[row, col] = 0
     # choose random sites to place N bacteria
     sites = np.random.choice(L*L, size=N, replace=False)
     # place bacteria on the lattice
@@ -54,7 +61,6 @@ def init_lattice(L, N):
     return soil_lattice
 
 
-@njit
 def update(soil_lattice, L, r, d, s):
     """Update the lattice. Called once every timestep.
 
@@ -78,12 +84,21 @@ def update(soil_lattice, L, r, d, s):
     None
     """
 
-    # fill every empty lattice site with soil
+    # NEW SOIL FILLING MECHANICS
     empty_sites = np.argwhere(soil_lattice == 0)
-    for empty_site in empty_sites:
-        if np.random.rand() < s:
-            soil_lattice[empty_site[0], empty_site[1]] = 1
+    should_be_filled = np.random.rand(len(empty_sites)) < s
+    for i, site in enumerate(empty_sites):
+        if should_be_filled[i]:
+            soil_lattice[site[0], site[1]] = 1
+
+    # NEW DEATH MECHANICS
+    bacteria_sites = np.argwhere(soil_lattice == 2)
+    should_be_killed = np.random.rand(len(bacteria_sites)) < d
+    for i, site in enumerate(bacteria_sites):
+        if should_be_killed[i]:
+            soil_lattice[site[0], site[1]] = 0
     
+
     # find bacteria sites
     bacteria_sites = np.argwhere(soil_lattice == 2)
 
@@ -93,7 +108,7 @@ def update(soil_lattice, L, r, d, s):
 
     # choose a random bacteria site
     site = bacteria_sites[np.random.randint(len(bacteria_sites))]
-    # move to a random neighbour
+    # select a random neighbour
     new_site = neighbours(site, L)[np.random.randint(4)]
     # check the value of the new site
     new_site_value = soil_lattice[new_site[0], new_site[1]]
@@ -101,44 +116,32 @@ def update(soil_lattice, L, r, d, s):
     soil_lattice[new_site[0], new_site[1]] = 2
     soil_lattice[site[0], site[1]] = 0
 
-    # check if the new site was empty
-    if new_site_value == 0:
-        # check if the bacteria dies
-        if np.random.rand() < d:
-            soil_lattice[new_site[0], new_site[1]] = 0
-
     # check if the new site is soil
-    elif new_site_value == 1:
+    if new_site_value == 1:
         # find neighbouring sites
         neighbours_sites = neighbours(new_site, L)
-        # filter for empty sites
-        empty_sites = [[nbr[0], nbr[1]] if soil_lattice[nbr[0], nbr[1]] == 0 else None for nbr in neighbours_sites]
-        # for each empty site, check if a new bacteria is born
-        for empty_site in empty_sites:
-            if empty_site is not None:
-                if np.random.rand() < r:
-                    soil_lattice[empty_site[0], empty_site[1]] = 2
+        for nbr in neighbours_sites:  # todo: Optimize
+            if (nbr[0], nbr[1]) != (site[0], site[1]):
+                if soil_lattice[nbr[0], nbr[1]] == 0:
+                    if np.random.rand() < r:
+                        soil_lattice[nbr[0], nbr[1]] = 2
+                        break
 
-    # # check if the new site is a bacteria
-    # elif new_site_value == 2:
-    #     # keep both with bacteria
-    #     soil_lattice[new_site[0], new_site[1]] = 2
-    #     soil_lattice[site[0], site[1]] = 2
+    # check if the new site is a bacteria
+    elif new_site_value == 2:
+        # keep both with bacteria (undo the vacant space in original site)
+        soil_lattice[site[0], site[1]] = 2
 
-
-    # NOTE: when the new site is a bacteria, nothing happens
-    #       in effect, the bacteria overwrite each other, like they're "eating" each other
-    
 
 def main():
 
     # initialize the parameters
     n_steps = 100_000  # number of bacteria moves
-    L = 10  # side length of the square lattice
-    N = 10  # initial number of bacteria
-    r = 0.5  # reproduction rate
-    d = np.linspace(0, 1, 100)  # death rate
-    s = np.linspace(0, 0.5, 100)  # soil filling rate
+    L = 20  # side length of the square lattice
+    N = int(L**2 / 10)  # initial number of bacteria
+    r = 1  # reproduction rate
+    d = np.linspace(0, 0.05, 20)  # death rate
+    s = np.linspace(0, 0.05, 20)  # soil filling rate
     soil_lattice_data = []
 
     for d_i in tqdm(d):
@@ -152,7 +155,7 @@ def main():
     soil_lattice_data = pd.DataFrame(soil_lattice_data)
 
     # save the data
-    soil_lattice_data.to_json(f"docs/data/soil_lattice_data_{r=}.json", orient="records")
+    soil_lattice_data.to_json(f"docs/data/single_species/soil_lattice_data_{r=}.json", orient="records")
     
 
 if __name__ == "__main__":
