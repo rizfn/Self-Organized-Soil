@@ -24,3 +24,18 @@ Wednesday 10:30: Guest Lectures
 Do a plot of characteristics over time to look for oscillation.
 
 Do it with random connections, and then you can use a mean-field comparison. Compare DEs to the solution.
+
+## Meeting 3:
+
+Logscale x and y
+
+Asymmetry: bacteria ned to live longer than the holes
+
+Check newrepro rate and reset simulation
+
+**Every time step: move all bacteria**: Set a number of bacteria to move every time step, each can move multiple times. One movement per bacteria
+
+Calculate cluster size distribution.
+
+Do log-log axes on heatmap viz
+
