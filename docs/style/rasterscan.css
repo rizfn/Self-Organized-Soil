@@ -13,6 +13,10 @@ body {
     flex-direction: column;
 }
 
+#lattice {
+    flex-direction: column;
+}
+
 .popup {
     opacity: 0;
     position: absolute;

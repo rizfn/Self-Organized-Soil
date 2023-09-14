@@ -1,4 +1,5 @@
 const { default: data } = await import("../data/single_species/soil_lattice_data_r=1.json", { assert: { type: "json" } });
+// const { default: data } = await import("../data/single_species/old_RW_r=0.5.json", { assert: { type: "json" } });
 
 // check if mobile
 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
