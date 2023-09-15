@@ -15,11 +15,12 @@ Every time step:
 
 * select all empty sites, and fill each one with a probability $s$
 * select all bacteria sites, and kill each one with a probability $d$
-* select a bacteria, and select an adjacent location
-* if the adjacent location is another bacteria, do nothing
-* if the adjacent location is space, move the bacteria
-* if the adjacent location is soil, move the bacteria
-* if the soil had at least one vacant neighbour before the move, attempt to reproduce into that neighbour with probability $r$
+* Perform one 'move' for every bacteria in the system. A move consists of:
+  * select a bacteria, and select an adjacent location
+  * if the adjacent location is another bacteria, do nothing
+  * if the adjacent location is space, move the bacteria
+  * if the adjacent location is soil, move the bacteria
+  * if the soil had at least one vacant neighbour before the move, attempt to reproduce into that neighbour with probability $r$
 
 
 
@@ -27,7 +28,7 @@ Every time step:
 
 Every time step:
 
-* select a bacteria, and move it to an adjacent location, leaving behind vacant space
+* select a single bacteria, and move it to an adjacent location, leaving behind vacant space
 * if the adjacent location is soil, the bacteria reproduces with a probability $r$ for each vacant space around it
 * if the adjacent location is vacant space, the bacteria dies with a probability $d$
 * vacant spaces are randomly filled with a probability $s$

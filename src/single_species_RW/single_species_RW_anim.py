@@ -104,47 +104,42 @@ def update(soil_lattice, L, r, d, s):
     # find bacteria sites
     bacteria_sites = np.argwhere(soil_lattice == 2)
 
-    # check if there are no bacteria left
-    if len(bacteria_sites) == 0:
-        return
+    for site in bacteria_sites:
+        # select a random neighbour
+        new_site = neighbours(site, L)[np.random.randint(4)]
+        # check the value of the new site
+        new_site_value = soil_lattice[new_site[0], new_site[1]]
+        # move the bacteria
+        soil_lattice[new_site[0], new_site[1]] = 2
+        soil_lattice[site[0], site[1]] = 0
 
-    # choose a random bacteria site
-    site = bacteria_sites[np.random.randint(len(bacteria_sites))]
-    # select a random neighbour
-    new_site = neighbours(site, L)[np.random.randint(4)]
-    # check the value of the new site
-    new_site_value = soil_lattice[new_site[0], new_site[1]]
-    # move the bacteria
-    soil_lattice[new_site[0], new_site[1]] = 2
-    soil_lattice[site[0], site[1]] = 0
+        # check if the new site is soil
+        if new_site_value == 1:
+            # find neighbouring sites
+            neighbours_sites = neighbours(new_site, L)
+            for nbr in neighbours_sites:  # todo: Optimize
+                if (nbr[0], nbr[1]) != (site[0], site[1]):
+                    if soil_lattice[nbr[0], nbr[1]] == 0:
+                        if np.random.rand() < r:
+                            soil_lattice[nbr[0], nbr[1]] = 2
+                            break
 
-    # check if the new site is soil
-    if new_site_value == 1:
-        # find neighbouring sites
-        neighbours_sites = neighbours(new_site, L)
-        for nbr in neighbours_sites:  # todo: Optimize
-            if (nbr[0], nbr[1]) != (site[0], site[1]):
-                if soil_lattice[nbr[0], nbr[1]] == 0:
-                    if np.random.rand() < r:
-                        soil_lattice[nbr[0], nbr[1]] = 2
-                        break
+        # check if the new site is a bacteria
+        elif new_site_value == 2:
+            # keep both with bacteria (undo the vacant space in original site)
+            soil_lattice[site[0], site[1]] = 2
 
-    # check if the new site is a bacteria
-    elif new_site_value == 2:
-        # keep both with bacteria (undo the vacant space in original site)
-        soil_lattice[site[0], site[1]] = 2
 
-    
 
 def main():
 
     # initialize the parameters
-    n_steps = 1_000_000  # number of bacteria moves
+    n_steps = 100_000  # number of bacteria moves
     L = 20  # side length of the square lattice
     N = int(L**2 / 10)  # initial number of bacteria
     r = 1  # reproduction rate
-    d = 0.02  # death rate
-    s = 0.02  # soil filling rate
+    d = 0.1  # death rate
+    s = 0.1  # soil filling rate
     soil_lattice = init_lattice(L, N)
 
     n_frames = 100  # number of potential frames in the animation (will be less in practice because only unique frames are saved)
@@ -161,21 +156,21 @@ def main():
         if step in datasteps:
             soil_lattice_data[np.where(datasteps == step)] = soil_lattice
 
-    # # animate the lattice
-    # fig, ax = plt.subplots()
-    # ax.set_xticks(np.arange(-.5, L, 1), minor=True)
-    # ax.set_yticks(np.arange(-.5, L, 1), minor=True)
-    # ax.set_xticklabels([])
-    # ax.set_yticklabels([])
-    # ax.grid(which='minor', linewidth=1)
-    # ax.set_title(f"{L=}, {r=:.2f}, {d=:.2f}, {s=:.2f}\nstep {datasteps[0]}")
-    # im = ax.imshow(soil_lattice_data[0], cmap="cubehelix_r", vmin=0, vmax=2)
-    # def animate(i):
-    #     ax.set_title(f"{L=}, {r=:.2f}, {d=:.2f}, {s=:.2f}\nstep {datasteps[i]}")
-    #     im.set_data(soil_lattice_data[i])
-    #     return im,
-    # ani = animation.FuncAnimation(fig, animate, frames=n_frames, interval=1000, blit=True)
-    # ani.save("src/single_species_RW/single_species_logspace.gif", fps=1)
+    # animate the lattice
+    fig, ax = plt.subplots()
+    ax.set_xticks(np.arange(-.5, L, 1), minor=True)
+    ax.set_yticks(np.arange(-.5, L, 1), minor=True)
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    ax.grid(which='minor', linewidth=1)
+    ax.set_title(f"{L=}, {r=:.2f}, {d=:.2f}, {s=:.2f}\nstep {datasteps[0]}")
+    im = ax.imshow(soil_lattice_data[0], cmap="cubehelix_r", vmin=0, vmax=2)
+    def animate(i):
+        ax.set_title(f"{L=}, {r=:.2f}, {d=:.2f}, {s=:.2f}\nstep {datasteps[i]}")
+        im.set_data(soil_lattice_data[i])
+        return im,
+    ani = animation.FuncAnimation(fig, animate, frames=n_frames, interval=1000, blit=True)
+    ani.save("src/single_species_RW/single_species_logspace.gif", fps=1)
 
     # plot the number of bacteria, soil, and empty sites as a function of time
     n_bacteria = np.zeros(n_frames, dtype=np.int32)
