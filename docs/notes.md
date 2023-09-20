@@ -19,13 +19,14 @@ Tuesday afternoon: Group meetings
 Wednesday 10:30: Guest Lectures
 
 
-## Meeting 2:
+## Meeting 2: 6th September 2023
 
 Do a plot of characteristics over time to look for oscillation.
 
 Do it with random connections, and then you can use a mean-field comparison. Compare DEs to the solution.
 
-## Meeting 3:
+
+## Meeting 3: 13th September 2023
 
 Logscale x and y
 
@@ -39,7 +40,8 @@ Calculate cluster size distribution.
 
 Do log-log axes on heatmap viz
 
-## Meeting 4:
+
+## Meeting 4: 20th September 2023
 
 Try to make everything stochastic: choose a point, and depending on what it is, do something (fill/die/move)
 
@@ -47,4 +49,12 @@ If it's a bacteria, check for death, and if not make it move
 
 Do phase space diagram for mean field model
 
+Analyze meanfield soln by looking at bifurcation
 
+The area where bacteria dies in mean-field and survives in neighbours could be relevant?
+
+Do for 50x50, less phase points
+
+Try to do it with lower birth rate
+
+Make visualizations for every state, put them next to each other
