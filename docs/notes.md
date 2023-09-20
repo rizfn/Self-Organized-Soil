@@ -39,3 +39,12 @@ Calculate cluster size distribution.
 
 Do log-log axes on heatmap viz
 
+## Meeting 4:
+
+Try to make everything stochastic: choose a point, and depending on what it is, do something (fill/die/move)
+
+If it's a bacteria, check for death, and if not make it move
+
+Do phase space diagram for mean field model
+
+
