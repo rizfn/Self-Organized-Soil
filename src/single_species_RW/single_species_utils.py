@@ -220,3 +220,102 @@ def update_wellmixed(soil_lattice, L, r, d, s):
             # keep both with bacteria (undo the vacant space in original site)
             soil_lattice[site[0], site[1]] = 2
 
+
+@njit
+def update_stochastic(soil_lattice, L, r, d, s):
+    """Update the lattice stochastically. Called once every timestep.
+
+    The function mutates a global variable, to avoid slowdowns from numba primitives.
+    It works by choosing a random site, and then giving a dynamics ascribed to the said site.
+    
+    Parameters:
+    -----------
+    soil_lattice : numpy.ndarray
+        Lattice with bacteria randomly placed on it.
+    L : int
+        Side length of the square lattice.
+    r : float
+        Reproduction rate.
+    d : float
+        Death rate.
+    s : float
+        Soil filling rate.
+    
+    Returns:
+    --------
+    None
+    """
+
+    # select a random site
+    site = np.random.randint(0, L), np.random.randint(0, L)
+
+    if soil_lattice[site[0], site[1]] == 0:
+        # fill with soil-filling rate
+        if np.random.rand() < s:
+            soil_lattice[site[0], site[1]] = 1
+
+    elif soil_lattice[site[0], site[1]] == 2:
+        # check for death
+        if np.random.rand() < d:
+            soil_lattice[site[0], site[1]] = 0
+        else:
+            # move into a neighbour
+            new_site = neighbours(site, L)[np.random.randint(4)]
+            # check the value of the new site
+            new_site_value = soil_lattice[new_site[0], new_site[1]]
+            # move the bacteria
+            soil_lattice[new_site[0], new_site[1]] = 2
+            soil_lattice[site[0], site[1]] = 0
+            # check if the new site is soil
+            if new_site_value == 1:
+                # find neighbouring sites
+                neighbours_sites = neighbours(new_site, L)
+                for nbr in neighbours_sites:  # todo: Optimize
+                    if (nbr[0], nbr[1]) != (site[0], site[1]):
+                        if soil_lattice[nbr[0], nbr[1]] == 0:
+                            if np.random.rand() < r:
+                                soil_lattice[nbr[0], nbr[1]] = 2
+                                break
+            # check if the new site is a bacteria
+            elif new_site_value == 2:
+                # keep both with bacteria (undo the vacant space in original site)
+                soil_lattice[site[0], site[1]] = 2
+
+
+@njit
+def run_stochastic(n_steps, L, r, d, s, steps_to_record=np.array([100, 1000, 10000, 100000])):
+    """Run the stochastic simulation for n_steps timesteps.
+
+    Parameters
+    ----------
+    n_steps : int
+        Number of timesteps to run the simulation for.
+    L : int
+        Side length of the square lattice.
+    r : float
+        Reproduction rate.
+    d : float
+        Death rate.
+    s : float
+        Soil filling rate.
+    steps_to_record : ndarray, optional
+        Array of timesteps to record the lattice data for, by default [100, 1000, 10000, 100000].
+
+    Returns
+    -------
+    soil_lattice_data : ndarray
+        List of soil_lattice data for specific timesteps.
+    """
+    N = int(L**2 / 10)  # initial number of bacteria
+    soil_lattice = init_lattice(L, N)
+
+    soil_lattice_data = np.zeros((len(steps_to_record), L, L), dtype=np.int8)
+
+    for step in range(1, n_steps+1):
+        update_stochastic(soil_lattice, L, r, d, s)
+        if step in steps_to_record:
+            soil_lattice_data[steps_to_record == step] = soil_lattice
+
+    return soil_lattice_data
+
+

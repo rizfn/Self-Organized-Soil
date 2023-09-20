@@ -1,4 +1,5 @@
-const { default: data } = await import("../data/single_species/soil_lattice_data_r=1.json", { assert: { type: "json" } });
+// const { default: data } = await import("../data/single_species/soil_lattice_data_r=1.json", { assert: { type: "json" } });
+const { default: data } = await import("../data/single_species/stochastic_dynamics_r=1.json", { assert: { type: "json" } });
 // const { default: data } = await import("../data/single_species/old_RW_r=0.5.json", { assert: { type: "json" } });
 
 // check if mobile
@@ -22,6 +23,14 @@ document.addEventListener('keydown', function(event) {
 function calculateNeighbours(c, L) {
 	return [[(c[0]-1+L)%L, c[1]], [(c[0]+1)%L, c[1]], [c[0], (c[1]-1+L)%L], [c[0], (c[1]+1)%L]];
 }
+
+var step_list = data.reduce(function (a, d) {
+	if (a.indexOf(d.step) === -1) {
+	  a.push(d.step);
+	}
+	return a;
+ }, []);
+
 
 data.forEach((d) => {
 	const lattice = d.soil_lattice;
@@ -54,7 +63,7 @@ data.forEach((d) => {
 console.log(data);
 
 
-let step = 1000
+let step = step_list[1]  // start from 2nd step, cause why not
 
 let filtereddata = data.filter(function(d){ return d.step == step });
 
@@ -279,18 +288,8 @@ function refilter_data() {
 
 	console.log('Refiltering data')
 
-	if (step == 100) {
-		step = 1000
-	}
-	else if (step == 1000) {
-		step = 10000
-	}
-	else if (step == 10000) {
-		step = 100000
-	}
-	else if (step == 100000) {
-		step = 100
-	}
+	// select the next entry in steplist
+	step = step_list[(step_list.indexOf(step) + 1) % step_list.length]
 
 	filtereddata = data.filter(function(d){ return d.step == step });
 
