@@ -1,38 +1,134 @@
-const { default: data } = await import("../data/single_species/mean_field_data_r=1.json", { assert: { type: "json" } });
-
-// check if mobile
-if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-	// add a button to run refilterdata
-	var button = d3.select("div#lattice")
-		.append("button")
-		.attr("id", "refilterdata")
-		.html("Refilter data")
-		.on("click", refilter_data);
-}
+let { default: data_meanfield } = await import("../data/single_species/mean_field_data_r=1.json", { assert: { type: "json" } });
+let { default: data_stochastic } = await import("../data/single_species/stochastic_dynamics_r=1.json", { assert: { type: "json" } });
+let { default: data_parallel } = await import("../data/single_species/soil_lattice_data_r=1.json", { assert: { type: "json" } });
 
 
-// on spacebar, call refilterdata
+// add 3 radio buttons to switch between meanfield, stochastic, and parallel data
+var form = d3.select("div#select-data")
+	.append("form")
+	.attr("id", "radio-buttons")
+	.attr("class", "radio-buttons");
+
+var form_label = form.append("label")
+	.attr("class", "radio-label")
+	.text("Meanfield (1)")
+	.append("input")
+	.attr("type", "radio")
+	.attr("name", "radio")
+	.attr("value", "meanfield")
+	.attr("checked", "checked")
+	.on("change", function() {
+		change_data(this.value)
+	});
+
+form_label.append("span")
+	.attr("class", "checkmark");
+
+form_label = form.append("label")
+	.attr("class", "radio-label")
+	.text("Stochastic (2)")
+	.append("input")
+	.attr("type", "radio")
+	.attr("name", "radio")
+	.attr("value", "stochastic")
+	.on("change", function() {
+		change_data(this.value)
+	});
+
+form_label.append("span")
+	.attr("class", "checkmark");
+
+form_label = form.append("label")
+	.attr("class", "radio-label")
+	.text("Parallel (3)")
+	.append("input")
+	.attr("type", "radio")
+	.attr("name", "radio")
+	.attr("value", "parallel")
+	.on("change", function() {	
+		change_data(this.value)
+	});
+
+// on 1,2,3, set radio buttons
 document.addEventListener('keydown', function(event) {
-	if (event.code === 'Space') {
-		refilter_data()
+	if (event.code === 'Digit1') {
+		// set radio button to meanfield
+		document.getElementById("radio-buttons").elements[0].checked = true;
+		change_data('meanfield')
+	}
+	else if (event.code === 'Digit2') {
+		// set radio button to stochastic
+		document.getElementById("radio-buttons").elements[1].checked = true;
+		change_data('stochastic')
+	}
+	else if (event.code === 'Digit3') {
+		// set radio button to parallel
+		document.getElementById("radio-buttons").elements[2].checked = true;
+		change_data('parallel')
 	}
 });
 
-function calculateNeighbours(c, L) {
-	return [[(c[0]-1+L)%L, c[1]], [(c[0]+1)%L, c[1]], [c[0], (c[1]-1+L)%L], [c[0], (c[1]+1)%L]];
-}
+let step_list = data_stochastic.reduce(function (a, d) {
+	if (a.indexOf(d.step) === -1) {
+	  a.push(d.step);
+	}
+	return a;
+ }, []);
+const step_stochastic = d3.max(step_list);
 
-console.log(data);
+step_list = data_parallel.reduce(function (a, d) {
+	if (a.indexOf(d.step) === -1) {
+	  a.push(d.step);
+	}
+	return a;
+ }, []);
+const step_parallel = d3.max(step_list);
 
-let step = 1000
+step_list = data_meanfield.reduce(function (a, d) {
+	if (a.indexOf(d.step) === -1) {
+	  a.push(d.step);
+	}
+	return a;
+ }, []);
+const step_meanfield = d3.max(step_list);
 
-let filtereddata = data.filter(function(d){ return d.step == step });
+data_meanfield = data_meanfield.filter(function(d) {return d.step == step_meanfield});
+data_stochastic = data_stochastic.filter(function(d) {return d.step == step_stochastic});
+data_parallel = data_parallel.filter(function(d) {return d.step == step_parallel});
 
-console.log(filtereddata);
+console.log(data_meanfield);
+console.log(data_stochastic);
+console.log(data_parallel);
+
+let data = data_meanfield;
+
+data_stochastic.forEach((d) => {
+	const lattice = d.soil_lattice;
+	const L = lattice.length
+	// calculate the fraction of 1s, 2s and 0s in the matrix
+	const ones = lattice.reduce((a, b) => a + b.filter((x) => x === 1).length, 0);
+	const twos = lattice.reduce((a, b) => a + b.filter((x) => x === 2).length, 0);
+	const zeros = lattice.reduce((a, b) => a + b.filter((x) => x === 0).length, 0);
+	d.vacancy = zeros / L**2;
+	d.soil = ones / L**2;
+	d.bacteria = twos / L**2;
+});
+
+data_parallel.forEach((d) => {
+	const lattice = d.soil_lattice;
+	const L = lattice.length
+	// calculate the fraction of 1s, 2s and 0s in the matrix
+	const ones = lattice.reduce((a, b) => a + b.filter((x) => x === 1).length, 0);
+	const twos = lattice.reduce((a, b) => a + b.filter((x) => x === 2).length, 0);
+	const zeros = lattice.reduce((a, b) => a + b.filter((x) => x === 0).length, 0);
+	d.vacancy = zeros / L**2;
+	d.soil = ones / L**2;
+	d.bacteria = twos / L**2;
+});
 
 // set the dimensions and margins of the graph
 var margin = {top: 40, right: 40, bottom: 100, left: 100},
-  width = innerWidth - margin.left - margin.right,
+  width = innerWidth*0.8 - margin.left - margin.right,
   height = innerHeight - margin.top - margin.bottom;
 
 
@@ -44,28 +140,19 @@ function getOffset(element) {
   };
 }
 
-var rows = d3.map(data, function(d){return d.d;})
-var cols = d3.map(data, function(d){return d.s;}) 
+var rows = d3.map(data_meanfield, function(d){return d.d;})
+var cols = d3.map(data_meanfield, function(d){return d.s;}) 
 
 var x = d3.scaleBand()
 	.range([0, width])
 	.domain(rows)
 	.padding(0.05);
-	
 
 var y = d3.scaleBand()
 	.range([height, 0])
 	.domain(cols)
 	.padding(0.05);
           
-var Tooltip = d3.select("div#raster")
-	.append("div")
-	.style("opacity", 0)
-	.attr("class", "tooltip")
-
-let current_soil_lattice_state = {"d": 0, "s": 0};
-
-
 // append the svg object to the body of the page
 var svg_soil = d3.select("div#raster")
   .append("svg")
@@ -76,6 +163,11 @@ var svg_soil = d3.select("div#raster")
     .attr("transform",
           "translate(" + margin.left + "," + margin.top + ")");
 
+
+var Tooltip = d3.select("div#raster")
+	.append("div")
+	.style("opacity", 0)
+	.attr("class", "tooltip") 
 	// Three function that change the tooltip when user hover / move / leave a cell
 	var mouseover_rgb = function(event, d) {
 	Tooltip
@@ -130,7 +222,7 @@ svg_soil.append("text")
 
 
 svg_soil.selectAll(".cell")
-	.data(filtereddata)
+	.data(data)
 	.enter()
 	.append("rect")
 		.attr("class", "cell")
@@ -144,41 +236,27 @@ svg_soil.selectAll(".cell")
 		.on("mouseleave", mouseleave_rgb);
 
 
-function refilter_data() {
+function change_data(state) {
 	
 	const t = d3.transition().duration(750)
 
-	console.log('Refiltering data')
+	console.log('Changing data');
 
-	if (step == 100) {
-		step = 1000
+	if (state == 'meanfield') {
+		data = data_meanfield;
+	} 
+	else if (state == 'stochastic') {
+		data = data_stochastic;
+	} 
+	else if (state == 'parallel') {
+		data = data_parallel;
 	}
-	else if (step == 1000) {
-		step = 10000
-	}
-	else if (step == 10000) {
-		step = 100000
-	}
-	else if (step == 100000) {
-		step = 100
-	}
-
-	filtereddata = data.filter(function(d){ return d.step == step });
-
-	// add a 0.5s popup window  to show the current step
-	var popup = d3.select("div#visualization")
-		.append("div")
-		.attr("class", "popup")	
-		.html(step)
-		.transition(t)
-		.style("opacity", 1)
-		.transition(t)
-		.style("opacity", 0)
-		.remove();
 
 	// update the rgb heatmap
 	svg_soil.selectAll(".cell")
-		.data(filtereddata)
+		.data(data)
 		.transition(t)
-		.style("fill", function(d) { return "rgb(" + d.soil*255 + "," + d.vacancy*255 + "," + d.bacteria*255 + ")" } )
+		.style("fill", function(d) { return "rgb(" + d.soil*255 + "," + d.vacancy*255 + "," + d.bacteria*255 + ")" } );
+
 }
+	
