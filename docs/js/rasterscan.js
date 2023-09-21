@@ -1,5 +1,6 @@
 // const { default: data } = await import("../data/single_species/soil_lattice_data_r=1.json", { assert: { type: "json" } });
 const { default: data } = await import("../data/single_species/stochastic_dynamics_r=1.json", { assert: { type: "json" } });
+// const { default: data } = await import("../data/single_species/stochastic_dynamics_r=0.5.json", { assert: { type: "json" } });
 // const { default: data } = await import("../data/single_species/old_RW_r=0.5.json", { assert: { type: "json" } });
 
 // check if mobile
