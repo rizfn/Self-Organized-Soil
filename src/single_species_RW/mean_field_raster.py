@@ -101,8 +101,8 @@ def main():
     n_steps = 100_000  # number of bacteria moves
     L = 20  # side length of the square lattice
     r = 1  # reproduction rate
-    d = np.linspace(0, 0.4, 20)  # death rate
-    s = np.linspace(0, 0.8, 20)  # soil filling rate
+    d = np.linspace(0, 0.3, 10)  # death rate
+    s = np.linspace(0, 0.8, 10)  # soil filling rate
 
     soil_lattice_data = run_raster(n_steps, L, r, d, s)
 

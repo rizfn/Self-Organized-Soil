@@ -75,11 +75,13 @@ def main():
 
     # initialize the parameters
     # n_steps = 100_000  # number of bacteria moves
-    n_steps = 1_000_000  # number of bacteria moves (more for stochastic)
-    L = 20  # side length of the square lattice
+    n_steps = 10_000_000  # number of bacteria moves (more for stochastic)
+    L = 50  # side length of the square lattice
     r = 1  # reproduction rate
-    d = np.linspace(0, 0.3, 20)  # death rate
-    s = np.linspace(0, 0.3, 20)  # soil filling rate
+    # d = np.linspace(0, 0.3, 20)  # death rate
+    # s = np.linspace(0, 0.3, 20)  # soil filling rate
+    d = np.linspace(0, 0.3, 10)  # death rate (same as mean field)
+    s = np.linspace(0, 0.8, 10)  # soil filling rate (same as mean field)
 
     # soil_lattice_data = run_raster(n_steps, L, r, d, s)
     soil_lattice_data = run_raster_stochastic(n_steps, L, r, d, s, np.geomspace(100, n_steps, int(np.log10(n_steps/100))+1, dtype=np.int32))
