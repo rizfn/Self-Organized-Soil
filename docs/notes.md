@@ -58,3 +58,14 @@ Do for 50x50, less phase points
 Try to do it with lower birth rate
 
 Make visualizations for every state, put them next to each other
+
+
+## Meeting 5: 25th September 2023
+
+Visualize the nullcline: B-E landscape, change the parameters and see wher the fixed point
+
+Try mean field
+
+Try to quantify some sort of spatial structure which is causing the difference between mean field
+
+Potentially try 3d.
