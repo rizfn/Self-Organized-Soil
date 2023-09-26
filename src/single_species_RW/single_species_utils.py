@@ -319,3 +319,52 @@ def run_stochastic(n_steps, L, r, d, s, steps_to_record=np.array([100, 1000, 100
     return soil_lattice_data
 
 
+def ode_integrate(s, d, r, stoptime=100_000, nsteps=100_000):
+    """Integrate the ODEs for the single species model.
+
+    Parameters
+    ----------
+    s : float
+        Soil filling rate.
+    d : float
+        Death rate.
+    r : float
+        Reproduction rate.
+    stoptime : int, optional
+        Time to stop the integration. The default is 100.
+    nsteps : int, optional
+        Number of steps to take. The default is 100_000.
+    
+    Returns
+    -------
+    T : list
+        List of times.
+    S : list
+        List of soil fractions.
+    E : list
+        List of empty fractions.
+    B : list
+        List of bacteria fractions.
+    """
+
+    B_0 = 0.1  # initial fraction of bacteria
+    E_0 = (1 - B_0) / 2  # initial number of empty sites
+    S_0 = 1 - B_0 - E_0  # initial number of soil sites
+
+    dt = stoptime / nsteps
+
+    S = [S_0]
+    B = [B_0]
+    E = [E_0]
+    T = [0]
+
+
+    for i in range(nsteps):
+        S.append(S[i] + dt * (s*E[i] - B[i]*S[i]))
+        E.append(E[i] + dt * (B[i]*S[i] + d*B[i] - s*E[i] - r*B[i]*S[i]*E[i]))
+        B.append(B[i] + dt * (r*B[i]*S[i]*E[i] - d*B[i]))
+        T.append(T[i] + dt)
+    
+    return T, S, E, B
+
+

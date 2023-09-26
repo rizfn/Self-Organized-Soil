@@ -1,7 +1,7 @@
-let { default: data_meanfield } = await import("../data/single_species/mean_field_data_r=1.json", { assert: { type: "json" } });
+let { default: data_nullclines } = await import("../data/single_species/mean_field_data_dense_r=1.json", { assert: { type: "json" } });
 
 
-const s_list = data_meanfield.reduce(function (a, d) {
+const s_list = data_nullclines.reduce(function (a, d) {
 	if (a.indexOf(d.s) === -1) {
 	  a.push(d.s);
 	}
@@ -31,7 +31,7 @@ d3.select("div#select-data")
     .text("s = " + s_list[slider.property("value")]);
 
 
-let filtereddata = d3.filter(data_meanfield, function (d) { return d.s === s_list[0]; });
+let filtereddata = d3.filter(data_nullclines, function (d) { return d.s === s_list[0]; });
 console.log(filtereddata);
 
 // plot data.bacteria against data.soil in 2d
@@ -142,7 +142,7 @@ function getOffset(el) {
 
 
 function refilter_data(s) {
-    filtereddata = d3.filter(data_meanfield, function (d) { return d.s === s; });
+    filtereddata = d3.filter(data_nullclines, function (d) { return d.s === s; });
     console.log(filtereddata);
     g.selectAll(".dot")
         .data(filtereddata)
