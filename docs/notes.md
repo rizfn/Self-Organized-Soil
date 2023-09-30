@@ -19,14 +19,14 @@ Tuesday afternoon: Group meetings
 Wednesday 10:30: Guest Lectures
 
 
-## Meeting 2: 6th September 2023
+## Meeting 2: 6th September, 2023
 
 Do a plot of characteristics over time to look for oscillation.
 
 Do it with random connections, and then you can use a mean-field comparison. Compare DEs to the solution.
 
 
-## Meeting 3: 13th September 2023
+## Meeting 3: 13th September, 2023
 
 Logscale x and y
 
@@ -41,7 +41,7 @@ Calculate cluster size distribution.
 Do log-log axes on heatmap viz
 
 
-## Meeting 4: 20th September 2023
+## Meeting 4: 20th September, 2023
 
 Try to make everything stochastic: choose a point, and depending on what it is, do something (fill/die/move)
 
@@ -60,7 +60,7 @@ Try to do it with lower birth rate
 Make visualizations for every state, put them next to each other
 
 
-## Meeting 5: 25th September 2023
+## Meeting 5: 25th September, 2023
 
 Visualize the nullcline: B-E landscape, change the parameters and see wher the fixed point
 
@@ -69,3 +69,18 @@ Try mean field
 Try to quantify some sort of spatial structure which is causing the difference between mean field
 
 Potentially try 3d.
+
+
+## Meeting 6: 28th September, 2023
+
+Pick a random side, you're going in an ordedred way.
+
+Make  hybrid model, where you reprouce anywhere.
+
+Find out how to vsualize 3d
+
+Top triangle possible due to the sparsity of empty spaces.
+
+Try to measure the spatial corrrelatials: the soil autocorrection.
+
+Do emanfield for r=0.1
