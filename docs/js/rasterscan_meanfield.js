@@ -1,9 +1,10 @@
 let { default: data_meanfield } = await import("../data/single_species/mean_field_data_r=1.json", { assert: { type: "json" } });
 let { default: data_stochastic } = await import("../data/single_species/stochastic_dynamics_r=1.json", { assert: { type: "json" } });
 let { default: data_parallel } = await import("../data/single_species/soil_lattice_data_r=1.json", { assert: { type: "json" } });
+let { default: data_3D } = await import("../data/single_species/3D_stochastic_dynamics_r=1.json", { assert: { type: "json" } });
 
 
-// add 3 radio buttons to switch between meanfield, stochastic, and parallel data
+// add 4 radio buttons to switch between meanfield, stochastic, parallel, and 3d data
 var form = d3.select("div#select-data")
 	.append("form")
 	.attr("id", "radio-buttons")
@@ -49,7 +50,21 @@ form_label = form.append("label")
 		change_data(this.value)
 	});
 
-// on 1,2,3, set radio buttons
+form_label.append("span")
+	.attr("class", "checkmark");
+
+form_label = form.append("label")
+	.attr("class", "radio-label")
+	.text("3D (4)")
+	.append("input")
+	.attr("type", "radio")
+	.attr("name", "radio")
+	.attr("value", "3D")
+	.on("change", function() {	
+		change_data(this.value)
+	});
+
+// on 1,2,3,4, set radio buttons
 document.addEventListener('keydown', function(event) {
 	if (event.code === 'Digit1') {
 		// set radio button to meanfield
@@ -65,6 +80,11 @@ document.addEventListener('keydown', function(event) {
 		// set radio button to parallel
 		document.getElementById("radio-buttons").elements[2].checked = true;
 		change_data('parallel')
+	}
+	else if (event.code === 'Digit4') {
+		// set radio button to 3D
+		document.getElementById("radio-buttons").elements[3].checked = true;
+		change_data('3D')
 	}
 });
 
@@ -92,13 +112,23 @@ step_list = data_meanfield.reduce(function (a, d) {
  }, []);
 const step_meanfield = d3.max(step_list);
 
+step_list = data_3D.reduce(function (a, d) {
+	if (a.indexOf(d.step) === -1) {
+	  a.push(d.step);
+	}
+	return a;
+ }, []);
+const step_3D = d3.max(step_list);
+
 data_meanfield = data_meanfield.filter(function(d) {return d.step == step_meanfield});
 data_stochastic = data_stochastic.filter(function(d) {return d.step == step_stochastic});
 data_parallel = data_parallel.filter(function(d) {return d.step == step_parallel});
+data_3D = data_3D.filter(function(d) {return d.step == step_3D});
 
 console.log(data_meanfield);
 console.log(data_stochastic);
 console.log(data_parallel);
+console.log(data_3D);
 
 let data = data_meanfield;
 
@@ -124,6 +154,18 @@ data_parallel.forEach((d) => {
 	d.vacancy = zeros / L**2;
 	d.soil = ones / L**2;
 	d.bacteria = twos / L**2;
+});
+
+data_3D.forEach((d) => {
+	const lattice = d.soil_lattice;
+	const L = lattice.length
+	// calculate the fraction of 1s, 2s and 0s in the 3D matrix
+	const ones = lattice.reduce((a, b) => a + b.reduce((c, d) => c + d.filter((x) => x === 1).length, 0), 0);
+	const twos = lattice.reduce((a, b) => a + b.reduce((c, d) => c + d.filter((x) => x === 2).length, 0), 0);
+	const zeros = lattice.reduce((a, b) => a + b.reduce((c, d) => c + d.filter((x) => x === 0).length, 0), 0);
+	d.vacancy = zeros / L**3;
+	d.soil = ones / L**3;
+	d.bacteria = twos / L**3;
 });
 
 // set the dimensions and margins of the graph
@@ -250,6 +292,9 @@ function change_data(state) {
 	} 
 	else if (state == 'parallel') {
 		data = data_parallel;
+	}
+	else if (state == '3D') {
+		data = data_3D;
 	}
 
 	// update the rgb heatmap
