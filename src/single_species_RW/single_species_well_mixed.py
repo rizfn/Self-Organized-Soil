@@ -2,58 +2,7 @@ import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from single_species_utils import init_lattice, update_wellmixed, update, update_stochastic
-
-def ode_integrate(L, s, d, r, stoptime=100_000, nsteps=100_000):
-    """Integrate the ODEs for the single species model.
-
-    Parameters
-    ----------
-    L : int
-        Side length of the square lattice.
-    s : float
-        Soil filling rate.
-    d : float
-        Death rate.
-    r : float
-        Reproduction rate.
-    stoptime : int, optional
-        Time to stop the integration. The default is 100.
-    nsteps : int, optional
-        Number of steps to take. The default is 100_000.
-    
-    Returns
-    -------
-    T : list
-        List of times.
-    S : list
-        List of soil fractions.
-    E : list
-        List of empty fractions.
-    B : list
-        List of bacteria fractions.
-    """
-
-    N_sites = L**2  # number of sites
-    B_0 = int(N_sites / 10)  # initial number of bacteria
-    E_0 = int((N_sites - B_0) / 2)  # initial number of empty sites
-    S_0 = N_sites - B_0 - E_0  # initial number of soil sites
-
-    dt = stoptime / nsteps
-
-    S = [S_0/N_sites]
-    B = [B_0/N_sites]
-    E = [E_0/N_sites]
-    T = [0]
-
-
-    for i in tqdm(range(nsteps)):
-        S.append(S[i] + dt * (s*E[i] - B[i]*S[i]))
-        E.append(E[i] + dt * (B[i]*S[i] + d*B[i] - s*E[i] - r*B[i]*S[i]*E[i]))
-        B.append(B[i] + dt * (r*B[i]*S[i]*E[i] - d*B[i]))
-        T.append(T[i] + dt)
-    
-    return T, S, E, B
+from single_species_utils import init_lattice, update_wellmixed, update, update_stochastic, ode_integrate, update_stochastic_wellmixed
 
 
 def main():
@@ -77,7 +26,7 @@ def main():
 
     # run the simulation
     for step in tqdm(range(1, n_steps+1)):
-        update_wellmixed(soil_lattice, L, r, d, s)
+        update_stochastic_wellmixed(soil_lattice, L, r, d, s)
         if step in datasteps:
             soil_lattice_data[np.where(datasteps == step)] = soil_lattice
 
@@ -93,7 +42,7 @@ def main():
 
 
     # run the ODE integrator
-    T, S, E, B = ode_integrate(L, s, d, r, stoptime=n_steps, nsteps=100_000)
+    T, S, E, B = ode_integrate(s, d, r, stoptime=n_steps, nsteps=100_000)
 
     # # animate the lattice
     # fig, ax = plt.subplots()

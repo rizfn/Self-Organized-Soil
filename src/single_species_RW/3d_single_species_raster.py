@@ -104,12 +104,15 @@ def update_stochastic_3D(soil_lattice, L, r, d, s):
             if new_site_value == 1:
                 # find neighbouring sites
                 neighbours_sites = neighbours_3D(new_site, L)
-                for nbr in neighbours_sites:  # todo: Optimize
-                    if (nbr[0], nbr[1], nbr[2]) != (site[0], site[1], site[2]):
-                        if soil_lattice[nbr[0], nbr[1], nbr[2]] == 0:
-                            if np.random.rand() < r:
-                                soil_lattice[nbr[0], nbr[1], nbr[2]] = 2
-                                break
+                # choose a random neighbour
+                nbr = neighbours_sites[np.random.randint(6)]
+                while (nbr[0], nbr[1], nbr[2]) == (site[0], site[1], site[2]): # todo: Optimize
+                    nbr = neighbours_sites[np.random.randint(6)]
+                # check if random neighbour is empty, if so, reproduce with rate r
+                if soil_lattice[nbr[0], nbr[1], nbr[2]] == 0:
+                    if np.random.rand() < r:
+                        soil_lattice[nbr[0], nbr[1], nbr[2]] = 2
+
             # check if the new site is a bacteria
             elif new_site_value == 2:
                 # keep both with bacteria (undo the vacant space in original site)
@@ -190,7 +193,7 @@ def run_raster_stochastic_3D(n_steps, L, r, d_list, s_list, steps_to_record=np.a
 def main():
 
     # initialize the parameters
-    n_steps = 100_000_000  # number of bacteria moves (more for stochastic)
+    n_steps = 10_000_000  # number of bacteria moves (more for stochastic)
     L = 20  # side length of the cubic lattice
     r = 1  # reproduction rate
     # d = np.linspace(0, 0.3, 20)  # death rate
