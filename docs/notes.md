@@ -84,3 +84,21 @@ Top triangle possible due to the sparsity of empty spaces.
 Try to measure the spatial corrrelatials: the soil autocorrection.
 
 Do emanfield for r=0.1
+
+
+## Meeting 7: 4th October, 2023
+
+One animal eats it's own environment, and thus it dies out faster than mean field?
+
+CML: if density is coming in, reduce it by prob 1/d
+
+Don't conserve d
+
+Different types of vacancies, red bug can give the blue bug.
+
+If red moves into blue, make it swapping
+
+Slow repro rate, at a rate that would kill meanfield but locality stays alive
+
+Try jumping far as well, and if you jump far, you have a chance to die
+
