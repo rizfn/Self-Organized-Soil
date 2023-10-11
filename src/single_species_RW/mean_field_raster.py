@@ -42,19 +42,18 @@ def main():
 
     # initialize the parameters
     n_steps = 100_000  # number of bacteria moves
-    r = 1  # reproduction rate
+    r = 0.1  # reproduction rate
     # d = np.linspace(0, 0.3, 20)  # death rate
     # s = np.linspace(0, 0.8, 20)  # soil filling rate
-    d = np.linspace(0, 1, 100)  # dense death rate
-    s = np.linspace(0, 1, 100)  # dense soil filling rate
+    d = np.linspace(0, 0.03, 20)  # dense death rate
+    s = np.linspace(0, 0.8, 20)  # dense soil filling rate
 
     soil_lattice_data = run_raster(n_steps, r, d, s)
 
     soil_lattice_data = pd.DataFrame(soil_lattice_data)
 
     # save the data
-    # soil_lattice_data.to_json(f"docs/data/single_species/mean_field_data_{r=}.json", orient="records")
-    soil_lattice_data.to_json(f"docs/data/single_species/mean_field_data_dense_{r=}.json", orient="records")
+    soil_lattice_data.to_json(f"docs/data/single_species/mean_field_data_{r=}.json", orient="records")
     
 
 if __name__ == "__main__":

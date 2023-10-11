@@ -13,7 +13,7 @@ def main():
     L = 20  # side length of the square lattice
     N = int(L**2 / 10)  # initial number of bacteria
     r = 1  # reproduction rate
-    d = 0.05  # death rate
+    d = 0.1  # death rate
     s = 0.1  # soil filling rate
 
     n_frames = 100  # number of potential frames in the animation (will be less in practice because only unique frames are saved)

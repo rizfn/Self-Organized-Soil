@@ -111,22 +111,22 @@ def main():
     # n_steps = 100_000  # number of bacteria moves
     n_steps = 10_000_000  # number of bacteria moves (more for stochastic)
     L = 50  # side length of the square lattice
-    r = 1  # reproduction rate
-    # d = np.linspace(0, 0.3, 20)  # death rate
+    r = 0.1  # reproduction rate
+    d = np.linspace(0, 0.03, 20)  # death rate
     # s = np.linspace(0, 0.3, 20)  # soil filling rate
-    d = np.linspace(0, 0.3, 20)  # death rate (same as mean field)
+    # d = np.linspace(0, 0.3, 20)  # death rate (same as mean field)
     s = np.linspace(0, 0.8, 20)  # soil filling rate (same as mean field)
 
     # soil_lattice_data = run_raster(n_steps, L, r, d, s)
-    # soil_lattice_data = run_raster_stochastic(n_steps, L, r, d, s, np.geomspace(100, n_steps, int(np.log10(n_steps/100))+1, dtype=np.int32))
-    soil_lattice_data = run_raster_stochastic_wellmixed(n_steps, L, r, d, s, np.geomspace(100, n_steps, int(np.log10(n_steps/100))+1, dtype=np.int32))
+    soil_lattice_data = run_raster_stochastic(n_steps, L, r, d, s, np.geomspace(100, n_steps, int(np.log10(n_steps/100))+1, dtype=np.int32))
+    # soil_lattice_data = run_raster_stochastic_wellmixed(n_steps, L, r, d, s, np.geomspace(100, n_steps, int(np.log10(n_steps/100))+1, dtype=np.int32))
 
     soil_lattice_data = pd.DataFrame(soil_lattice_data)
 
     # save the data
     # soil_lattice_data.to_json(f"docs/data/single_species/soil_lattice_data_{r=}.json", orient="records")
-    # soil_lattice_data.to_json(f"docs/data/single_species/stochastic_dynamics_{r=}.json", orient="records")
-    soil_lattice_data.to_json(f"docs/data/single_species/wellmixed_stochastic_dynamics_{r=}.json", orient="records")
+    soil_lattice_data.to_json(f"docs/data/single_species/stochastic_dynamics_{r=}.json", orient="records")
+    # soil_lattice_data.to_json(f"docs/data/single_species/wellmixed_stochastic_dynamics_{r=}.json", orient="records")
     
 
 if __name__ == "__main__":

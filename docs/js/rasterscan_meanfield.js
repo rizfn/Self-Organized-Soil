@@ -1,5 +1,7 @@
-let { default: data_meanfield } = await import("../data/single_species/mean_field_data_r=1.json", { assert: { type: "json" } });
-let { default: data_stochastic } = await import("../data/single_species/stochastic_dynamics_r=1.json", { assert: { type: "json" } });
+// let { default: data_meanfield } = await import("../data/single_species/mean_field_data_r=1.json", { assert: { type: "json" } });
+// let { default: data_stochastic } = await import("../data/single_species/stochastic_dynamics_r=1.json", { assert: { type: "json" } });
+let { default: data_meanfield } = await import("../data/single_species/mean_field_data_r=0.1.json", { assert: { type: "json" } });
+let { default: data_stochastic } = await import("../data/single_species/stochastic_dynamics_r=0.1.json", { assert: { type: "json" } });
 let { default: data_parallel } = await import("../data/single_species/soil_lattice_data_r=1.json", { assert: { type: "json" } });
 let { default: data_3D } = await import("../data/single_species/3D_stochastic_dynamics_r=1.json", { assert: { type: "json" } });
 let { default: data_wellmixed } = await import("../data/single_species/wellmixed_stochastic_dynamics_r=1.json", { assert: { type: "json" } });

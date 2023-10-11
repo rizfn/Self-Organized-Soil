@@ -102,3 +102,17 @@ Slow repro rate, at a rate that would kill meanfield but locality stays alive
 
 Try jumping far as well, and if you jump far, you have a chance to die
 
+
+# Meeting 8: 11th October, 2023
+
+Meanfield scaling r and d the same way doesn't change results
+
+Try to do it with a larger lattice size and see if it approaches meanfield
+
+Correct bug with red living and blue dying
+
+Try nutrient, soil, empty, bacteria. Bacteria leave behind nutrients, and only replicate in them
+
+If you move into soil, chance to replicate + chance to die
+
+Try doing the soil filling only if your neighbours are soil
