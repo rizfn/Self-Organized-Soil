@@ -65,7 +65,7 @@ else if (random_site == worm):
 
 ---
 
-<iframe width="auto" height="1000px" src="https://rizfn.github.io/Masters-Thesis/visualizations/rasterscan.html">
+<iframe width="auto" height="1000px" src="https://rizfn.github.io/Self-Organized-Soil/visualizations/rasterscan.html" style="border: 1px solid #ccc" frameborder=0>
 </iframe>
 
 ---
@@ -83,8 +83,25 @@ $$
 
 ---
 
-<iframe width="auto" height="1000px" src="https://rizfn.github.io/Masters-Thesis/visualizations/rasterscan_meanfield.html">
+<iframe width="auto" height="1000px" src="https://rizfn.github.io/Self-Organized-Soil/visualizations/rasterscan_meanfield.html"style="border: 1px solid #ccc" frameborder=0>
 </iframe>
+
+---
+
+### Bifurcation analysis
+<br>
+
+$$
+\begin{align}
+    \frac{\mathrm{d}E(t)}{\mathrm{d}t} &= d\cdot B + B\cdot S - r\cdot B\cdot S\cdot E - s\cdot E &&= 0 \\
+    \frac{\mathrm{d}S(t)}{\mathrm{d}t} &= s\cdot E - B\cdot S &&= 0\\
+    \frac{\mathrm{d}B(t)}{\mathrm{d}t} &= r\cdot B\cdot S\cdot E - d\cdot B &&= 0
+\end{align}
+$$
+<br>
+
+$$B+E+S=1$$
+
 
 ---
 
@@ -94,7 +111,7 @@ $$
 
 1. Always negative
 2. Complex
-3. Complex
+3. Complex conjugate
 4. Pure soil
 
 ---
@@ -102,4 +119,18 @@ $$
 #### Saddle node bifurcation
 
 <iframe src="https://www.desmos.com/calculator/rwa4klpx87?embed" width="auto" height="500" style="border: 1px solid #ccc" frameborder=0></iframe>
+
+---
+
+### Coupled Map Lattice
+
+<br>
+
+- Two lattices
+  - Soil densities; $d_{i,j}$
+  - Worm counts; $w_{i,j}$
+- Parallel update every timestep:
+  - Smoothen (laplacian on soil lattice)
+  - Worm birth/death
+  - Worm action on soil (shuffling)
 
