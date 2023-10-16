@@ -86,10 +86,10 @@ def main():
     # soil_lattice_data = pd.DataFrame(soil_lattice_data)
     # soil_lattice_data.to_json(f"docs/data/two_species/stochastic_dynamics_{r=}.json", orient="records")
 
-    # WELLMIXED
-    soil_lattice_data = run_raster_stochastic_wellmixed(n_steps, L, r, d, s, np.geomspace(100, n_steps, int(np.log10(n_steps/100))+1, dtype=np.int32))
-    soil_lattice_data = pd.DataFrame(soil_lattice_data)
-    soil_lattice_data.to_json(f"docs/data/two_species/wellmixed_stochastic_dynamics_{r=}.json", orient="records")
+    # # WELLMIXED
+    # soil_lattice_data = run_raster_stochastic_wellmixed(n_steps, L, r, d, s, np.geomspace(100, n_steps, int(np.log10(n_steps/100))+1, dtype=np.int32))
+    # soil_lattice_data = pd.DataFrame(soil_lattice_data)
+    # soil_lattice_data.to_json(f"docs/data/two_species/wellmixed_stochastic_dynamics_{r=}.json", orient="records")
     
 
 if __name__ == "__main__":

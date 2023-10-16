@@ -9,8 +9,9 @@ from two_species_utils import ode_integrate, run_stochastic, run_stochastic_well
 def main():
 
     # initialize the parameters
-    n_steps = 1_000_000  # number of bacteria moves
+    n_steps_ode = 10_000  # number of ode time steps
     L = 20  # side length of the square lattice
+    n_steps = n_steps_ode * L**2  # number of bacteria moves
     N = int(L**2 / 10)  # initial number of bacteria
     r = 1  # reproduction rate
     d = 0.1  # death rate
@@ -28,7 +29,7 @@ def main():
     # soil_lattice_data = run_stochastic(n_steps, L, r, d, s, datasteps)
 
     # run the ODE integrator
-    T, S, E_R, E_B, R, B = ode_integrate(s, d, r, n_steps//L**2, n_steps//L**2)
+    T, S, E_R, E_B, R, B = ode_integrate(s, d, r, n_steps_ode, n_steps_ode)
 
     two_spec_cmap = LinearSegmentedColormap.from_list("two_spec", ['#fcb6b1', '#b1cafc', '#996953', '#cc3535','#2861c9'], N=5)
 

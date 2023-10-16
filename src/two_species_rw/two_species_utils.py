@@ -94,7 +94,7 @@ def update_stochastic(soil_lattice, L, r, d, s):
     if soil_lattice[site[0], site[1]] == 0:
         # fill with soil-filling rate
         if np.random.rand() < s:
-            soil_lattice[site[0], site[1]] = 1
+            soil_lattice[site[0], site[1]] = 2
 
     elif soil_lattice[site[0], site[1]] == 1:
         # fill with soil-filling rate
@@ -114,7 +114,7 @@ def update_stochastic(soil_lattice, L, r, d, s):
             soil_lattice[new_site[0], new_site[1]] = 3
             soil_lattice[site[0], site[1]] = 0
             # check if the new site is soil
-            if new_site_value == 1:
+            if new_site_value == 2:
                 # find neighbouring sites
                 neighbours_sites = neighbours(new_site, L)
                 # choose a random neighbour
@@ -125,14 +125,10 @@ def update_stochastic(soil_lattice, L, r, d, s):
                 if soil_lattice[nbr[0], nbr[1]] == 1:
                     if np.random.rand() < r:
                         soil_lattice[nbr[0], nbr[1]] = 3
-            # check if the new site is a red bacteria
-            elif new_site_value == 3:
+            # check if the new site is a bacteria
+            elif (new_site_value == 3) or (new_site_value == 4):
                 # keep both with bacteria (undo the vacant space in original site)
-                soil_lattice[site[0], site[1]] = 3
-            # check if the new site is a blue bacteria
-            elif new_site_value == 4:
-                # swap the positions (undo the vacant space in original site)
-                soil_lattice[site[0], site[1]] = 4
+                soil_lattice[site[0], site[1]] = new_site_value
 
     elif soil_lattice[site[0], site[1]] == 4:
         # check for death
@@ -158,14 +154,10 @@ def update_stochastic(soil_lattice, L, r, d, s):
                 if soil_lattice[nbr[0], nbr[1]] == 0:
                     if np.random.rand() < r:
                         soil_lattice[nbr[0], nbr[1]] = 4
-            # check if the new site is a blue bacteria
-            elif new_site_value == 4:
+            # check if the new site is a bacteria
+            elif (new_site_value == 4) or (new_site_value == 3):
                 # keep both with bacteria (undo the vacant space in original site)
-                soil_lattice[site[0], site[1]] = 4
-            # check if the new site is a red bacteria
-            elif new_site_value == 3:
-                # swap the positions (undo the vacant space in original site)
-                soil_lattice[site[0], site[1]] = 3
+                soil_lattice[site[0], site[1]] = new_site_value
 
 
 @njit
@@ -236,7 +228,7 @@ def update_stochastic_wellmixed(soil_lattice, L, r, d, s):
     if soil_lattice[site[0], site[1]] == 0:
         # fill with soil-filling rate
         if np.random.rand() < s:
-            soil_lattice[site[0], site[1]] = 1
+            soil_lattice[site[0], site[1]] = 2
 
     elif soil_lattice[site[0], site[1]] == 1:
         # fill with soil-filling rate
@@ -258,7 +250,7 @@ def update_stochastic_wellmixed(soil_lattice, L, r, d, s):
             soil_lattice[new_site[0], new_site[1]] = 3
             soil_lattice[site[0], site[1]] = 0
             # check if the new site is soil
-            if new_site_value == 1:
+            if new_site_value == 2:
                 # choose a random reproduction site
                 nbr = np.random.randint(0, L), np.random.randint(0, L)
                 while (nbr == site) or (nbr == new_site): # todo: Optimize
@@ -267,14 +259,10 @@ def update_stochastic_wellmixed(soil_lattice, L, r, d, s):
                 if soil_lattice[nbr[0], nbr[1]] == 1:
                     if np.random.rand() < r:
                         soil_lattice[nbr[0], nbr[1]] = 3
-            # check if the new site is a red bacteria
-            elif new_site_value == 3:
+            # check if the new site is a bacteria
+            elif (new_site_value == 3) or (new_site_value == 4):
                 # keep both with bacteria (undo the vacant space in original site)
-                soil_lattice[site[0], site[1]] = 3
-            # check if the new site is a blue bacteria
-            elif new_site_value == 4:
-                # swap the positions (undo the vacant space in original site)
-                soil_lattice[site[0], site[1]] = 4
+                soil_lattice[site[0], site[1]] = new_site_value
 
     elif soil_lattice[site[0], site[1]] == 4:
         # check for death
@@ -300,14 +288,10 @@ def update_stochastic_wellmixed(soil_lattice, L, r, d, s):
                 if soil_lattice[nbr[0], nbr[1]] == 0:
                     if np.random.rand() < r:
                         soil_lattice[nbr[0], nbr[1]] = 4
-            # check if the new site is a blue bacteria
-            elif new_site_value == 4:
+            # check if the new site is a bacteria
+            elif (new_site_value == 3) or (new_site_value == 4):
                 # keep both with bacteria (undo the vacant space in original site)
-                soil_lattice[site[0], site[1]] = 4
-            # check if the new site is a red bacteria
-            elif new_site_value == 3:
-                # swap the positions (undo the vacant space in original site)
-                soil_lattice[site[0], site[1]] = 3
+                soil_lattice[site[0], site[1]] = new_site_value
 
 
 @njit
