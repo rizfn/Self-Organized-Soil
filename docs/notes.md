@@ -103,7 +103,7 @@ Slow repro rate, at a rate that would kill meanfield but locality stays alive
 Try jumping far as well, and if you jump far, you have a chance to die
 
 
-# Meeting 8: 11th October, 2023
+## Meeting 8: 11th October, 2023
 
 Meanfield scaling r and d the same way doesn't change results
 
@@ -116,3 +116,28 @@ Try nutrient, soil, empty, bacteria. Bacteria leave behind nutrients, and only r
 If you move into soil, chance to replicate + chance to die
 
 Try doing the soil filling only if your neighbours are soil
+
+
+## Meeting 9: 18th October, 2023
+
+Do mean field corresponding to soil neighbour
+
+Check inside boundary of soil neighbour, is it still critical
+
+Reduce replication rate and try
+
+Add nullclines to presentation
+
+Consider exploring nutrient model (to have bacteria support each other) and coupled map lattice
+
+Do a bigger simulation and see if cutoff changes
+
+See if exponent is independent of parameters s,d
+
+Try to quantify scaling r,d
+
+Search for predator prey model on latticeC
+
+Check power law in predator-prey
+
+Do the meanfield for the predator prey
