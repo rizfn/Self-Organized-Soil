@@ -259,6 +259,99 @@ def run_stochastic_wellmixed(n_steps, L, r, d, s, steps_to_record=np.array([100,
     return soil_lattice_data
 
 
+@njit
+def update_predatorprey(soil_lattice, L, r, d, s):
+    """Update the lattice stochastically. Called once every timestep.
+
+    The function mutates a global variable, to avoid slowdowns from numba primitives.
+    It works by choosing a random site, and then giving a dynamics ascribed to the said site.
+    
+    Parameters:
+    -----------
+    soil_lattice : numpy.ndarray
+        Lattice with bacteria randomly placed on it.
+    L : int
+        Side length of the square lattice.
+    r : float
+        Reproduction rate.
+    d : float
+        Death rate.
+    s : float
+        Soil filling rate.
+    
+    Returns:
+    --------
+    None
+    """
+
+    # select a random site
+    site = np.random.randint(0, L), np.random.randint(0, L)
+
+    if soil_lattice[site[0], site[1]] == 0:
+        # choose a random neighbour
+        nbr = neighbours(site, L)[np.random.randint(4)]
+        if soil_lattice[nbr[0], nbr[1]] == 1:  # if neighbour is soil
+            # fill with soil-filling rate
+            if np.random.rand() < s:
+                soil_lattice[site[0], site[1]] = 1
+
+    elif soil_lattice[site[0], site[1]] == 2:
+        # check for death
+        if np.random.rand() < d:
+            soil_lattice[site[0], site[1]] = 0
+        else:
+            # move into a neighbour
+            new_site = neighbours(site, L)[np.random.randint(4)]
+            # check the value of the new site
+            new_site_value = soil_lattice[new_site[0], new_site[1]]
+            # check if the new site is soil
+            if new_site_value == 1:
+                # change it to a bacteria
+                soil_lattice[new_site[0], new_site[1]] = 2
+            # check if the new site is empty
+            elif new_site_value == 0:
+                # move the bacteria
+                soil_lattice[site[0], site[1]] = 0
+                soil_lattice[new_site[0], new_site[1]] = 2
+
+
+@njit  # NOTE: slows down considerably if n_steps == 10M, check `predator_prey_stochastic.py`
+def run_predatorprey(n_steps, L, r, d, s, steps_to_record=np.array([100, 1000, 10000, 100000])):
+    """Run the stochastic simulation for n_steps timesteps.
+
+    Parameters
+    ----------
+    n_steps : int
+        Number of timesteps to run the simulation for.
+    L : int
+        Side length of the square lattice.
+    r : float
+        Reproduction rate.
+    d : float
+        Death rate.
+    s : float
+        Soil filling rate.
+    steps_to_record : ndarray, optional
+        Array of timesteps to record the lattice data for, by default [100, 1000, 10000, 100000].
+
+    Returns
+    -------
+    soil_lattice_data : ndarray
+        List of soil_lattice data for specific timesteps.
+    """
+    N = int(L**2 / 10)  # initial number of bacteria
+    soil_lattice = init_lattice(L, N)
+
+    soil_lattice_data = np.zeros((len(steps_to_record), L, L), dtype=np.int8)
+
+    for step in range(1, n_steps+1):
+        update_stochastic(soil_lattice, L, r, d, s)
+        if step in steps_to_record:
+            soil_lattice_data[steps_to_record == step] = soil_lattice
+
+    return soil_lattice_data
+
+
 
 def ode_integrate(s, d, r, stoptime=100_000, nsteps=100_000):
     """Integrate the ODEs for the single species model.
@@ -304,6 +397,55 @@ def ode_integrate(s, d, r, stoptime=100_000, nsteps=100_000):
         S.append(S[i] + dt * (s*E[i]*S[i] - B[i]*S[i]))
         E.append(E[i] + dt * (B[i]*S[i] + d*B[i] - s*E[i]*S[i] - r*B[i]*S[i]*E[i]))
         B.append(B[i] + dt * (r*B[i]*S[i]*E[i] - d*B[i]))
+        T.append(T[i] + dt)
+    
+    return T, S, E, B
+
+
+def predator_prey_ode_integrate(s, d, r, stoptime=100_000, nsteps=100_000):
+    """Integrate the ODEs for the Predator Prey.
+
+    Parameters
+    ----------
+    s : float
+        Soil filling rate.
+    d : float
+        Death rate.
+    r : float
+        Reproduction rate.
+    stoptime : int, optional
+        Time to stop the integration. The default is 100.
+    nsteps : int, optional
+        Number of steps to take. The default is 100_000.
+    
+    Returns
+    -------
+    T : list
+        List of times.
+    S : list
+        List of soil fractions.
+    E : list
+        List of empty fractions.
+    B : list
+        List of bacteria fractions.
+    """
+
+    B_0 = 0.1  # initial fraction of bacteria
+    E_0 = (1 - B_0) / 2  # initial number of empty sites
+    S_0 = 1 - B_0 - E_0  # initial number of soil sites
+
+    dt = stoptime / nsteps
+
+    S = [S_0]
+    B = [B_0]
+    E = [E_0]
+    T = [0]
+
+
+    for i in range(nsteps):
+        S.append(S[i] + dt * (s*E[i]*S[i] - r*B[i]*S[i]))
+        E.append(E[i] + dt * (d*B[i] - s*E[i]*S[i]))
+        B.append(B[i] + dt * (r*B[i]*S[i] - d*B[i]))
         T.append(T[i] + dt)
     
     return T, S, E, B

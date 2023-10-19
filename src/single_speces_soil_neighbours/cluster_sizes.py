@@ -34,8 +34,8 @@ def main():
     n_steps = steps_per_latticepoint * L**2  # number of bacteria moves
     N = int(L**2 / 10)  # initial number of bacteria
     r = 1  # reproduction rate
-    d = 0.06  # death rate
-    s = 0.35  # soil filling rate
+    d = 0.03  # death rate
+    s = 0.4  # soil filling rate
 
     steps_to_record = np.arange(n_steps//2, n_steps, 10*steps_per_latticepoint, dtype=np.int32)
 
@@ -55,6 +55,7 @@ def main():
     # plot power law with exponent -2
     x = np.array(edges[:-1])
     plt.plot(x, 5*x**-2, label=r'$\tau=2$ power law')
+    plt.plot(x, x**-1, label=r'$\tau=1$ power law')
     plt.xscale('log')
     plt.yscale('log')
     plt.legend()
