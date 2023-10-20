@@ -1,6 +1,7 @@
-const { default: data } = await import("../data/single_species/soil_neighbours_r=1.json", { assert: { type: "json" } });
+// const { default: data } = await import("../data/single_species/soil_neighbours_r=1.json", { assert: { type: "json" } });
 // const { default: data } = await import("../data/single_species/soil_neighbours_r=0.5.json", { assert: { type: "json" } });
 // const { default: data } = await import("../data/single_species/wellmixed_soil_neighbours_r=1.json", { assert: { type: "json" } });
+const { default: data } = await import("../data/single_species/predatorprey_stochastic_r=1.json", { assert: { type: "json" } });
 
 // check if mobile
 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
