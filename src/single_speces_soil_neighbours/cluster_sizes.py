@@ -35,7 +35,7 @@ def main():
     N = int(L**2 / 10)  # initial number of bacteria
     r = 1  # reproduction rate
     d = 0.03  # death rate
-    s = 0.4  # soil filling rate
+    s = 0.75  # soil filling rate
 
     steps_to_record = np.arange(n_steps//2, n_steps, 10*steps_per_latticepoint, dtype=np.int32)
 
