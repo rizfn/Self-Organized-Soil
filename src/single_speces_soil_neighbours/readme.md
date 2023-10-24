@@ -10,7 +10,7 @@ In the animation:
 - Black = Bacteria
 
 
-## Stochastic dynamics (`single_species_RW_anim.py`)
+## Stochastic dynamics (`soil_neighbour_raster.py`)
 
 Every time step:
 
@@ -24,3 +24,31 @@ Every time step:
 
 **Note:** If a bacteria moves into another bacteria, nothing happens: they both remain bacteria.
 
+The mean field ODEs can be written as
+
+$$
+\begin{align*}
+\frac{\mathrm{d}S}{\mathrm{d}t} &= s \cdot E \cdot S - B \cdot S \\
+\frac{\mathrm{d}E}{\mathrm{d}t} &= B \cdot S + d \cdot B - s \cdot E \cdot S - r \cdot B \cdot S \cdot E \\
+\frac{\mathrm{d}B}{\mathrm{d}t} &= r \cdot B \cdot S \cdot E - d \cdot B
+\end{align*}
+$$
+
+
+## Predator-Prey dynamics (`predator_prey_raster.py`)
+
+The same as before, but now change the replication rules.
+
+* If the chosen site is bacteria and wants to move to a neighbour which is soil, simply flip the soil to bacteria with rate $r$.
+
+In other words, they move into soil and replicate behind them.
+
+The mean field ODEs can be written as
+
+$$
+\begin{align*}
+\frac{\mathrm{d}S}{\mathrm{d}t} &= s \cdot E \cdot S - r \cdot B \cdot S \\
+\frac{\mathrm{d}E}{\mathrm{d}t} &= d \cdot B - s \cdot E \cdot S \\
+\frac{\mathrm{d}B}{\mathrm{d}t} &= r \cdot B \cdot S - d \cdot B
+\end{align*}
+$$
