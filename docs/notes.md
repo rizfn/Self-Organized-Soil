@@ -136,8 +136,26 @@ See if exponent is independent of parameters s,d
 
 Try to quantify scaling r,d
 
-Search for predator prey model on latticeC
+Search for predator prey model on lattice
 
 Check power law in predator-prey
 
 Do the meanfield for the predator prey
+
+
+## Meeting 10: 25th October, 2023
+
+When moving in, take over, or try to annhiliate
+
+Low death rate: soil is limiting, high death rate: empty space is limiting.
+Empty space is collapsing: bacteria deaths give empty sace, but not enough to compensate for empty space created in bacterial movement. No empty space causes bacteria to die out, which gives the phase transition.
+
+Try to write the equations for the nullclines in both cases.
+
+Try to do the 2 species with difference in death rate
+
+Measure the boundary of cluster sizes. Fractical dimension of boundary
+
+CML: measure autocorrelation without defining clusters
+
+Think about using gradient instead of linear in CML, to emphasize boundaries
