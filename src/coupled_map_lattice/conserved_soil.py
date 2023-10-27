@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from numba import njit
 from tqdm import tqdm
 
 
@@ -26,11 +25,33 @@ def smooth_density_lattice(density_lattice, smoothing_factor=0.1):
     density_lattice += smoothing_factor * (np.roll(density_lattice, 1, axis=0) + np.roll(density_lattice, -1, axis=0) + np.roll(density_lattice, 1, axis=1) + np.roll(density_lattice, -1, axis=1))
     density_lattice /= 1 + 4 * smoothing_factor
 
+# def target_worm_count(density_lattice):
+#     '''
+#     Returns the target worm count for a given density.
+    
+#     If density lattice is 0.5, worms go to 1. if it's 0 or 1, worms go to 0. Assumed linear and symmetric on both sides of 0.5.
+        
+#     Parameters
+#     ----------
+#     density : float
+#         The density of the lattice site.
+        
+#     Returns
+#     -------
+#     worm_count : float
+#         The target worm count for the lattice site.
+#     '''
+#     target_lattice = np.zeros_like(density_lattice)
+#     target_lattice[density_lattice <= 0.5] = 2 * density_lattice[density_lattice <= 0.5]
+#     target_lattice[density_lattice > 0.5] = 2 - 2 * density_lattice[density_lattice > 0.5]
+#     target_lattice[density_lattice > 1] = 0
+#     return target_lattice
+
 def target_worm_count(density_lattice):
     '''
     Returns the target worm count for a given density.
     
-    If density lattice is 0.5, worms go to 1. if it's 0 or 1, worms go to 0. Assumed linear and symmetric on both sides of 0.5.
+    Depends on the gradient of the density lattice. High |gradient|, worms go to 1, low |gradient|, worms go to 0.
         
     Parameters
     ----------
@@ -42,11 +63,12 @@ def target_worm_count(density_lattice):
     worm_count : float
         The target worm count for the lattice site.
     '''
-    target_lattice = np.zeros_like(density_lattice)
-    target_lattice[density_lattice <= 0.5] = 2 * density_lattice[density_lattice <= 0.5]
-    target_lattice[density_lattice > 0.5] = 2 - 2 * density_lattice[density_lattice > 0.5]
-    target_lattice[density_lattice > 1] = 0
-    return target_lattice
+    x_derivative = np.roll(density_lattice, 1, axis=0) - np.roll(density_lattice, -1, axis=0)
+    y_derivative = np.roll(density_lattice, 1, axis=1) - np.roll(density_lattice, -1, axis=1)
+    gradient = np.sqrt(x_derivative**2 + y_derivative**2)
+    gradient[gradient > 1] = 1
+    return gradient
+
 
 def reproduce_worms(density_lattice, worm_lattice, birth_factor=0.1):
     '''
@@ -66,44 +88,6 @@ def reproduce_worms(density_lattice, worm_lattice, birth_factor=0.1):
         None
     '''
     worm_lattice += birth_factor * (target_worm_count(density_lattice) - worm_lattice)
-
-@njit
-def handle_overflow(density_lattice, worm_lattice, interaction_factor):
-    '''
-    In cases where the density lattice is > 1, this function will redistribute the excess to neighbouring cells.
-
-    Not called directly, always called by `interact_worm_soil`.
-
-    Parameters
-    ----------
-    density_lattice : np.ndarray
-        The density lattice.
-    worm_lattice : np.ndarray
-        The worm lattice.
-    interaction_factor : float
-        The speed at which the density lattice will approach the worm lattice. Max 1, where a cell gives everything to it's neighbours.
-
-    Returns
-    -------
-        None
-    '''
-    L = density_lattice.shape[0]
-    while np.max(density_lattice) > 1:
-        overflowing_cells = np.argwhere(density_lattice > 1)
-        for i in range(len(overflowing_cells)):
-            c = overflowing_cells[i]
-            overflow_amount = interaction_factor * density_lattice[c[0], c[1]] * worm_lattice[c[0], c[1]] / 4
-            density_lattice[c[0], c[1]] -= 4 * overflow_amount
-            density_lattice[(c[0]-1) % L, c[1]] += overflow_amount
-            density_lattice[(c[0]+1) % L, c[1]] += overflow_amount
-            density_lattice[c[0], (c[1]-1) % L] += overflow_amount
-            density_lattice[c[0], (c[1]+1) % L] += overflow_amount
-
-    ## todo: find way to vectorize, something like below.
-    # while np.max(density_lattice) > 1:
-    #     mask = density_lattice > 1
-    #     density_lattice[mask] += interaction_factor * (np.roll(density_lattice, 1, axis=0)[mask] * np.roll(worm_lattice, 1, axis=0)[mask] + np.roll(density_lattice, -1, axis=0)[mask] * np.roll(worm_lattice, -1, axis=0)[mask] + np.roll(density_lattice, 1, axis=1)[mask] * np.roll(worm_lattice, 1, axis=1)[mask] + np.roll(density_lattice, -1, axis=1)[mask] * np.roll(worm_lattice, -1, axis=1)[mask] - 4 * density_lattice[mask] * worm_lattice[mask]) / 4
-
 
 def interact_worm_soil(density_lattice, worm_lattice, interaction_factor=0.1):
     '''
@@ -131,7 +115,7 @@ def interact_worm_soil(density_lattice, worm_lattice, interaction_factor=0.1):
     # handle_overflow(density_lattice, worm_lattice, interaction_factor)
 
 
-def update_lattices(density_lattice, worm_lattice):  # todo: remove safeguards if not needed
+def update_lattices(density_lattice, worm_lattice, s, b, i):  # todo: remove safeguards if not needed
     '''
     Updates the density and worm lattices. Called once per timestep.
 
@@ -143,35 +127,54 @@ def update_lattices(density_lattice, worm_lattice):  # todo: remove safeguards i
         The density lattice.
     worm_lattice : np.ndarray
         The worm lattice.
+    s : float
+        The smoothening factor
+    b : float
+        The birth factor
+    i : float
+        The interaction factor
 
     Returns
     -------
         None
     '''
-    smooth_density_lattice(density_lattice, 0.1)
-    # if np.max(density_lattice > 1):
-    #     print("ALERT! Smoothening, density lattice > 1")
-    reproduce_worms(density_lattice, worm_lattice)
-    # if np.max(worm_lattice > 1):
-    #     print("ALERT! Reproducing, worm lattice > 1")
-    interact_worm_soil(density_lattice, worm_lattice)
-    # if np.max(density_lattice > 1):
-    #     print("ALERT! Interacting, density lattice > 1")
+    smooth_density_lattice(density_lattice, s)
+    reproduce_worms(density_lattice, worm_lattice, b)
+    interact_worm_soil(density_lattice, worm_lattice, i)
+
+
+def calculate_cluster_sizes(density_lattice):
+    '''
+    Calculates the cluster sizes for each timestep.
+    
+    Parameters
+    ----------
+    density_lattice : ndarray
+        Array of density_lattice data for each timestep.
+    
+    Returns
+    -------
+    cluster_sizes : ndarray
+        Array of cluster sizes for each timestep.
+    '''
+    from scipy import ndimage
+    cluster_sizes = []
+    m = np.round(density_lattice) > 0
+    lw, num = ndimage.label(m)
+    cluster_sizes = ndimage.sum(m, lw, index=np.arange(num + 1))
+    return cluster_sizes
 
 
 def main():
     L = 100  # side length of the lattice
     n_steps = 1000  # number of steps to run the simulation
+    initial_density = 0.8
+    s_f = 0.01
+    b_f = 0.1
+    i_f = 0.1
 
-
-    density_lattice = (0.8 / 0.5) * np.random.rand(L, L) 
+    density_lattice = (initial_density / 0.5) * np.random.rand(L, L) 
     worm_lattice = np.random.rand(L, L)
-
-    # # DEBUGGING
-    # density_lattice = np.zeros((L, L))
-    # density_lattice[L//2, L//2] = 0.5
-    # worm_lattice = np.ones((L, L))
-
 
     fig, ax = plt.subplots(1, 2)
 
@@ -182,7 +185,7 @@ def main():
 
 
     for i in tqdm(range(n_steps)):
-        update_lattices(density_lattice, worm_lattice)
+        update_lattices(density_lattice, worm_lattice, s_f, b_f, i_f)
         # set overall title to iteration number
         fig.suptitle(f"Step {i}")
         ax[0].cla()
@@ -192,6 +195,23 @@ def main():
         ax[1].imshow(worm_lattice, vmin=0, vmax=1)
         ax[1].title.set_text(f"{np.mean(worm_lattice):.2f}, ({np.min(worm_lattice):.2f}, {np.max(worm_lattice):.2f})")
         plt.pause(0.01)
+
+
+    # # CLUSTER SIZES
+    # cluster_sizes = calculate_cluster_sizes(density_lattice)
+
+    # hist, edges = np.histogram(cluster_sizes, bins=100, density=True)
+    # plt.title(f'{L=}, {s_f=}, {b_f=}, {i_f=}')
+    # plt.xlabel('Cluster size')
+    # plt.ylabel('Probability density')
+    # plt.plot(edges[:-1], hist, 'x', label='data')
+    # x = np.array(edges[:-1])
+    # plt.plot(x, 2*x**-2, label=r'$\tau=2$ power law')
+    # plt.xscale('log')
+    # plt.yscale('log')
+    # plt.legend()
+    # plt.savefig(f"src/coupled_map_lattice/cluster_sizes_{L}_{s_f}_{b_f}_{i_f}.png", dpi=300)
+    # plt.show()
     
 
 
