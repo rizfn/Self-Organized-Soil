@@ -382,3 +382,156 @@ def ode_integrate(s, d, r, stoptime=100_000, nsteps=100_000):
     
     return T, S, E_G, E_B, G, B
 
+
+@njit
+def update_stochastic_asym(soil_lattice, L, r1, r2, d1, d2, s1, s2):
+    """Update the lattice stochastically. Called once every timestep.
+
+    The function mutates a global variable, to avoid slowdowns from numba primitives.
+    It works by choosing a random site, and then giving a dynamics ascribed to the said site.
+    
+    Parameters:
+    -----------
+    soil_lattice : numpy.ndarray
+        Lattice with bacteria randomly placed on it.
+    L : int
+        Side length of the square lattice.
+    r1 : float
+        Reproduction rate of green worms.
+    r2 : float
+        Reproduction rate of blue worms.
+    d1 : float
+        Death rate of green worms.
+    d2 : float
+        Death rate of blue worms.
+    s1 : float
+        Soil filling rate of green empty space.
+    s2 : float
+        Soil filling rate of blue empty space.
+    
+    Returns:
+    --------
+    None
+    """
+
+    # select a random site
+    site = np.random.randint(0, L), np.random.randint(0, L)
+
+    if (soil_lattice[site[0], site[1]] == 0):
+        # choose a random neighbour
+        nbr = neighbours(site, L)[np.random.randint(4)]
+        # if neighbour is soil, fill with soil-filling rate
+        if soil_lattice[nbr[0], nbr[1]] == 2:
+            if np.random.rand() < s1:
+                soil_lattice[site[0], site[1]] = 2
+
+    if (soil_lattice[site[0], site[1]] == 1):
+        # choose a random neighbour
+        nbr = neighbours(site, L)[np.random.randint(4)]
+        # if neighbour is soil, fill with soil-filling rate
+        if soil_lattice[nbr[0], nbr[1]] == 2:
+            if np.random.rand() < s2:
+                soil_lattice[site[0], site[1]] = 2
+
+
+    elif soil_lattice[site[0], site[1]] == 3:
+        # check for death
+        if np.random.rand() < d1:
+            soil_lattice[site[0], site[1]] = 0
+        else:
+            # move into a neighbour
+            new_site = neighbours(site, L)[np.random.randint(4)]
+            # check the value of the new site
+            new_site_value = soil_lattice[new_site[0], new_site[1]]
+            # move the bacteria
+            soil_lattice[new_site[0], new_site[1]] = 3
+            soil_lattice[site[0], site[1]] = 0
+            # check if the new site is soil
+            if new_site_value == 2:
+                # find neighbouring sites
+                neighbours_sites = neighbours(new_site, L)
+                # choose a random neighbour
+                nbr = neighbours_sites[np.random.randint(4)]
+                while (nbr[0], nbr[1]) == (site[0], site[1]): # todo: Optimize
+                    nbr = neighbours_sites[np.random.randint(4)]
+                # check if random neighbour is empty blue, if so, reproduce with rate r
+                if soil_lattice[nbr[0], nbr[1]] == 1:
+                    if np.random.rand() < r1:
+                        soil_lattice[nbr[0], nbr[1]] = 3
+            # check if the new site is a bacteria
+            elif (new_site_value == 3) or (new_site_value == 4):
+                # keep both with bacteria (undo the vacant space in original site)
+                soil_lattice[site[0], site[1]] = new_site_value
+
+    elif soil_lattice[site[0], site[1]] == 4:
+        # check for death
+        if np.random.rand() < d2:
+            soil_lattice[site[0], site[1]] = 1
+        else:
+            # move into a neighbour
+            new_site = neighbours(site, L)[np.random.randint(4)]
+            # check the value of the new site
+            new_site_value = soil_lattice[new_site[0], new_site[1]]
+            # move the bacteria
+            soil_lattice[new_site[0], new_site[1]] = 4
+            soil_lattice[site[0], site[1]] = 1
+            # check if the new site is soil
+            if new_site_value == 2:
+                # find neighbouring sites
+                neighbours_sites = neighbours(new_site, L)
+                # choose a random neighbour
+                nbr = neighbours_sites[np.random.randint(4)]
+                while (nbr[0], nbr[1]) == (site[0], site[1]): # todo: Optimize
+                    nbr = neighbours_sites[np.random.randint(4)]
+                # check if random neighbour is empty green, if so, reproduce with rate r
+                if soil_lattice[nbr[0], nbr[1]] == 0:
+                    if np.random.rand() < r2:
+                        soil_lattice[nbr[0], nbr[1]] = 4
+            # check if the new site is a bacteria
+            elif (new_site_value == 4) or (new_site_value == 3):
+                # keep both with bacteria (undo the vacant space in original site)
+                soil_lattice[site[0], site[1]] = new_site_value
+
+
+@njit
+def run_stochastic_asym(n_steps, L, r1, r2, d1, d2, s1, s2, steps_to_record=np.array([100, 1000, 10000, 100000])):
+    """Run the stochastic simulation for n_steps timesteps.
+
+    Parameters
+    ----------
+    n_steps : int
+        Number of timesteps to run the simulation for.
+    L : int
+        Side length of the square lattice.
+    r1 : float
+        Reproduction rate of green worms.
+    r2 : float
+        Reproduction rate of blue worms.
+    d1 : float
+        Death rate of green worms.
+    d2 : float
+        Death rate of blue worms.
+    s1 : float
+        Soil filling rate of green empty space.
+    s2 : float
+        Soil filling rate of blue empty space.
+    steps_to_record : ndarray, optional
+        Array of timesteps to record the lattice data for, by default [100, 1000, 10000, 100000].
+
+    Returns
+    -------
+    soil_lattice_data : ndarray
+        List of soil_lattice data for specific timesteps.
+    """
+    N = int(L**2 / 10)  # initial number of bacteria
+    soil_lattice = init_lattice(L, N)
+
+    soil_lattice_data = np.zeros((len(steps_to_record), L, L), dtype=np.int8)
+
+    for step in range(1, n_steps+1):
+        update_stochastic_asym(soil_lattice, L, r1, r2, d1, d2, s1, s2)
+        if step in steps_to_record:
+            soil_lattice_data[steps_to_record == step] = soil_lattice
+
+    return soil_lattice_data
+

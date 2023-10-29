@@ -1,4 +1,5 @@
-const { default: data } = await import("../data/two_species/soil_neighbours_r=1.json", { assert: { type: "json" } });
+// const { default: data } = await import("../data/two_species/soil_neighbours_r=1.json", { assert: { type: "json" } });
+const { default: data } = await import("../data/two_species/double_d_r=1.json", { assert: { type: "json" } });
 
 // check if mobile
 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {

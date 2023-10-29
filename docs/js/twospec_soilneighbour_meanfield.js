@@ -1,8 +1,7 @@
 let { default: data_meanfield } = await import("../data/two_species/soil_neighbours_meanfield_r=1.json", { assert: { type: "json" } });
 let { default: data_stochastic } = await import("../data/two_species/soil_neighbours_r=1.json", { assert: { type: "json" } });
 // let { default: data_3D } = await import("../data/two_species/3D_stochastic_dynamics_r=1.json", { assert: { type: "json" } });
-let { default: data_wellmixed } = await import("../data/two_species/wellmixed_stochastic_dynamics_r=1.json", { assert: { type: "json" } });
-
+let { default: data_double_d } = await import("../data/two_species/double_d_r=1.json", { assert: { type: "json" } });
 
 // add 4 radio buttons to switch between meanfield, stochastic, parallel, 3d, wellmixed data
 var form = d3.select("div#select-data")
@@ -55,11 +54,11 @@ form_label.append("span")
 
 form_label = form.append("label")
 	.attr("class", "radio-label")
-	.text("Well-mixed (4)")
+	.text("Double d (4)")
 	.append("input")
 	.attr("type", "radio")
 	.attr("name", "radio")
-	.attr("value", "wellmixed")
+	.attr("value", "double_d")
 	.on("change", function() {	
 		change_data(this.value)
 	});
@@ -85,53 +84,29 @@ document.addEventListener('keydown', function(event) {
 	else if (event.code === 'Digit4') {
 		// set radio button to wellmixed
 		document.getElementById("radio-buttons").elements[3].checked = true;
-		change_data('wellmixed')
+		change_data('double_d')
 	}
 });
 
+function filter_max_step(data) {
+	let step_list = data.reduce(function (a, d) {
+		if (a.indexOf(d.step) === -1) {
+		  a.push(d.step);
+		}
+		return a;
+	  }, []);
+	return data.filter(function(d) {return d.step == d3.max(step_list)});
+}
 
-let step_list = data_meanfield.reduce(function (a, d) {
-    if (a.indexOf(d.step) === -1) {
-        a.push(d.step);
-	}
-	return a;
-}, []);
-const step_meanfield = d3.max(step_list);
-
-step_list = data_stochastic.reduce(function (a, d) {
-    if (a.indexOf(d.step) === -1) {
-      a.push(d.step);
-    }
-    return a;
- }, []);
-const step_stochastic = d3.max(step_list);
-
-// step_list = data_3D.reduce(function (a, d) {
-// 	if (a.indexOf(d.step) === -1) {
-// 	  a.push(d.step);
-// 	}
-// 	return a;
-//  }, []);
-// const step_3D = d3.max(step_list);
-
-step_list = data_wellmixed.reduce(function (a, d) {
-	if (a.indexOf(d.step) === -1) {
-	  a.push(d.step);
-	}
-	return a;
- }, []);
-const step_wellmixed = d3.max(step_list);
-
-
-data_meanfield = data_meanfield.filter(function(d) {return d.step == step_meanfield});
-data_stochastic = data_stochastic.filter(function(d) {return d.step == step_stochastic});
-// data_3D = data_3D.filter(function(d) {return d.step == step_3D});
-data_wellmixed = data_wellmixed.filter(function(d) {return d.step == step_wellmixed});
+data_meanfield = filter_max_step(data_meanfield);
+data_stochastic = filter_max_step(data_stochastic);
+// data_3D = filter_max_step(data_3D);
+data_double_d = filter_max_step(data_double_d);
 
 console.log(data_meanfield);
 console.log(data_stochastic);
 // console.log(data_3D);
-console.log(data_wellmixed);
+console.log(data_double_d);
 
 let data = data_meanfield;
 
@@ -163,7 +138,7 @@ data_stochastic.forEach((d) => {
 // 	d.bacteria = twos / L**3;
 // });
 
-data_wellmixed.forEach((d) => {
+data_double_d.forEach((d) => {
 	const lattice = d.soil_lattice;
 	const L = lattice.length
 	// calculate the fraction of 1s, 2s and 0s in the matrix
@@ -305,8 +280,8 @@ function change_data(state) {
 	else if (state == '3D') {
 		data = data_3D;
 	}
-	else if (state == 'wellmixed') {
-		data = data_wellmixed;
+	else if (state == 'double_d') {
+		data = data_double_d;
 	}
 
 	// update the rgb heatmap
