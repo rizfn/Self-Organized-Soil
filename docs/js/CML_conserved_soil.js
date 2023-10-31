@@ -65,11 +65,10 @@ const interactWormSoil = gpu.createKernel(function (densityLattice, wormLattice,
     output: [L, L],
 });
 
-const nSteps = 1000; // number of steps to run the simulation
-const initialDensity = 0.8;
-const sF = 0.6;
-const bF = 0.1;
-const iF = 1;
+let initialDensity = 0.8;
+let sF = 0.6;
+let bF = 0.1;
+let iF = 1;
 
 let densityLattice = gpu.createKernel(function (initialDensity) {
     return initialDensity / 0.5 * Math.random();
@@ -82,7 +81,22 @@ let wormLattice = gpu.createKernel(function () {
 
 
 
-// todo: MAKE SLIDERS WORK, MAKE RESTART BUTTON MOVE STEP TO 0, use GPU memory instead
+// todo: MAKE SLIDERS WORK, use GPU memory instead
+
+let isRunning = false;
+let simulationId;
+
+function startSimulation() {
+    isRunning = true;
+    updateAndRender(0);
+}
+
+function stopSimulation() {
+    isRunning = false;
+    if (simulationId) {
+        cancelAnimationFrame(simulationId);
+    }
+}
 
 // add button to restart the simulation
 d3.select("div#input-section")
@@ -90,6 +104,7 @@ d3.select("div#input-section")
     .attr("id", "restart_button")
     .text("Restart")
     .on("click", function () {
+        stopSimulation();
         densityLattice = gpu.createKernel(function (initialDensity) {
             return initialDensity / 0.5 * Math.random();
         }
@@ -99,15 +114,15 @@ d3.select("div#input-section")
             return Math.random();
         }).setOutput([L, L])();
 
-        update_lattices(densityLattice, wormLattice);
+        startSimulation();
     });
 
 // Define the slider properties
 const sliders = [
-    { id: 'smoothing', label: 'Smoothing Factor', value: sF, callback: function () { sF = +this.value; console.log('sF:', sF); } },
-    { id: 'birth', label: 'Birth Factor', value: bF, callback: function () { bF = +this.value; console.log('bF:', bF); } },
-    { id: 'interaction', label: 'Interaction Factor', value: iF, callback: function () { iF = +this.value; console.log('iF:', iF); } },
-    { id: 'initialDensity', label: 'Initial Density', value: initialDensity, callback: function () { initialDensity = +this.value; console.log('initialDensity:', initialDensity); } }
+    { id: 'smoothing', label: 'Smoothing Factor', value: sF, callback: function () { sF = +this.value; } },
+    { id: 'birth', label: 'Birth Factor', value: bF, callback: function () { bF = +this.value; } },
+    { id: 'interaction', label: 'Interaction Factor', value: iF, callback: function () { iF = +this.value; } },
+    { id: 'initialDensity', label: 'Initial Density', value: initialDensity, callback: function () { initialDensity = +this.value; } }
 ];
 
 // Create the sliders
@@ -232,23 +247,17 @@ function update_lattices(density_lattice, worm_lattice) {
         .attr("fill", function (d) { return colors(d); });
 }
 
-// // Update the lattices and redraw the heatmaps for each step
-// for (let i = 0; i < nSteps; i++) {
-//     console.log(i);
-//     densityLattice = smoothDensityLattice(densityLattice, sF);
-//     wormLattice = reproduceWorms(densityLattice, wormLattice, bF);
-//     densityLattice = interactWormSoil(densityLattice, wormLattice, iF);
-//     // console.log(`Step ${i}: min=${d3.min(d3.min(densityLattice))}, mean=${densityLattice.reduce((acc, row) => acc + row.reduce((acc2, val) => acc2 + val, 0), 0)/L**2}, max=${d3.max(d3.max(densityLattice))}`);
-//     // update_lattices(densityLattice, wormLattice);
-// }
-
 function updateAndRender(i) {
+    if (!isRunning) {
+        return;
+    }
+
     console.log(i);
     densityLattice = smoothDensityLattice(densityLattice, sF);
     wormLattice = reproduceWorms(densityLattice, wormLattice, bF);
     densityLattice = interactWormSoil(densityLattice, wormLattice, iF);
     if (i % 5 == 0) {update_lattices(densityLattice, wormLattice);}
-    requestAnimationFrame(() => updateAndRender(i + 1));
+    simulationId = requestAnimationFrame(() => updateAndRender(i + 1));
 }
 
 updateAndRender(0);
