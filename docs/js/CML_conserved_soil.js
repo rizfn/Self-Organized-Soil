@@ -81,18 +81,15 @@ let wormLattice = gpu.createKernel(function () {
 
 
 
-// todo: MAKE SLIDERS WORK, use GPU memory instead
+// todo: use GPU memory instead
 
-let isRunning = false;
 let simulationId;
 
 function startSimulation() {
-    isRunning = true;
     updateAndRender(0);
 }
 
 function stopSimulation() {
-    isRunning = false;
     if (simulationId) {
         cancelAnimationFrame(simulationId);
     }
@@ -129,9 +126,17 @@ const sliders = [
 const sliderSection = d3.select("div#input-section").append("div").attr("id", "slider_section");
 
 sliders.forEach(slider => {
-    const section = sliderSection.append("div").attr("id", `${slider.id}_slider_section`).attr("class", "slider");
+    const section = sliderSection.append("div")
+        .attr("id", `${slider.id}_slider_section`)
+        .attr("class", "slider")
+        .style("display", "flex")
+        .style("flex-direction", "column")
+        .style("align-items", "center")
+        .style("justify-content", "center");
 
-    section.append("label").attr("for", `${slider.id}_slider`).text(slider.label + '\n');
+    section.append("label")
+        .attr("for", `${slider.id}_slider`)
+        .text(slider.label);
 
     section.append("input")
         .attr("type", "range")
@@ -145,7 +150,7 @@ sliders.forEach(slider => {
 
 // set the dimensions and margins of the graph
 var margin = { top: 10, right: 10, bottom: 10, left: 10 },
-    width = innerWidth / 2.3 - margin.left - margin.right,
+    width = 0.8 * innerWidth / 2 - margin.left - margin.right,
     height = innerHeight - margin.top - margin.bottom;
 
 function getOffset(element) {
@@ -160,10 +165,11 @@ const latticeSize = Math.min(width, height);
 
 // append the svg object to the body of the page
 var densityLatticeSvg = d3.select("div#lattices")
+    .style("height", "100vh")
     .append("svg")
     .attr("id", "density_lattice")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
+    .attr("width", latticeSize + margin.left + margin.right)
+    .attr("height", latticeSize + margin.top + margin.bottom)
     .append("g")
     .attr("transform",
         "translate(" + margin.left + "," + margin.top + ")");
@@ -205,8 +211,8 @@ densityLatticeSvg.selectAll("g.row")
 var wormLatticeSvg = d3.select("div#lattices")
     .append("svg")
     .attr("id", "worm_lattice")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
+    .attr("width", latticeSize + margin.left + margin.right)
+    .attr("height", latticeSize + margin.top + margin.bottom)
     .append("g")
     .attr("transform",
         "translate(" + margin.left + "," + margin.top + ")");
@@ -248,10 +254,6 @@ function update_lattices(density_lattice, worm_lattice) {
 }
 
 function updateAndRender(i) {
-    if (!isRunning) {
-        return;
-    }
-
     console.log(i);
     densityLattice = smoothDensityLattice(densityLattice, sF);
     wormLattice = reproduceWorms(densityLattice, wormLattice, bF);
@@ -259,5 +261,3 @@ function updateAndRender(i) {
     if (i % 5 == 0) {update_lattices(densityLattice, wormLattice);}
     simulationId = requestAnimationFrame(() => updateAndRender(i + 1));
 }
-
-updateAndRender(0);
