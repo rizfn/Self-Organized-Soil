@@ -1,10 +1,10 @@
-const L = 100
+const L = 100;
 
 const gpu = new GPU.GPU({ mode: 'gpu' });
 
 const smoothDensityLattice = gpu.createKernel(function (densityLattice, smoothingFactor) {
-    const x = this.thread.x;
-    const y = this.thread.y;
+    const x = this.thread.y;  // note: Opposite. GPU.js is row-major (?), the outputs were getting transposed each step
+    const y = this.thread.x;
     const numRows = this.constants.numRows;
     const numCols = this.constants.numCols;
     const rolledLattice = (
@@ -24,16 +24,16 @@ const smoothDensityLattice = gpu.createKernel(function (densityLattice, smoothin
 });
 
 const reproduceWorms = gpu.createKernel(function (densityLattice, wormLattice, birthFactor) {
-    const x = this.thread.x;
-    const y = this.thread.y;
-    const targetWormCount1 = (
+    const x = this.thread.y;  // opposite to deal with transposed outputs
+    const y = this.thread.x;
+    const targetWormCount = (
         densityLattice[x][y] <= 0.5 ?
             2 * densityLattice[x][y] :
             -2 * densityLattice[x][y] + 2
     );
-    const targetValue = densityLattice[x][y] > 1 ? 0 : targetWormCount1;
-    const newValue = (1 - birthFactor) * wormLattice[x][y] + birthFactor * targetValue;
-    return newValue;
+    const truncatedTargetWormCount = targetWormCount < 0 ? 0 : targetWormCount;
+    const newWormLattice = wormLattice[x][y] + (birthFactor * (truncatedTargetWormCount - wormLattice[x][y]));
+    return newWormLattice;
 }, {
     constants: {
         numRows: L,
@@ -43,8 +43,8 @@ const reproduceWorms = gpu.createKernel(function (densityLattice, wormLattice, b
 });
 
 const interactWormSoil = gpu.createKernel(function (densityLattice, wormLattice, interactionFactor) {
-    const x = this.thread.x;
-    const y = this.thread.y;
+    const x = this.thread.y;  // opposite to deal with transposed outputs
+    const y = this.thread.x;
     const numRows = this.constants.numRows;
     const numCols = this.constants.numCols;
     const pushedLattice = (
@@ -85,14 +85,25 @@ let wormLattice = gpu.createKernel(function () {
 
 let simulationId;
 
-function startSimulation() {
-    updateAndRender(0);
-}
+// on spacebar, restart the simulation
+document.addEventListener("keydown", function (event) {
+    if (event.code === "Space") {
+        restartSimulation();
+    }
+});
 
-function stopSimulation() {
+function restartSimulation() {
     if (simulationId) {
         cancelAnimationFrame(simulationId);
     }
+    densityLattice = gpu.createKernel(function (initialDensity) {
+        return initialDensity / 0.5 * Math.random();
+    }
+    ).setOutput([L, L])(initialDensity);
+    wormLattice = gpu.createKernel(function () {
+        return Math.random();
+    }).setOutput([L, L])();
+    updateAndRender(0);
 }
 
 // add button to restart the simulation
@@ -101,17 +112,7 @@ d3.select("div#input-section")
     .attr("id", "restart_button")
     .text("Restart")
     .on("click", function () {
-        stopSimulation();
-        densityLattice = gpu.createKernel(function (initialDensity) {
-            return initialDensity / 0.5 * Math.random();
-        }
-        ).setOutput([L, L])(initialDensity);
-
-        wormLattice = gpu.createKernel(function () {
-            return Math.random();
-        }).setOutput([L, L])();
-
-        startSimulation();
+        restartSimulation();
     });
 
 // Define the slider properties
@@ -253,11 +254,12 @@ function update_lattices(density_lattice, worm_lattice) {
         .attr("fill", function (d) { return colors(d); });
 }
 
+
 function updateAndRender(i) {
-    console.log(i);
-    densityLattice = smoothDensityLattice(densityLattice, sF);
-    wormLattice = reproduceWorms(densityLattice, wormLattice, bF);
-    densityLattice = interactWormSoil(densityLattice, wormLattice, iF);
-    if (i % 5 == 0) {update_lattices(densityLattice, wormLattice);}
-    simulationId = requestAnimationFrame(() => updateAndRender(i + 1));
+        console.log(i);
+        densityLattice = smoothDensityLattice(densityLattice, sF);
+        wormLattice = reproduceWorms(densityLattice, wormLattice, bF);
+        densityLattice = interactWormSoil(densityLattice, wormLattice, iF);
+        if (i % 5 == 0) {update_lattices(densityLattice, wormLattice);}
+        simulationId = requestAnimationFrame(() => updateAndRender(i + 1));
 }
