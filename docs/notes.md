@@ -159,3 +159,26 @@ Measure the boundary of cluster sizes. Fractical dimension of boundary
 CML: measure autocorrelation without defining clusters
 
 Think about using gradient instead of linear in CML, to emphasize boundaries
+
+
+## Meeting 11: 1st November, 2023
+
+Two species meanfield, and check fractions of red/blue
+
+Gather more data for single species power law
+
+Lotka voltairre with competitive exclusion
+
+Microscopic biofilms(?)
+
+Presentation notes:
+
+- [x] Show predator prey vs meanfield
+
+- [ ] Add axes labels
+
+- [ ] Add a little discussion on power law
+
+- [x] Remove the bad model
+
+- [x] Remove the top heatmap
