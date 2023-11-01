@@ -1,7 +1,7 @@
 let { default: data_meanfield } = await import("../data/single_species/soil_neighbours_meanfield_r=1.json", { assert: { type: "json" } });
-// let { default: data_meanfield } = await import("../data/single_species/predatorprey_meanfield_r=1.json", { assert: { type: "json" } });
 let { default: data_stochastic } = await import("../data/single_species/soil_neighbours_meanfield_d_r=1.json", { assert: { type: "json" } });
 let { default: data_wellmixed } = await import("../data/single_species/wellmixed_soil_neighbours_r=1.json", { assert: { type: "json" } });
+let { default: data_predatorprey } = await import("../data/single_species/predatorprey_meanfield_r=1.json", { assert: { type: "json" } });
 
 // add 4 radio buttons to switch between meanfield, stochastic, parallel, 3d, wellmixed data
 var form = d3.select("div#select-data")
@@ -49,8 +49,23 @@ form_label = form.append("label")
 		change_data(this.value)
 	});
 
+form_label.append("span")
+	.attr("class", "checkmark");
 
-// on 1,2,3,4,5 set radio buttons
+form_label = form.append("label")
+	.attr("class", "radio-label")
+	.text("Predator-prey (4)")
+	.append("input")
+	.attr("type", "radio")
+	.attr("name", "radio")
+	.attr("value", "predatorprey")
+	.on("change", function() {
+		change_data(this.value)
+	});
+
+
+
+// on 1,2,3,4 set radio buttons
 document.addEventListener('keydown', function(event) {
 	if (event.code === 'Digit1') {
 		// set radio button to meanfield
@@ -67,36 +82,28 @@ document.addEventListener('keydown', function(event) {
 		document.getElementById("radio-buttons").elements[2].checked = true;
 		change_data('wellmixed')
 	}
+	else if (event.code === 'Digit4') {
+		// set radio button to predatorprey
+		document.getElementById("radio-buttons").elements[3].checked = true;
+		change_data('predatorprey')
+	}
 });
 
-let step_list = data_meanfield.reduce(function (a, d) {
-    if (a.indexOf(d.step) === -1) {
-      a.push(d.step);
-    }
-    return a;
- }, []);
-const step_meanfield = d3.max(step_list);
 
-step_list = data_stochastic.reduce(function (a, d) {
-	if (a.indexOf(d.step) === -1) {
-	  a.push(d.step);
-	}
-	return a;
- }, []);
-const step_stochastic = d3.max(step_list);
+function filter_max_step(data) {
+	let step_list = data.reduce(function (a, d) {
+		if (a.indexOf(d.step) === -1) {
+		  a.push(d.step);
+		}
+		return a;
+	  }, []);
+	return data.filter(function(d) {return d.step == d3.max(step_list)});
+}
 
-step_list = data_wellmixed.reduce(function (a, d) {
-	if (a.indexOf(d.step) === -1) {
-	  a.push(d.step);
-	}
-	return a;
- }, []);
-const step_wellmixed = d3.max(step_list);
-
-
-data_meanfield = data_meanfield.filter(function(d) {return d.step == step_meanfield});
-data_stochastic = data_stochastic.filter(function(d) {return d.step == step_stochastic});
-data_wellmixed = data_wellmixed.filter(function(d) {return d.step == step_wellmixed});
+data_meanfield = filter_max_step(data_meanfield);
+data_stochastic = filter_max_step(data_stochastic);
+data_wellmixed = filter_max_step(data_wellmixed);
+data_predatorprey = filter_max_step(data_predatorprey);
 
 console.log(data_meanfield);
 console.log(data_stochastic);
@@ -206,8 +213,7 @@ svg_soil.append("text")
 	.attr("class", "axis_label")
 	.attr("transform", "translate(" + (width/2) + " ," + (height + margin.top) + ")")
 	.style("text-anchor", "middle")
-	.text("d");
-
+	.text("Death rate (θ)");
 
 svg_soil.append("g")
 	.attr("class", "axis")
@@ -221,7 +227,7 @@ svg_soil.append("text")
 .attr("x",0 - (height / 2))
 .attr("dy", "1em")
 .style("text-anchor", "middle")
-.text("s");
+.text("Soil-filling rate (σ)");
 
 
 svg_soil.selectAll(".cell")
@@ -253,6 +259,9 @@ function change_data(state) {
 	} 
 	else if (state == 'wellmixed') {
 		data = data_wellmixed;
+	}
+	else if (state == 'predatorprey') {
+		data = data_predatorprey;
 	}
 
 	// update the rgb heatmap

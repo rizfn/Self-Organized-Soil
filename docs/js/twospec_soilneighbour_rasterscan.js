@@ -73,9 +73,11 @@ let filtereddata = data.filter(function(d){ return d.step == step });
 console.log(filtereddata);
 
 // set the dimensions and margins of the graph
-var margin = {top: 10, right: 10, bottom: 10, left: 10},
+// var margin = {top: 10, right: 10, bottom: 10, left: 10},
+var margin = {top: 10, right: 10, bottom: 50, left: 50},
   width = innerWidth/2 - margin.left - margin.right,
-  height = innerHeight/2 - margin.top - margin.bottom;
+//   height = innerHeight/2 - margin.top - margin.bottom;
+  height = innerHeight - margin.top - margin.bottom;
 
 
 function getOffset(element) {
@@ -86,15 +88,15 @@ function getOffset(element) {
   };
 }
           
-// append the svg object to the body of the page
-var svg = d3.select("div#raster")
-  .append("svg")
-    .attr("id", "soil_boundaries")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")");
+// // append the svg object to the body of the page
+// var svg = d3.select("div#raster")
+//   .append("svg")
+//     .attr("id", "soil_boundaries")
+//     .attr("width", width + margin.left + margin.right)
+//     .attr("height", height + margin.top + margin.bottom)
+//   .append("g")
+//     .attr("transform",
+//           "translate(" + margin.left + "," + margin.top + ")");
 
 var rows = d3.map(data, function(d){return d.d;})
 var cols = d3.map(data, function(d){return d.s;}) 
@@ -111,9 +113,9 @@ var y = d3.scaleBand()
 	.padding(0.05);
 
 
-var colors = d3.scaleSequential()
-	.interpolator(d3.interpolateViridis)
-	.domain([d3.min(data, function(d) {return d.soil_boundaries;}), d3.max(data, function(d) {return d.soil_boundaries;})])  
+// var colors = d3.scaleSequential()
+// 	.interpolator(d3.interpolateViridis)
+// 	.domain([d3.min(data, function(d) {return d.soil_boundaries;}), d3.max(data, function(d) {return d.soil_boundaries;})])  
 
 var Tooltip = d3.select("div#raster")
 	.append("div")
@@ -150,20 +152,20 @@ var mousedown = function(event, d) {
 	update_soil_lattice(d.soil_lattice)
 }
 
-svg.selectAll(".cell")
-	.data(filtereddata)
-	.enter()
-	.append("rect")
-		.attr("class", "cell")
-		.attr("x", function(d) { return x(d.d) })
-		.attr("y", function(d) { return y(d.s) })
-		.attr("width", x.bandwidth())
-		.attr("height", y.bandwidth())
-		.style("fill", function(d) { return colors(d.soil_boundaries)} )
-		.on("mouseover", mouseover)
-		.on("mousemove", mousemove)
-		.on("mouseleave", mouseleave)
-		.on("mousedown", mousedown);
+// svg.selectAll(".cell")
+// 	.data(filtereddata)
+// 	.enter()
+// 	.append("rect")
+// 		.attr("class", "cell")
+// 		.attr("x", function(d) { return x(d.d) })
+// 		.attr("y", function(d) { return y(d.s) })
+// 		.attr("width", x.bandwidth())
+// 		.attr("height", y.bandwidth())
+// 		.style("fill", function(d) { return colors(d.soil_boundaries)} )
+// 		.on("mouseover", mouseover)
+// 		.on("mousemove", mousemove)
+// 		.on("mouseleave", mouseleave)
+// 		.on("mousedown", mousedown);
 		
 
 // append the svg object to the body of the page
@@ -175,6 +177,23 @@ var svg_soil = d3.select("div#raster")
   .append("g")
     .attr("transform",
           "translate(" + margin.left + "," + margin.top + ")");
+
+// add axes labels
+
+svg_soil.append("text")
+	.attr("class", "axis_label")
+	.attr("transform", "translate(" + (width/2) + " ," + (height + margin.bottom/2) + ")")
+	.style("text-anchor", "middle")
+	.text("Death rate (θ)");
+
+svg_soil.append("text")
+	.attr("class", "axis_label")
+	.attr("transform", "rotate(-90)")
+	.attr("y", 0 - margin.left/1.5)
+	.attr("x",0 - (height / 2))
+	.attr("dy", "1em")
+	.style("text-anchor", "middle")
+	.text("Soil-filling rate (σ)");
 
 	// Three function that change the tooltip when user hover / move / leave a cell
 	var mouseover_rgb = function(event, d) {
@@ -311,11 +330,11 @@ function refilter_data() {
 		.style("opacity", 0)
 		.remove();
 
-	// update the heatmap
-	svg.selectAll(".cell")
-		.data(filtereddata)
-		.transition(t)
-		.style("fill", function(d) { return colors(d.soil_boundaries)} )
+	// // update the heatmap
+	// svg.selectAll(".cell")
+	// 	.data(filtereddata)
+	// 	.transition(t)
+	// 	.style("fill", function(d) { return colors(d.soil_boundaries)} )
 
 	// update the rgb heatmap
 	svg_soil.selectAll(".cell")

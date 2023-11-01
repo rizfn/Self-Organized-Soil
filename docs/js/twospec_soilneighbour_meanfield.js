@@ -232,8 +232,7 @@ svg_soil.append("text")
 	.attr("class", "axis_label")
 	.attr("transform", "translate(" + (width/2) + " ," + (height + margin.top) + ")")
 	.style("text-anchor", "middle")
-	.text("d");
-
+	.text("Death rate (θ)");
 
 svg_soil.append("g")
 	.attr("class", "axis")
@@ -247,7 +246,7 @@ svg_soil.append("text")
 .attr("x",0 - (height / 2))
 .attr("dy", "1em")
 .style("text-anchor", "middle")
-.text("s");
+.text("Soil-filling rate (σ)");
 
 
 svg_soil.selectAll(".cell")
