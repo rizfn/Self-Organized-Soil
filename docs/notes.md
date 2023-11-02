@@ -175,10 +175,13 @@ Presentation notes:
 
 - [x] Show predator prey vs meanfield
 
-- [ ] Add axes labels
+- [x] Add axes labels
 
-- [ ] Add a little discussion on power law
+- [x] Add a little discussion on power law
 
 - [x] Remove the bad model
 
 - [x] Remove the top heatmap
+
+- [x] Explain predator-prey better
+

@@ -4,6 +4,12 @@ theme: uncover
 math: mathjax
 paginate: true
 _paginate: skip
+style: |
+        .columns {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 0.6rem;
+        }
 ---
 
 
@@ -14,7 +20,7 @@ _paginate: skip
   }
 </style> -->
 
-![bg right:38%](images/Leaning_Tower_of_Pisa_in_the_1890s.jpg)
+![bg right:42% brightness:1.5 saturate:1.5](images/soil.png)
 
 # Self-Organised Soil
 
@@ -26,19 +32,27 @@ Supervised by Kim Sneppen and Kunihiko Kaneko
 
 ---
 
-- Inter-soil spacings appear to follow a power law
+<div class='columns'>
 
-- In particular, the exponent appears to depend on the *biodiversity* of the soil
 
-- Something causes the soil to *self-organize* into this critical state
+- Soil has a fractal struture
+
+- There is a correlation between the fractal dimension and the biodiversity of the soil
+
+- *Hypothesis:* Biology contributes to the fractal structure
+
+<img src="images/soil_fractal_dim.png" style="max-width: 100%;"></img>
+[Image source](https://www.nature.com/articles/s41598-020-77676-w)
+
+</div>
 
 ---
 
 #### Parameters
 
-- $d$: Death rate of worms
-- $r$: Reproductive rate of worms
-- $s$: Soil filling rate
+- $\theta$: Death rate of worms
+- $\rho$: Reproductive rate of worms
+- $\sigma$: Soil filling rate
 
 <br>
 <br>
@@ -49,23 +63,35 @@ Supervised by Kim Sneppen and Kunihiko Kaneko
 
 #### Algorithm
 
+<div class="columns">
+
 ```java
 choose random_site
+
 if (random_site == empty):
-  fill with probability s
+  choose neighbour_site
+  if (neighbour_site == soil):
+    fill with probability σ
+
 else if (random_site == worm):
-  die with probability d
+  die with probability θ
+
   if (not dead):
     move to neighbour_site
+
     if (neighbour_site == soil):
       choose target_site
       if (target_site == empty):
-        reproduce with probability r
+        reproduce with probability ρ
 ```
+
+![](images/algorithm.png)
+
+</div>
 
 ---
 
-<iframe width="auto" height="1000px" src="https://rizfn.github.io/Self-Organized-Soil/visualizations/rasterscan.html" style="border: 1px solid #ccc" frameborder=0>
+<iframe width="auto" height="1000px" src="https://rizfn.github.io/Self-Organized-Soil/visualizations/soil_neighbour_rasterscan.html"style="border: 1px solid #ccc" frameborder=0>
 </iframe>
 
 ---
@@ -75,15 +101,15 @@ else if (random_site == worm):
 
 $$
 \begin{align}
-    \frac{\mathrm{d}E(t)}{\mathrm{d}t} &= d\cdot B + B\cdot S - r\cdot B\cdot S\cdot E - s\cdot E \\
-    \frac{\mathrm{d}S(t)}{\mathrm{d}t} &= s\cdot E - B\cdot S \\
-    \frac{\mathrm{d}B(t)}{\mathrm{d}t} &= r\cdot B\cdot S\cdot E - d\cdot B
+    \frac{\mathrm{d}E(t)}{\mathrm{d}t} &= \theta\cdot W + W\cdot S - \rho\cdot W\cdot S\cdot E - \sigma\cdot S\cdot E \\
+    \frac{\mathrm{d}S(t)}{\mathrm{d}t} &= \sigma\cdot S\cdot E - W\cdot S \\
+    \frac{\mathrm{d}W(t)}{\mathrm{d}t} &= \rho\cdot W\cdot S\cdot E - \theta\cdot W
 \end{align}
 $$
 
 ---
 
-<iframe width="auto" height="1000px" src="https://rizfn.github.io/Self-Organized-Soil/visualizations/rasterscan_meanfield.html"style="border: 1px solid #ccc" frameborder=0>
+<iframe width="auto" height="1000px" src="https://rizfn.github.io/Self-Organized-Soil/visualizations/soil_neighbour_rasterscan_meanfield.html"style="border: 1px solid #ccc" frameborder=0>
 </iframe>
 
 ---
@@ -93,14 +119,14 @@ $$
 
 $$
 \begin{align}
-    \frac{\mathrm{d}E(t)}{\mathrm{d}t} &= d\cdot B + B\cdot S - r\cdot B\cdot S\cdot E - s\cdot E &&= 0 \\
-    \frac{\mathrm{d}S(t)}{\mathrm{d}t} &= s\cdot E - B\cdot S &&= 0\\
-    \frac{\mathrm{d}B(t)}{\mathrm{d}t} &= r\cdot B\cdot S\cdot E - d\cdot B &&= 0
+    \frac{\mathrm{d}E(t)}{\mathrm{d}t} &= \theta\cdot W + W\cdot S - \rho\cdot W\cdot S\cdot E - \sigma\cdot S\cdot E &&=0 \\
+    \frac{\mathrm{d}S(t)}{\mathrm{d}t} &= \sigma\cdot S\cdot E - W\cdot S &&=0 \\
+    \frac{\mathrm{d}W(t)}{\mathrm{d}t} &= \rho\cdot W\cdot S\cdot E - \theta\cdot W &&=0
 \end{align}
 $$
 <br>
 
-$$B+E+S=1$$
+$$W+E+S=1$$
 
 
 ---
@@ -122,15 +148,129 @@ $$B+E+S=1$$
 
 ---
 
+### Predator-Prey model
+
+<div class="columns">
+
+$$
+\begin{align*}
+\frac{\mathrm{d}E}{\mathrm{d}t} &= \theta \cdot W - \sigma \cdot E \cdot S \\ \\
+\frac{\mathrm{d}S}{\mathrm{d}t} &= \sigma \cdot E \cdot S - \rho \cdot W \cdot S \\ \\
+\frac{\mathrm{d}W}{\mathrm{d}t} &= \rho \cdot W \cdot S - \theta \cdot W
+\end{align*}
+$$
+
+<div>
+<pre> Old model     Predator-Prey</pre>
+<img src="images/predatorprey_algorithm.png" style="max-width: 90%;"></img>
+</div>
+
+</div>
+
+---
+
+<iframe width="auto" height="1000px" src="https://rizfn.github.io/Self-Organized-Soil/visualizations/soil_neighbour_rasterscan_meanfield.html"style="border: 1px solid #ccc" frameborder=0>
+</iframe>
+
+---
+
+<div class="columns">
+
+<div> 
+Predator prey
+
+<iframe src="https://www.desmos.com/calculator/4awpbqdqi4?embed" width="500" height="500" style="border: 1px solid #ccc" frameborder=0></iframe>
+</div>
+
+<div>
+Previous model
+<iframe src="https://www.desmos.com/calculator/prdbzv3s5n?embed" width="500" height="500" style="border: 1px solid #ccc" frameborder=0></iframe>
+</div>
+
+</div>
+
+---
+
+#### Critical behaviour(?)
+
+
+Look at the `cluster size distribution` of the soil
+
+<div class="columns">
+
+<div>
+On the boundary
+<img src="images/clustersizedist_boundary.png" style="max-width: 100%;"></img>
+</div>
+
+<div>
+Inside the region
+<img src="images/clustersizedist_int.png" style="max-width: 100%;"></img>
+</div>
+
+</div>
+
+---
+
+### Two Species
+<br>
+
+- `red` leave behind `lightred` when moving and dying
+<br>
+- `blue` leave behind `lightblue`
+<br>
+- `red` reproduce in `lightblue`, `blue` reproduce in `lightred`
+
+---
+
+<iframe width="auto" height="1000px" src="https://rizfn.github.io/Self-Organized-Soil/visualizations/twospec_soilneighbour_rasterscan.html"style="border: 1px solid #ccc" frameborder=0>
+</iframe>
+
+---
+
+<iframe width="auto" height="1000px" src="https://rizfn.github.io/Self-Organized-Soil/visualizations/twospec_soilneighbour_meanfield.html"style="border: 1px solid #ccc" frameborder=0>
+</iframe>
+
+---
+
 ### Coupled Map Lattice
 
 <br>
 
-- Two lattices
+- "Continuous" Cellular Automata
+- Two values per site:
   - Soil densities; $d_{i,j}$
   - Worm counts; $w_{i,j}$
 - Parallel update every timestep:
-  - Smoothen (laplacian on soil lattice)
+  - Smoothen
   - Worm birth/death
-  - Worm action on soil (shuffling)
+  - Worm action on soil
+
+---
+
+#### Algorithm
+
+<br>
+<br>
+
+<div class="columns">
+
+$$
+\begin{align*}
+\dot{D} &= s \cdot\nabla^2 D \\ \\
+\dot{W} &= b \cdot \left( f(D) - W \right) \\ \\
+\dot{D} &= i \cdot \left( - \frac14 \nabla^2 \left(DW\right) \right)
+\end{align*}
+$$
+
+
+- Soil diffuses ~ $\sigma$ <br> <br>
+- Worms update ~ $\rho, \theta$ <br><br>
+- Worms push soil
+</div>
+
+
+---
+
+<iframe width="auto" height="1000px" src="https://rizfn.github.io/Self-Organized-Soil/visualizations/CML_conserved_soil.html"style="border: 1px solid #ccc" frameborder=0> </iframe>
 
