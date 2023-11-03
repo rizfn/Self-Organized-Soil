@@ -185,3 +185,9 @@ Presentation notes:
 
 - [x] Explain predator-prey better
 
+
+## Meeting 12: 3rd November 2023
+
+Check if oscillations disappear with system size
+
+calculate worm-worm correlation
