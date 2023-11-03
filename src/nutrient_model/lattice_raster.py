@@ -43,9 +43,9 @@ def run_raster_stochastic(n_steps, L, rho, theta_list, sigma_list, delta, steps_
 def main():
 
     # initialize the parameters
-    n_steps = 100_000_000  # number of bacteria moves
+    n_steps = 10_000_000  # number of bacteria moves
     L = 50  # side length of the square lattice
-    rho = 1  # reproduction rate
+    rho = 0.5  # reproduction rate
     delta = 0
     theta_list = np.linspace(0, 0.3, 20)  # death rate
     sigma_list = np.linspace(0, 1, 20)  # soil filling rate

@@ -1,4 +1,6 @@
-const { default: data } = await import("../data/nutrient/lattice_rho=1_delta=0.json", { assert: { type: "json" } });
+// const { default: data } = await import("../data/nutrient/lattice_rho=1_delta=0.json", { assert: { type: "json" } });
+const { default: data } = await import("../data/nutrient/lattice_rho=0.5_delta=0.json", { assert: { type: "json" } });
+// const { default: data } = await import("../data/nutrient/lattice_rho=1_delta=0.5.json", { assert: { type: "json" } });
 
 // check if mobile
 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
@@ -237,11 +239,11 @@ function color_lattice(d) {
 	if (d === 0) {
 		return "rgb(224, 224, 224)"
 	} else if (d === 1) {
-        return "rgb(200, 240, 200)"
+        return "rgb(150, 200, 200)"
     } else if (d === 2) {
 		return "rgb(102, 51, 0)"
 	} else if (d === 3) {
-		return "rgb(0, 180, 0)"
+		return "rgb(0, 150, 0)"
 	}
 }
 

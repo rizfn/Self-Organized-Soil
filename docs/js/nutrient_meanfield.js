@@ -2,6 +2,8 @@ let { default: data_meanfield } = await import("../data/nutrient/meanfield_rho=1
 let { default: data_rho_05 } = await import("../data/nutrient/meanfield_rho=0.5_delta=0.json", { assert: { type: "json" } });
 let { default: data_delta_05 } = await import("../data/nutrient/meanfield_rho=1_delta=0.5.json", { assert: { type: "json" } });
 let { default: data_lattice } = await import("../data/nutrient/lattice_rho=1_delta=0.json", { assert: { type: "json" } });
+let { default: data_lattice_rho_05 } = await import("../data/nutrient/lattice_rho=0.5_delta=0.json", { assert: { type: "json" } });
+let { default: data_lattice_delta_05 } = await import("../data/nutrient/lattice_rho=1_delta=0.5.json", { assert: { type: "json" } });
 
 // add 4 radio buttons to switch between meanfield, stochastic, parallel, 3d, wellmixed data
 var form = d3.select("div#select-data")
@@ -33,6 +35,8 @@ createRadioButton(form, "Meanfield (1)", "meanfield", true);
 createRadioButton(form, "Rho = 0.5 (2)", "rho05");
 createRadioButton(form, "Delta = 0.5 (3)", "delta05");
 createRadioButton(form, "Lattice (4)", "lattice");
+createRadioButton(form, "Lattice, rho = 0.5 (5)", "lattice_rho05");
+createRadioButton(form, "Lattice, delta = 0.5 (6)", "lattice_delta05");
 
 
 // on 1,2,3,4 set radio buttons
@@ -57,6 +61,16 @@ document.addEventListener('keydown', function(event) {
         document.getElementById("radio-buttons").elements[3].checked = true;
         change_data('lattice')
     }
+	if (event.code === 'Digit5') {
+		// set radio button to lattice rho 0.5
+		document.getElementById("radio-buttons").elements[4].checked = true;
+		change_data('lattice_rho05')
+	}
+	if (event.code === 'Digit6') {
+		// set radio button to lattice delta 0.5
+		document.getElementById("radio-buttons").elements[5].checked = true;
+		change_data('lattice_delta05')
+	}
 });
 
 
@@ -74,6 +88,8 @@ data_meanfield = filter_max_step(data_meanfield);
 data_rho_05 = filter_max_step(data_rho_05);
 data_delta_05 = filter_max_step(data_delta_05);
 data_lattice = filter_max_step(data_lattice);
+data_lattice_rho_05 = filter_max_step(data_lattice_rho_05);
+data_lattice_delta_05 = filter_max_step(data_lattice_delta_05);
 
 data_lattice.forEach((d) => {
 	const lattice = d.soil_lattice;
@@ -87,6 +103,37 @@ data_lattice.forEach((d) => {
 	d.nutrient = ones / L**2;
 	d.soil = twos / L**2;
     d.worm = threes / L**2;
+	delete d.soil_lattice;
+});
+
+data_lattice_rho_05.forEach((d) => {
+	const lattice = d.soil_lattice;
+	const L = lattice.length
+	// calculate the fraction of 1s, 2s and 0s in the matrix
+	const zeros = lattice.reduce((a, b) => a + b.filter((x) => x === 0).length, 0);
+	const ones = lattice.reduce((a, b) => a + b.filter((x) => x === 1).length, 0);
+	const twos = lattice.reduce((a, b) => a + b.filter((x) => x === 2).length, 0);
+	const threes = lattice.reduce((a, b) => a + b.filter((x) => x === 3).length, 0);
+	d.vacancy = zeros / L**2;
+	d.nutrient = ones / L**2;
+	d.soil = twos / L**2;
+	d.worm = threes / L**2;
+	delete d.soil_lattice;
+});
+
+data_lattice_delta_05.forEach((d) => {
+	const lattice = d.soil_lattice;
+	const L = lattice.length
+	// calculate the fraction of 1s, 2s and 0s in the matrix
+	const zeros = lattice.reduce((a, b) => a + b.filter((x) => x === 0).length, 0);
+	const ones = lattice.reduce((a, b) => a + b.filter((x) => x === 1).length, 0);
+	const twos = lattice.reduce((a, b) => a + b.filter((x) => x === 2).length, 0);
+	const threes = lattice.reduce((a, b) => a + b.filter((x) => x === 3).length, 0);
+	d.vacancy = zeros / L**2;
+	d.nutrient = ones / L**2;
+	d.soil = twos / L**2;
+	d.worm = threes / L**2;
+	delete d.soil_lattice;
 });
 
 
@@ -221,6 +268,12 @@ function change_data(state) {
     else if (state == 'lattice') {
         data = data_lattice;
     }
+	else if (state == 'lattice_rho05') {
+		data = data_lattice_rho_05;
+	}
+	else if (state == 'lattice_delta05') {
+		data = data_lattice_delta_05;
+	}
 
 	// update the rgb heatmap
 	svg_soil.selectAll(".cell")
