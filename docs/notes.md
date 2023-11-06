@@ -191,3 +191,10 @@ Presentation notes:
 Check if oscillations disappear with system size
 
 calculate worm-worm correlation
+
+## Meeting 13: 6th November 2023
+
+Correlation function in space
+
+Try reducing parameters by a facter and see if it changes stuff
+
