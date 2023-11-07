@@ -208,7 +208,7 @@ def run_stochastic_wellmixed(n_steps, L, r, d, s, steps_to_record=np.array([100,
 
 
 def ode_integrate(sigma, theta, rho, delta, stoptime=100_000, nsteps=100_000):
-    """Integrate the ODEs for the single species model.
+    """Integrate the ODEs for the nutrient model.
 
     Parameters
     ----------
@@ -217,7 +217,7 @@ def ode_integrate(sigma, theta, rho, delta, stoptime=100_000, nsteps=100_000):
     theta : float
         Worm death rate.
     rho : float
-        Worm eproduction rate.
+        Worm reproduction rate.
     delta : float
         Nutrient decay rate.
     stoptime : int, optional
@@ -260,4 +260,118 @@ def ode_integrate(sigma, theta, rho, delta, stoptime=100_000, nsteps=100_000):
         W.append(W[i] + dt * (rho*W[i]*N[i] - theta*W[i]))
         T.append(T[i] + dt)
     
+    return T, S, E, N, W
+
+@njit
+def ode_derivatives(S, E, N, W, sigma, theta, rho, delta):
+    """Calculate the derivatives of S, E, N, W.
+
+    This function is not called directly, but rather through `ode_integrate_rk4`
+    
+    Parameters
+    ----------
+    S : float
+        Soil fraction.
+    E : float
+        Empty fraction.
+    N : float
+        Nutrient fraction.
+    W : float
+        Worm fraction.
+    sigma : float
+        Soil filling rate.
+    theta : float
+        Worm death rate.
+    rho : float
+        Worm eeproduction rate.
+    delta : float
+        Nutrient decay rate.
+
+    Returns
+    -------
+    dS : float
+        Derivative of soil fraction.
+    dE : float
+        Derivative of empty fraction.
+    dN : float
+        Derivative of nutrient fraction.
+    dW : float
+        Derivative of worm fraction.
+    """
+
+    dS = sigma*S*(E+N) - W*S
+    dE = (1-rho)*W*N + theta*W - sigma*S*E + delta*N
+    dN = W*S - W*N - sigma*S*N - delta*N
+    dW = rho*W*N - theta*W
+
+    return dS, dE, dN, dW
+
+
+@njit
+def ode_integrate_rk4(sigma, theta, rho, delta, stoptime=100_000, nsteps=100_000):
+    """Integrate the ODEs for the nutrient model using Runge-Kutta 4th order method.
+    
+    Parameters
+    ----------
+    
+    sigma : float
+        Soil filling rate.
+    theta : float
+        Worm death rate.
+    rho : float
+        Worm reproduction rate.
+    delta : float
+        Nutrient decay rate.
+    stoptime : int, optional
+        Time to stop the integration. The default is 100_000.
+    nsteps : int, optional
+        Number of steps to take. The default is 100_000.
+    """
+
+    W_0 = 0.1  # initial fraction of worms
+    E_0 = (1 - W_0) / 3  # initial number of empty sites
+    S_0 = (1 - W_0) / 3 # initial number of soil sites
+    N_0 = 1 - W_0 - E_0 - S_0  # initial number of nutrient sites
+
+    dt = stoptime / nsteps
+
+    S = np.zeros(nsteps+1)
+    W = np.zeros(nsteps+1)
+    E = np.zeros(nsteps+1)
+    N = np.zeros(nsteps+1)
+    T = np.zeros(nsteps+1)
+
+    S[0] = S_0
+    W[0] = W_0
+    E[0] = E_0
+    N[0] = N_0
+    T[0] = 0
+
+    for i in range(nsteps):
+        k1_S, k1_E, k1_N, k1_W = ode_derivatives(S[i], E[i], N[i], W[i], sigma, theta, rho, delta)
+
+        S_temp = S[i] + 0.5 * dt * k1_S
+        E_temp = E[i] + 0.5 * dt * k1_E
+        N_temp = N[i] + 0.5 * dt * k1_N
+        W_temp = W[i] + 0.5 * dt * k1_W
+        k2_S, k2_E, k2_N, k2_W = ode_derivatives(S_temp, E_temp, N_temp, W_temp, sigma, theta, rho, delta)
+
+        S_temp = S[i] + 0.5 * dt * k2_S
+        E_temp = E[i] + 0.5 * dt * k2_E
+        N_temp = N[i] + 0.5 * dt * k2_N
+        W_temp = W[i] + 0.5 * dt * k2_W
+        k3_S, k3_E, k3_N, k3_W = ode_derivatives(S_temp, E_temp, N_temp, W_temp, sigma, theta, rho, delta)
+
+        S_temp = S[i] + dt * k3_S
+        E_temp = E[i] + dt * k3_E
+        N_temp = N[i] + dt * k3_N
+        W_temp = W[i] + dt * k3_W
+        k4_S, k4_E, k4_N, k4_W = ode_derivatives(S_temp, E_temp, N_temp, W_temp, sigma, theta, rho, delta)
+
+        S[i+1] = S[i] + (dt / 6) * (k1_S + 2 * k2_S + 2 * k3_S + k4_S)
+        E[i+1] = E[i] + (dt / 6) * (k1_E + 2 * k2_E + 2 * k3_E + k4_E)
+        N[i+1] = N[i] + (dt / 6) * (k1_N + 2 * k2_N + 2 * k3_N + k4_N)
+        W[i+1] = W[i] + (dt / 6) * (k1_W + 2 * k2_W + 2 * k3_W + k4_W)
+        T[i+1] = T[i] + dt
+
     return T, S, E, N, W

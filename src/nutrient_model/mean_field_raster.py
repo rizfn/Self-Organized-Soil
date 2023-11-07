@@ -1,7 +1,7 @@
 import numpy as np
 from tqdm import tqdm
 import pandas as pd
-from nutrient_utils import ode_integrate
+from nutrient_utils import ode_integrate_rk4
 
 
 def run_raster(n_steps, rho, theta_list, sigma_list, delta, steps_to_record=np.array([100, 1000, 10000, 100000])):
@@ -32,7 +32,7 @@ def run_raster(n_steps, rho, theta_list, sigma_list, delta, steps_to_record=np.a
     soil_lattice_list = []
     for i in tqdm(range(len(ts_pairs))):  # todo: parallelize
         theta, sigma = ts_pairs[i]
-        T, S, E, N, W = ode_integrate(sigma, theta, rho, delta, stoptime=n_steps, nsteps=100_000)
+        T, S, E, N, W = ode_integrate_rk4(sigma, theta, rho, delta, stoptime=n_steps, nsteps=100_000)
         for step in steps_to_record:
             soil_lattice_list.append({"theta": theta, "sigma": sigma, "step":step, "vacancy": E[step], "nutrient": N[step], "worm":W[step], "soil": S[step]})
     return soil_lattice_list
@@ -43,7 +43,7 @@ def main():
     # initialize the parameters
     n_steps = 100_000  # number of worm moves
     rho = 1  # reproduction rate
-    delta = 0.5  # nutrient decay rate
+    delta = 0  # nutrient decay rate
     theta_list = np.linspace(0, 0.3, 20)  # death rate
     sigma_list = np.linspace(0, 1, 20)  # soil filling rate
 
@@ -133,5 +133,5 @@ def plot_single_run():
 
 
 if __name__ == "__main__":
-    # main()
-    plot_single_run()
+    main()
+    # plot_single_run()
