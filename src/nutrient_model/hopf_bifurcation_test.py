@@ -8,9 +8,9 @@ def plot_multiple_runs():
     n_steps = 10_000  # number of worm moves
     rho = 1  # reproduction rate
     delta = 0  # nutrient decay rate
-    # theta_list = np.linspace(0.03, 0.13, 3)
-    theta_list = np.linspace(0.110, 0.135, 5)
-    sigma = 0.8
+    theta_list = np.linspace(0.16, 0.21, 4)
+    # theta_list = np.linspace(0.110, 0.135, 5)
+    sigma = 0.37
     E_list = []
     for theta in tqdm(theta_list):
         T, S, E, N, W = ode_integrate_rk4(sigma, theta, rho, delta, stoptime=n_steps, nsteps=100_000)

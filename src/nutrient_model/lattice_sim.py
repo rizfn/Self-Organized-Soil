@@ -43,15 +43,16 @@ def run_raster_stochastic(n_steps, L, rho, theta_list, sigma_list, delta, steps_
 def main():
 
     # initialize the parameters
-    n_steps = 10_000_000  # number of bacteria moves
-    L = 50  # side length of the square lattice
+    steps_per_latticepoint = 1000  # number of bacteria moves per lattice point
+    L = 100  # side length of the square lattice
+    n_steps = steps_per_latticepoint * L**2  # number of timesteps to run the simulation for
     rho = 1  # reproduction rate
     delta = 0
     theta = 0.14
-    sigma = 0.5
+    # sigma = 0.5
+    sigma = 0.75
 
-    steps_to_record = np.linspace(1, n_steps, 1000, dtype=np.int32)
-    steps_to_record = np.unique(steps_to_record)
+    steps_to_record = np.arange(1, n_steps+1, L**2, dtype=np.int32)
 
     soil_lattice_data = run_stochastic(n_steps, L, rho, theta, sigma, delta, steps_to_record=steps_to_record)
     print("done running")
@@ -65,10 +66,13 @@ def main():
     plt.plot(steps_to_record, nutrients, label="nutrients")
     plt.plot(steps_to_record, soil, label="soil")
     plt.plot(steps_to_record, worms, label="worms")
+    plt.title(f"{L=}, {rho=}, {theta=}, {sigma=}, {delta=}")
+    plt.xlabel("Timestep")
+    plt.ylabel("Fraction of lattice points")
     plt.legend()
     plt.show()
 
-    
+
 
 if __name__ == "__main__":
     main()
