@@ -205,3 +205,7 @@ Try reducing parameters by a facter and see if it changes stuff
 Start from different survival rates:
 
 Normalize the correlations
+
+Try CML with new dynamics
+
+Check cluster size dist for nutrient
