@@ -209,3 +209,16 @@ Normalize the correlations
 Try CML with new dynamics
 
 Check cluster size dist for nutrient
+
+## Meeting 15: 13th November 2023:
+
+Try changing the death rate and look for changes in the exponential for the worm-worm correlation
+
+Check if changing the birth rate changes the worm-correlation
+
+Check cluster size dist for different positions where it dies in meanfield
+
+maybe check bistability in lattice model
+
+Try adding nutrient to CML
+
