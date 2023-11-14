@@ -96,14 +96,15 @@ def main():
         plt.plot(np.arange(L+1), data.correlation_hist.iloc[i], label=f"sigma={round(data.sigma.iloc[i], 2)}, theta={round(data.theta.iloc[i], 2)}", marker='x', linestyle=' ')
     
     # plot powerlaw of slope -k
-    k = 0.5
+    k = 3
     x = np.linspace(1, L+1, 1000)
     y = x**(-k)
+    # y = 10**2 * x**(-k)
     plt.plot(x, y, label=f"powerlaw of slope -{k}", linestyle='--')
 
     plt.title(f"Correlation histogram for source={source_site}, target={target_site}, {L=}")
-    plt.xscale('log')
-    # plt.yscale('log')
+    # plt.xscale('log')
+    plt.yscale('log')
 
     plt.legend()  # Add a legend
     # plt.savefig("src/nutrient_model/correlation_histogram.png", dpi=300)
