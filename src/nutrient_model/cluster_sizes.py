@@ -36,8 +36,8 @@ def main():
     L = 500  # side length of the square lattice
     n_steps = steps_per_latticepoint * L**2  # number of bacteria moves
     rho = 1  # reproduction rate
-    theta = 0.14  # death rate
-    sigma = 0.2  # soil filling rate
+    theta = 0.06  # death rate
+    sigma = 0.68  # soil filling rate
     delta = 0 # nutrient decay rate
 
     steps_to_record = np.arange(n_steps//2, n_steps, 20 * L**2, dtype=np.int32)
@@ -74,7 +74,7 @@ def main():
     plt.xscale('log')
     plt.yscale('log')
     plt.legend()
-    plt.savefig('src/nutrient_model/cluster_sizes.png', dpi=300)
+    plt.savefig(f'src/nutrient_model/cluster_sizes_{theta=}_{sigma=}.png', dpi=300)
     plt.show()
 
 if __name__ == "__main__":

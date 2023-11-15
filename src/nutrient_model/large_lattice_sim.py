@@ -47,8 +47,10 @@ def main():
     n_steps = steps_per_latticepoint * L**2  # number of timesteps to run the simulation for
     rho = 1  # reproduction rate
     delta = 0
-    theta_list = np.array([0.14, 0.14, 0.1])
-    sigma_list = np.array([0.2, 0.8, 0.55])
+    # theta_list = np.array([0.14, 0.14, 0.1])
+    # sigma_list = np.array([0.2, 0.8, 0.55])
+    theta_list = np.array([0.14, 0.1, 0.06])
+    sigma_list = np.array([0.3, 0.3, 0.3])
 
     soil_lattice_data = run_multisim_stochastic(n_steps, L, rho, theta_list, sigma_list, delta, steps_to_record=np.array([n_steps]))
 

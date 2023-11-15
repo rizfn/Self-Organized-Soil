@@ -39,6 +39,25 @@ def distance_histogram(lattice, source_site=3, target_site=3):
     return histogram - 1
 
 
+@njit
+def distance_histogram_logbinned(lattice, source_site=3, target_site=3, num_bins=20):
+    L = lattice.shape[0]
+    distances = pairwise_manhattan_distances(lattice, L, source_site=source_site, target_site=target_site)
+    num_sources = np.count_nonzero(lattice == source_site)
+    num_targets = np.count_nonzero(lattice == target_site)
+    bins = np.logspace(np.log10(1), np.log10(L), num=num_bins)
+    hist, _ = np.histogram(distances, bins=bins)
+    hist = hist / num_sources
+    d = np.arange(L+1)
+    expected_counts = np.where(d < L/2, 4*d, 4*(L - d))
+    expected_counts = np.repeat(np.arange(len(expected_counts)), expected_counts)
+    expected_counts, _ = np.histogram(expected_counts, bins=bins)
+    hist = hist / (expected_counts * num_targets/L**2)
+    return hist
+
+
+
+
 def main_fulldata():
     data = pd.read_json("docs/data/nutrient/lattice_rho=1_delta=0.json")
 
@@ -91,16 +110,32 @@ def main():
 
 
     # For each row in dataframe, plot the correlation histogram 
-
-    for i in range(len(data)):
-        plt.plot(np.arange(L+1), data.correlation_hist.iloc[i], label=f"sigma={round(data.sigma.iloc[i], 2)}, theta={round(data.theta.iloc[i], 2)}", marker='x', linestyle=' ')
+    # for i in range(len(data)):
+    #     plt.plot(np.arange(L+1), data.correlation_hist.iloc[i], label=f"sigma={round(data.sigma.iloc[i], 2)}, theta={round(data.theta.iloc[i], 2)}", marker='x', linestyle=' ')
     
-    # plot powerlaw of slope -k
-    k = 3
-    x = np.linspace(1, L+1, 1000)
-    y = x**(-k)
-    # y = 10**2 * x**(-k)
-    plt.plot(x, y, label=f"powerlaw of slope -{k}", linestyle='--')
+
+    # Group the data by theta
+    grouped = data.groupby('theta')
+
+    # For each group, plot the correlation histogram and the exponential with the same color
+    for theta, group in grouped:
+        color = next(plt.gca()._get_lines.prop_cycler)['color']
+        for i in range(len(group)):
+            plt.plot(np.arange(L+1), group.correlation_hist.iloc[i], color=color, marker='x', linestyle=' ')
+            k = np.sqrt(1/theta) + 0.12/theta  # NOTE: ARBITRARY
+            # k = np.sqrt(1/theta)
+            x = np.linspace(1, 20, 100)
+            # Set the prefactor to the value of the correlation histogram at x=1
+            prefactor = group.correlation_hist.iloc[i][1] / np.exp(-1/k)
+            y = prefactor * np.exp(-x / k)
+            plt.plot(x, y, color=color, label=f"theta={theta:.2f}, exponential of slope -{1/k:.2f}", linestyle='--')
+
+
+    # # plot exponential of slope -k
+    # k = 0.3
+    # x = np.linspace(1, 20, 100)
+    # y = np.exp(-k*x)
+    # plt.plot(x, y, label=f"exponential of slope -{k}", linestyle='--')
 
     plt.title(f"Correlation histogram for source={source_site}, target={target_site}, {L=}")
     # plt.xscale('log')
@@ -113,8 +148,34 @@ def main():
 
 
 
+def main_logbinned():
+    data = pd.read_json("docs/data/nutrient/large_lattice_rho=1_delta=0.json")
+    source_site = 3  # 0 : empty, 1 : nutrient, 2 : soil, 3 : worm
+    target_site = 3  # 0 : empty, 1 : nutrient, 2 : soil, 3 : worm
+    n_bins = 100
+    data['correlation_hist'] = data.soil_lattice.apply(lambda x: distance_histogram_logbinned(np.array(x), source_site, target_site, n_bins))
+    L = len(data.soil_lattice.iloc[0])
+    bin_edges = np.geomspace(1, L, n_bins)
+    bin_midpoints = bin_edges[:-1]
+    for i in range(len(data)):
+        plt.plot(bin_midpoints, data.correlation_hist.iloc[i], label=f"sigma={round(data.sigma.iloc[i], 2)}, theta={round(data.theta.iloc[i], 2)}", marker='x', linestyle=' ')
+    
+    # plot powerlaw of slope -k
+    k = 1
+    x = np.linspace(1, L+1, 1000)
+    # y = x**(-k)
+    y = 10**1 * x**(-k)
+    # plt.plot(x, y, label=f"powerlaw of slope -{k}", linestyle='--')
+    plt.title(f"Logbinned correlation histogram for source={source_site}, target={target_site}, {L=}")
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.legend()  # Add a legend
+    # plt.savefig("src/nutrient_model/correlation_histogram.png", dpi=300)
+    plt.show()  # Display the plot
+
 
 
 if __name__ == "__main__":
     main()
     # main_fulldata()
+    # main_logbinned()
