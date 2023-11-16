@@ -210,6 +210,7 @@ Try CML with new dynamics
 
 Check cluster size dist for nutrient
 
+
 ## Meeting 15: 13th November 2023:
 
 Try changing the death rate and look for changes in the exponential for the worm-worm correlation
@@ -221,4 +222,19 @@ Check cluster size dist for different positions where it dies in meanfield
 maybe check bistability in lattice model
 
 Try adding nutrient to CML
+
+
+## Meeting 16: 16th November 2023:
+
+So 200x200 and see if power law changes
+
+Check fixed soil filling rate, vary death rate
+
+Try  to replicate paper with 2-d
+
+Try to make worms die from starvation: they die in white and live in soil
+
+Check in what region the power law is seen
+
+Check if power law changes with soil filling rate
 
