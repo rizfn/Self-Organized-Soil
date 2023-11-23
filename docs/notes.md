@@ -238,3 +238,13 @@ Check in what region the power law is seen
 
 Check if power law changes with soil filling rate
 
+
+## Meeting 17: 23rd November 2023:
+
+Worm -> Worm: kill the other worm
+
+Small difference in the soil methodology
+
+Try to calculate CSD for weird fractal dimension plot
+
+
