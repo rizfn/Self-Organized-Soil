@@ -122,8 +122,8 @@ def main():
         color = next(plt.gca()._get_lines.prop_cycler)['color']
         for i in range(len(group)):
             plt.plot(np.arange(L+1), group.correlation_hist.iloc[i], color=color, marker='x', linestyle=' ')
-            k = np.sqrt(1/theta) + 0.12/theta  # NOTE: ARBITRARY
-            # k = np.sqrt(1/theta)
+            # k = np.sqrt(1/theta) + 0.12/theta  # NOTE: ARBITRARY
+            k = np.sqrt(2/theta)
             x = np.linspace(1, 20, 100)
             # Set the prefactor to the value of the correlation histogram at x=1
             prefactor = group.correlation_hist.iloc[i][1] / np.exp(-1/k)
