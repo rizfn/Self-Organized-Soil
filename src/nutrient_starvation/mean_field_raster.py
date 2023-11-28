@@ -42,7 +42,7 @@ def main():
 
     # initialize the parameters
     n_steps = 100_000  # number of worm moves
-    rho = 0.5  # reproduction rate
+    rho = 1  # reproduction rate
     delta = 0  # nutrient decay rate
     theta_list = np.linspace(0, 1, 20)  # death rate
     sigma_list = np.linspace(0, 1, 20)  # soil filling rate

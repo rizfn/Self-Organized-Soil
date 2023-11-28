@@ -120,10 +120,7 @@ def update_stochastic(soil_lattice, L, rho, theta, sigma, delta):
         elif new_site_value == 2:
             # leave nutrient behind
             soil_lattice[site[0], site[1]] = 1
-        # check if the new site is a worm
-        elif new_site_value == 3:
-            # keep both with worms (undo the vacant space in original site)
-            soil_lattice[site[0], site[1]] = 3
+        # if the new site is worm, do nothing => kill the worm
 
 
 @njit
@@ -245,9 +242,9 @@ def ode_derivatives(S, E, N, W, sigma, theta, rho, delta):
     """
 
     dS = sigma*S*(E+N) - W*S
-    dE = (1-rho)*W*N + theta*W*E - sigma*S*E + delta*N
+    dE = (1-rho)*W*N + theta*W*E + W*W - sigma*S*E + delta*N
     dN = W*S - W*N - sigma*S*N - delta*N
-    dW = rho*W*N - theta*W*E
+    dW = rho*W*N - theta*W*E - W*W
 
     return dS, dE, dN, dW
 

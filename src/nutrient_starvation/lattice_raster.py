@@ -45,8 +45,8 @@ def main():
     # initialize the parameters
     n_steps = 10_000_000  # number of bacteria moves
     L = 50  # side length of the square lattice
-    rho = 0.5  # reproduction rate
-    delta = 0  # nutrient decay rate
+    rho = 1  # reproduction rate
+    delta = 0.5  # nutrient decay rate
     theta_list = np.linspace(0, 1, 20)  # death rate
     sigma_list = np.linspace(0, 1, 20)  # soil filling rate
 
