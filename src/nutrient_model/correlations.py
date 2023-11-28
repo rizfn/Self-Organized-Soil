@@ -142,7 +142,7 @@ def main():
     plt.yscale('log')
 
     plt.legend()  # Add a legend
-    # plt.savefig("src/nutrient_model/correlation_histogram.png", dpi=300)
+    # plt.savefig("src/nutrient_model/plots/correlation_histogram.png", dpi=300)
     plt.show()  # Display the plot
 
 
@@ -170,7 +170,7 @@ def main_logbinned():
     plt.xscale('log')
     plt.yscale('log')
     plt.legend()  # Add a legend
-    # plt.savefig("src/nutrient_model/correlation_histogram.png", dpi=300)
+    # plt.savefig("src/nutrient_model/plots/correlation_histogram.png", dpi=300)
     plt.show()  # Display the plot
 
 

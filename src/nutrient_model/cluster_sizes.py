@@ -74,8 +74,8 @@ def main():
     plt.xscale('log')
     plt.yscale('log')
     plt.legend()
-    # plt.savefig(f'src/nutrient_model/cluster_sizes_{theta=}_{sigma=}.png', dpi=300)
-    plt.savefig(f'src/nutrient_model/cluster_sizes_{L=}_{theta=}_{sigma=}.png', dpi=300)
+    # plt.savefig(f'src/nutrient_model/plots/cluster_sizes_{theta=}_{sigma=}.png', dpi=300)
+    plt.savefig(f'src/nutrient_model/plots/cluster_sizes_{L=}_{theta=}_{sigma=}.png', dpi=300)
     plt.show()
 
 if __name__ == "__main__":

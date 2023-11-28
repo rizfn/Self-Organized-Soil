@@ -84,7 +84,7 @@ def main():
     plt.plot(np.log10(normalized_lengths), tau * np.log10(normalized_lengths) + 1.6, label=f'Slope = {tau}', linestyle='--')
 
     plt.legend()
-    plt.savefig('src/nutrient_model/fractal_dimension.png', dpi=300)
+    plt.savefig('src/nutrient_model/plots/fractal_dimension.png', dpi=300)
     plt.show()
 
 

@@ -252,7 +252,7 @@ def main():
     plt.plot(np.log10(normalized_lengths), tau * np.log10(normalized_lengths) - 0.1 , label=f'Slope = {tau}', linestyle='--')
 
     plt.legend()
-    plt.savefig(f'src/nutrient_model/fractal_dimension_3D_{theta=}_{sigma=}.png', dpi=300)
+    plt.savefig(f'src/nutrient_model/plots/fractal_dimension_3D_{theta=}_{sigma=}.png', dpi=300)
     plt.show()
 
 
