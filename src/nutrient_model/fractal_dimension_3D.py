@@ -1,14 +1,12 @@
 import numpy as np
-from tqdm import tqdm
 import pandas as pd
 from scipy import ndimage
 import matplotlib.pyplot as plt
 from numba import njit
 
-
 @njit
-def neighbours_3D(c, L):
-    """Find the neighbouring sites of a site on a square lattice.
+def get_random_neighbour_3D(c, L):
+    """Get a random neighbour of a site on a cubic lattice.
     
     Parameters
     ----------
@@ -20,9 +18,16 @@ def neighbours_3D(c, L):
     Returns
     -------
     numpy.ndarray
-    Coordinates of the neighbouring sites.
+    Coordinates of the random neighbouring site.
     """
-    return np.array([[(c[0]-1)%L, c[1], c[2]], [(c[0]+1)%L, c[1], c[2]], [c[0], (c[1]-1)%L, c[2]], [c[0], (c[1]+1)%L, c[2]], [c[0], c[1], (c[2]-1)%L], [c[0], c[1], (c[2]+1)%L]])
+    c = np.array(c)
+    # choose a random coordinate to change
+    coord_changing = np.random.randint(3)
+    # choose a random direction to change the coordinate
+    change = 2 * np.random.randint(2) - 1
+    # change the coordinate
+    c[coord_changing] = (c[coord_changing] + change) % L
+    return c
 
 @njit
 def init_lattice_3D(L):
@@ -83,7 +88,7 @@ def update_stochastic_3D(soil_lattice, L, rho, theta, sigma, delta):
 
     if soil_lattice[site[0], site[1], site[2]] == 0:
         # choose a random neighbour
-        nbr = neighbours_3D(site, L)[np.random.randint(6)]
+        nbr = get_random_neighbour_3D(site, L)
         if soil_lattice[nbr[0], nbr[1], nbr[2]] == 2:  # if neighbour is soil
             # fill with soil-filling rate
             if np.random.rand() < sigma:
@@ -92,7 +97,7 @@ def update_stochastic_3D(soil_lattice, L, rho, theta, sigma, delta):
     elif soil_lattice[site[0], site[1], site[2]] == 1:
         is_filled = False
         # choose a random neighbour
-        nbr = neighbours_3D(site, L)[np.random.randint(6)]
+        nbr = get_random_neighbour_3D(site, L)
         if soil_lattice[nbr[0], nbr[1], nbr[2]] == 2:  # if neighbour is soil
             # fill with soil-filling rate
             if np.random.rand() < sigma:
@@ -109,7 +114,7 @@ def update_stochastic_3D(soil_lattice, L, rho, theta, sigma, delta):
             soil_lattice[site[0], site[1], site[2]] = 0
         else:
             # move into a neighbour
-            new_site = neighbours_3D(site, L)[np.random.randint(6)]
+            new_site = get_random_neighbour_3D(site, L)
             # check the value of the new site
             new_site_value = soil_lattice[new_site[0], new_site[1], new_site[2]]
             # move the worm
@@ -156,7 +161,6 @@ def run_stochastic_3D(n_steps, L, rho, theta, sigma, delta, steps_to_record=np.a
     soil_lattice_data : ndarray
         List of soil_lattice data for specific timesteps.
     """
-    N = int(L**2 / 10)  # initial number of bacteria
     soil_lattice = init_lattice_3D(L)
 
     soil_lattice_data = np.zeros((len(steps_to_record), L, L, L), dtype=np.int8)
@@ -167,7 +171,6 @@ def run_stochastic_3D(n_steps, L, rho, theta, sigma, delta, steps_to_record=np.a
             soil_lattice_data[steps_to_record == step] = soil_lattice
 
     return soil_lattice_data
-
 
 
 def calculate_cluster_sizes(soil_lattice_data, target_site=1):
@@ -198,20 +201,21 @@ def main():
 
     # initialize the parameters
     steps_per_latticepoint = 1_000  # number of time steps for each lattice point
-    L = 50  # side length of the square lattice
+    L = 100  # side length of the square lattice
     n_steps = steps_per_latticepoint * L**3  # number of bacteria moves
     rho = 1  # reproduction rate
     theta = 0.04  # death rate
-    sigma = 0.5  # soil filling rate
+    sigma = 1  # soil filling rate
     delta = 0 # nutrient decay rate
 
-    steps_to_record = np.arange(n_steps//2, n_steps, 20 * L**3, dtype=np.int32)
+    steps_to_record = np.arange(n_steps//2, n_steps, 10 * L**3, dtype=np.int32)
 
     # run the simulation
     soil_lattice_data = run_stochastic_3D(n_steps, L, rho, theta, sigma, delta, steps_to_record)
 
     # calculate the cluster sizes
     soil_cluster_sizes = np.concatenate(calculate_cluster_sizes(soil_lattice_data, 2))
+    soil_cluster_sizes = soil_cluster_sizes[soil_cluster_sizes > 0]
 
     # plot cluster size distribution with power law of slope tau
     plt.figure(figsize=(12, 8))
@@ -229,18 +233,12 @@ def main():
     plt.xlabel('Cluster Size')
     plt.ylabel('Probability Density')
 
-    # # plot power law with exponent gamma
-    # gamma = 2.3
-    # x = np.array(edges[:-1])
-    # plt.plot(x, 2e6*x**-gamma, label=r'$\gamma$ = ' + f'{gamma} power law', linestyle='--')
-    # plt.title(f'{L=}, {rho=}, {theta=}, {sigma=}, {delta=}')
-    # plt.legend()
-    # plt.savefig(f'src/nutrient_model/plots/cluster_sizes_3D_{theta=}_{sigma=}.png', dpi=300)
-    # plt.show()
-
-    # Convert to numpy arrays and remove zeros to avoid log(0)
+    # Convert to numpy arrays
     x = np.array(edges[:-1])
     y = np.array(hist)
+    # slice to only fit to the middle, and remove zeros to avoid log(0)
+    x, y = x[num_bins//4:3*num_bins//4], y[num_bins//4:3*num_bins//4]
+    # x, y = x[:num_bins//2], y[:num_bins//2]
     mask = (y > 0) & (x > 0)
     x = x[mask]
     y = y[mask]
@@ -248,10 +246,6 @@ def main():
     # Calculate the logarithm of x and y
     log_x = np.log10(x)
     log_y = np.log10(y)
-
-    # Remove or replace NaN and infinite values
-    log_x = np.nan_to_num(log_x, nan=0.0, posinf=0.0, neginf=0.0)
-    log_y = np.nan_to_num(log_y, nan=0.0, posinf=0.0, neginf=0.0)
 
     # Use polyfit to fit a 1-degree polynomial to the log-log data
     coeffs = np.polyfit(log_x, log_y, 1)
@@ -298,11 +292,9 @@ def main():
 
     # plot power-law with exponent tau
     tau = (4 - gamma) / 3    
-    # Find the index of the data point closest to x=-0.8
-    idx = np.abs(np.log10(normalized_lengths) + 0.8).argmin()
-    # Calculate the y-value of the line at x=-0.8
-    y_line = tau * -0.8
-    # Calculate the y-shift
+    x_match = 1  # the x-value where the power law and the line intersect
+    idx = np.abs(np.log10(normalized_lengths) + x_match).argmin()
+    y_line = tau * -x_match
     y_shift = np.log10(normalized_cumulative_volumes)[idx] - y_line
 
     # Plot the line with the calculated y-shift
