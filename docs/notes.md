@@ -247,4 +247,16 @@ Small difference in the soil methodology
 
 Try to calculate CSD for weird fractal dimension plot
 
+## Meeting 18: 4th December 2023:
+
+At what point does the cutoff enter in 2d
+
+Look for powerlaw regime with largest cluster size (1 order of magnitude less than system size)
+
+Do the 3D raster
+
+Try largest linear dimensions: both cumulative and in fractal dim
+
+
+# Meeting 19: 7th December 2023:
 
