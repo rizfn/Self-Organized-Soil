@@ -207,6 +207,177 @@ def run_stochastic_wellmixed(n_steps, L, r, d, s, steps_to_record=np.array([100,
 
 
 
+@njit
+def get_random_neighbour_3D(c, L):
+    """Get a random neighbour of a site on a cubic lattice.
+    
+    Parameters
+    ----------
+    c : numpy.ndarray
+        Coordinates of the site.
+    L : int
+    Side length of the square lattice.
+    
+    Returns
+    -------
+    numpy.ndarray
+    Coordinates of the random neighbouring site.
+    """
+    c = np.array(c)
+    # choose a random coordinate to change
+    coord_changing = np.random.randint(3)
+    # choose a random direction to change the coordinate
+    change = 2 * np.random.randint(2) - 1
+    # change the coordinate
+    c[coord_changing] = (c[coord_changing] + change) % L
+    return c
+
+@njit
+def init_lattice_3D(L):
+    """Initialize the 3D lattice.
+
+    Parameters
+    ----------
+    L : int
+        Side length of the cubic lattice.
+    N : int
+        Number of bacteria to place on the lattice.
+
+    Returns
+    -------
+    soil_lattice : numpy.ndarray
+        Lattice with bacteria randomly placed on it.
+    """
+
+    # note about lattice:
+    #   0 = empty
+    #   1 = nutrient
+    #   2 = soil
+    #   3 = worm
+    # start with 25-25-25-25
+    soil_lattice = np.random.choice(np.arange(0, 4), size=(L, L, L))
+
+    return soil_lattice
+
+@njit
+def update_stochastic_3D(soil_lattice, L, rho, theta, sigma, delta):
+    """Update the lattice stochastically. Called once every timestep.
+
+    The function mutates a global variable, to avoid slowdowns from numba primitives.
+    It works by choosing a random site, and then giving a dynamics ascribed to the said site.
+    
+    Parameters:
+    -----------
+    soil_lattice : numpy.ndarray
+        Lattice with bacteria randomly placed on it.
+    L : int
+        Side length of the square lattice.
+    rho : float
+        Reproduction rate.
+    theta : float
+        Death rate.
+    sigma : float
+        Soil filling rate.
+    delta : float
+        Nutrient decay rate.
+    
+    Returns:
+    --------
+    None
+    """
+
+    # select a random site
+    site = np.random.randint(0, L), np.random.randint(0, L), np.random.randint(0, L)
+
+    if soil_lattice[site[0], site[1], site[2]] == 0:
+        # choose a random neighbour
+        nbr = get_random_neighbour_3D(site, L)
+        if soil_lattice[nbr[0], nbr[1], nbr[2]] == 2:  # if neighbour is soil
+            # fill with soil-filling rate
+            if np.random.rand() < sigma:
+                soil_lattice[site[0], site[1], site[2]] = 2
+
+    elif soil_lattice[site[0], site[1], site[2]] == 1:
+        is_filled = False
+        # choose a random neighbour
+        nbr = get_random_neighbour_3D(site, L)
+        if soil_lattice[nbr[0], nbr[1], nbr[2]] == 2:  # if neighbour is soil
+            # fill with soil-filling rate
+            if np.random.rand() < sigma:
+                soil_lattice[site[0], site[1], site[2]] = 2
+                is_filled = True
+        if not is_filled:
+            # decay to empty with rate delta
+            if np.random.rand() < delta:
+                soil_lattice[site[0], site[1], site[2]] = 0
+
+    elif soil_lattice[site[0], site[1], site[2]] == 3:
+        # check for death
+        if np.random.rand() < theta:
+            soil_lattice[site[0], site[1], site[2]] = 0
+        else:
+            # move into a neighbour
+            new_site = get_random_neighbour_3D(site, L)
+            # check the value of the new site
+            new_site_value = soil_lattice[new_site[0], new_site[1], new_site[2]]
+            # move the worm
+            soil_lattice[new_site[0], new_site[1], new_site[2]] = 3
+            soil_lattice[site[0], site[1], site[2]] = 0
+            # check if the new site is nutrient
+            if new_site_value == 1:
+                # reproduce behind you
+                if np.random.rand() < rho:
+                    soil_lattice[site[0], site[1], site[2]] = 3
+            # check if the new site is soil
+            elif new_site_value == 2:
+                # leave nutrient behind
+                soil_lattice[site[0], site[1], site[2]] = 1
+            # check if the new site is a worm
+            elif new_site_value == 3:
+                # keep both with worms (undo the vacant space in original site)
+                soil_lattice[site[0], site[1], site[2]] = 3
+
+
+@njit
+def run_stochastic_3D(n_steps, L, rho, theta, sigma, delta, steps_to_record=np.array([100, 1000, 10000, 100000])):
+    """Run the stochastic simulation for n_steps timesteps.
+
+    Parameters
+    ----------
+    n_steps : int
+        Number of timesteps to run the simulation for.
+    L : int
+        Side length of the square lattice.
+    rho : float
+        Reproduction rate.
+    theta : float
+        Death rate.
+    sigma : float
+        Soil filling rate.
+    delta : float
+        Nutrient decay rate.
+    steps_to_record : ndarray, optional
+        Array of timesteps to record the lattice data for, by default [100, 1000, 10000, 100000].
+
+    Returns
+    -------
+    soil_lattice_data : ndarray
+        List of soil_lattice data for specific timesteps.
+    """
+    soil_lattice = init_lattice_3D(L)
+
+    soil_lattice_data = np.zeros((len(steps_to_record), L, L, L), dtype=np.int8)
+
+    for step in range(1, n_steps+1):
+        update_stochastic_3D(soil_lattice, L, rho, theta, sigma, delta)
+        if step in steps_to_record:
+            soil_lattice_data[steps_to_record == step] = soil_lattice
+
+    return soil_lattice_data
+
+
+
+
 def ode_integrate(sigma, theta, rho, delta, stoptime=100_000, nsteps=100_000):
     """Integrate the ODEs for the nutrient model.
 
