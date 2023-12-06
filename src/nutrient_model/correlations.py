@@ -4,6 +4,7 @@ import pandas as pd
 import seaborn as sns
 from numba import njit
 
+#  NOTE: data updated so it should be too slow.
 
 @njit(parallel=True)
 def pairwise_manhattan_distances(lattice, L, source_site, target_site):

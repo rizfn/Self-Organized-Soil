@@ -2,7 +2,7 @@ import numpy as np
 from numba import njit
 
 
-@njit
+@njit  # NOT USED ANYWHERE 
 def neighbours(c, L):
     """Find the neighbouring sites of a site on a square lattice.
     
@@ -20,6 +20,31 @@ def neighbours(c, L):
     """
 
     return np.array([[(c[0]-1)%L, c[1]], [(c[0]+1)%L, c[1]], [c[0], (c[1]-1)%L], [c[0], (c[1]+1)%L]])
+
+@njit
+def get_random_neighbour(c, L):
+    """Get a random neighbour of a site on a square lattice.
+    
+    Parameters
+    ----------
+    c : numpy.ndarray
+        Coordinates of the site.
+    L : int
+    Side length of the square lattice.
+    
+    Returns
+    -------
+    numpy.ndarray
+    Coordinates of the random neighbouring site.
+    """
+    c = np.array(c)
+    # choose a random coordinate to change
+    coord_changing = np.random.randint(2)
+    # choose a random direction to change the coordinate
+    change = 2 * np.random.randint(2) - 1
+    # change the coordinate
+    c[coord_changing] = (c[coord_changing] + change) % L
+    return c
 
 @njit
 def init_lattice(L):
@@ -78,7 +103,7 @@ def update_stochastic(soil_lattice, L, rho, theta, sigma, delta):
 
     if soil_lattice[site[0], site[1]] == 0:
         # choose a random neighbour
-        nbr = neighbours(site, L)[np.random.randint(4)]
+        nbr = get_random_neighbour(site, L)
         if soil_lattice[nbr[0], nbr[1]] == 2:  # if neighbour is soil
             # fill with soil-filling rate
             if np.random.rand() < sigma:
@@ -87,7 +112,7 @@ def update_stochastic(soil_lattice, L, rho, theta, sigma, delta):
     elif soil_lattice[site[0], site[1]] == 1:
         is_filled = False
         # choose a random neighbour
-        nbr = neighbours(site, L)[np.random.randint(4)]
+        nbr = get_random_neighbour(site, L)
         if soil_lattice[nbr[0], nbr[1]] == 2:  # if neighbour is soil
             # fill with soil-filling rate
             if np.random.rand() < sigma:
@@ -104,7 +129,7 @@ def update_stochastic(soil_lattice, L, rho, theta, sigma, delta):
             soil_lattice[site[0], site[1]] = 0
         else:
             # move into a neighbour
-            new_site = neighbours(site, L)[np.random.randint(4)]
+            new_site = get_random_neighbour(site, L)
             # check the value of the new site
             new_site_value = soil_lattice[new_site[0], new_site[1]]
             # move the worm

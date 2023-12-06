@@ -79,8 +79,9 @@ def run_raster_stochastic_3D(n_steps, L, rho, theta_list, sigma_list, delta, ste
 def main():
 
     # initialize the parameters
-    n_steps = 10_000_000  # number of bacteria moves
-    L = 50  # side length of the square lattice
+    steps_per_latticepoint = 500  # number of bacteria worm per lattice point
+    L = 400  # side length of the square lattice
+    n_steps = steps_per_latticepoint * L**2  # number of bacteria moves
     rho = 1  # reproduction rate
     delta = 0
     theta_list = np.linspace(0, 0.3, 20)  # death rate
@@ -91,9 +92,14 @@ def main():
     # soil_lattice_data = pd.DataFrame(soil_lattice_data)
     # soil_lattice_data.to_json(f"docs/data/nutrient/lattice_{rho=}_{delta=}.json", orient="records")
 
-    # 3D
+    # # NEIGHBOURS, large lattice max timestep
+    # soil_lattice_data = run_raster_stochastic(n_steps, L, rho, theta_list, sigma_list, delta, np.array([n_steps]))
+    # soil_lattice_data = pd.DataFrame(soil_lattice_data)
+    # soil_lattice_data.to_json(f"docs/data/nutrient/large_lattice_{rho=}_{delta=}.json", orient="records")
+
+    # 3D (also max timestep only)
     L = 50
-    n_steps = 500 * L**3
+    n_steps = steps_per_latticepoint * L**3
     soil_lattice_data = run_raster_stochastic_3D(n_steps, L, rho, theta_list, sigma_list, delta, np.array([n_steps]))
     soil_lattice_data = pd.DataFrame(soil_lattice_data)
     soil_lattice_data.to_json(f"docs/data/nutrient/lattice3D_{rho=}_{delta=}.json", orient="records")

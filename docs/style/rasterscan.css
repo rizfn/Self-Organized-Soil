@@ -38,8 +38,8 @@ body {
 .tooltip {
     position: absolute;
     text-align: center;
-    width: 90px;
-    height: 28px;
+    /* width: 90px;
+    height: 28px; */
     padding: 2px;
     font: 12px sans-serif;
     background: lightsteelblue;
