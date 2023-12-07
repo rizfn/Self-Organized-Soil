@@ -260,3 +260,18 @@ Try largest linear dimensions: both cumulative and in fractal dim
 
 # Meeting 19: 7th December 2023:
 
+Normalize by the amount of soil in the system: cluster as % of total soil
+
+CONNECT NUTRIENT AND WORM for clusters
+
+lattice in worm osicllation amplitude (ratio in logscale)
+
+Choose a soil site, and find the cluster size containing it over time. Move cluster along
+
+Calculate effective soil filling rate
+
+Show 3D over time (CSD)
+
+
+# Meeting 20: 14th December 2023:
+
