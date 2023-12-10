@@ -52,7 +52,7 @@ style: |
    - Strip phenemena down!
    - Few parameters
 <br>
-1. **Generalizable** models
+2. **Generalizable** models
    - Behaviour across different length scales
 
 ---
@@ -103,7 +103,7 @@ style: |
 
 ---
 
-### Project 2: SOC in Neural Avalanches
+### Project 2: SOC in Neuronal Avalanches
 
 <br>
 
@@ -128,7 +128,9 @@ Periods of inactivity followed by multiple neuron activations
 <br>
 - "Percolation" like **network model** instead
   - needs to be tuned to criticality
-  
+<br>
+- Sandpile models can be deterministic too!
+
 ---
 
 <div class='columns'>
@@ -143,3 +145,21 @@ Development over time
 <span class='caption'> <a href='https://www.frontiersin.org/articles/10.3389/fphy.2021.639389/full'>Plenz, D., Ribeiro, T. L., Miller, S. R., Kells, P. A., Vakili, A., & Capek, E. L. (2021)</a> </span>
 
 </div>
+
+---
+
+### Conclusion
+
+<br>
+
+> 「さあ」と師匠はわたしへ向けて言う。
+> 「超えてみせよ」と、晴れ晴れとした笑顔で言う。
+
+\- 円城塔
+
+<br>
+
+> _"Now," says my Master._
+> _"Surpass me," he declares, with a bright smile._
+
+\- Toh Enjoe
