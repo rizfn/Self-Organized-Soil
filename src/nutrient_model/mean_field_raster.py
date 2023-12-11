@@ -116,9 +116,14 @@ def plot_single_run():
     n_steps = 100_000  # number of worm moves
     rho = 1  # reproduction rate
     delta = 0  # nutrient decay rate
-    theta = 0.01
-    sigma = 0.35
-    T, S, E, N, W = ode_integrate_fast(sigma, theta, rho, delta, stoptime=n_steps, nsteps=100_000)
+    # theta = 0.08
+    # sigma = 1
+    
+    theta = 0.13
+    sigma = 0.79
+    # T, S, E, N, W = ode_integrate_fast(sigma, theta, rho, delta, stoptime=n_steps, nsteps=100_000)
+
+    T, S, E, N, W = ode_integrate_rk4(sigma, theta, rho, delta, stoptime=n_steps, nsteps=100_000)
 
     import matplotlib.pyplot as plt
 
@@ -126,6 +131,7 @@ def plot_single_run():
     plt.plot(T, E, label="vacancy")
     plt.plot(T, N, label="nutrient")
     plt.plot(T, W, label="worm")
+    plt.title(f"{theta=}, {sigma=}, {rho=}, {delta=}")
     # plt.plot(T, np.array(S) + np.array(N) + np.array(W) + np.array(E), label="total")
     plt.legend()
     plt.show()
@@ -133,5 +139,5 @@ def plot_single_run():
 
 
 if __name__ == "__main__":
-    main()
-    # plot_single_run()
+    # main()
+    plot_single_run()
