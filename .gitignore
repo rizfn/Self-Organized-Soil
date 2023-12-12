@@ -1,3 +1,4 @@
 src/venv_thesis
 __pycache__/
 docs/data/nutrient/large_lattice_rho=1_delta=0.json
+docs/data/nutrient/lattice3D_rho=1_delta=0.json

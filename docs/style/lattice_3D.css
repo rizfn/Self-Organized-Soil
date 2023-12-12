@@ -4,6 +4,14 @@ body, html {
     padding: 0;
 }
 
+#visualization {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 100%;
+    width: 100%;
+    gap: 0;
+}
+
 canvas#c {
     display: block;
     width: 100%;
@@ -13,7 +21,7 @@ canvas#c {
 div#controls {
     position: absolute;
     top: 0;
-    left: 0;
+    left: 50%;
 }
 
 div#controls label {
