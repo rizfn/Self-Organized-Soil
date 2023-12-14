@@ -264,7 +264,7 @@ Normalize by the amount of soil in the system: cluster as % of total soil
 
 CONNECT NUTRIENT AND WORM for clusters
 
-lattice in worm osicllation amplitude (ratio in logscale)
+lattice in worm oscillation amplitude (ratio in logscale)
 
 Choose a soil site, and find the cluster size containing it over time. Move cluster along
 
@@ -275,3 +275,13 @@ Show 3D over time (CSD)
 
 # Meeting 20: 14th December 2023:
 
+Make 2D oscillations
+
+Try smaller regions and see if the oscillations are visible
+
+Max divided by min (or mean), to see the sensititity. Want to see how close it gets to "dying out"
+
+Try the two species model
+
+
+# Meeting 21: 21st December 2023:
