@@ -6,8 +6,8 @@ from scipy.signal import find_peaks
 import matplotlib.pyplot as plt
 
 
-def calculate_oscillation_period_amplitude(array, time_series):
-    """Calculates the oscillation period of the time series.
+def calculate_oscillation_metrics(array, time_series):
+    """Calculates the oscillation period, amplitude, and sensitivity of the oscillating part of the time series.
     
     Parameters
     ----------
@@ -18,17 +18,39 @@ def calculate_oscillation_period_amplitude(array, time_series):
     
     Returns
     -------
-    float
-        Oscillation period.
+    oscillation_period : float
+        Mean oscillation period.
+    amplitude : float
+        Mean oscillation amplitude.
+    sensitivity : float
+        Mean oscillation sensitivity.
     """
     # find the peaks
     peaks, _ = find_peaks(array, prominence=0.01)
+    
+    # if no peaks are found, return None
+    if len(peaks) == 0:
+        return None, None, None
+
     # find the time at which the peaks occur
     peak_times = time_series[peaks]
     # find the difference between the times
     peak_time_diffs = np.diff(peak_times)
-    # return the mean difference
-    return np.mean(peak_time_diffs), np.mean(array[peaks])
+    # calculate the mean difference (oscillation period)
+    oscillation_period = np.mean(peak_time_diffs)
+    # calculate the mean peak value (amplitude)
+    amplitude = np.mean(array[peaks])
+
+    # define the oscillating region as the part of the array between the first and last peak
+    oscillating_region = array[peaks[0]:peaks[-1]+1]
+    # calculate the oscillation closeness metric for the oscillating region (sensitivity)
+    min_value = np.min(oscillating_region)
+    max_value = np.max(oscillating_region)
+    sensitivity = (max_value - min_value) / min_value
+
+    # return the oscillation period, amplitude, and sensitivity
+    return oscillation_period, amplitude, sensitivity
+
 
 def run_raster(n_steps, rho, theta_list, sigma_list, delta):
     """Scans the ODE integrator over s and d for n_steps timesteps.
@@ -59,8 +81,8 @@ def run_raster(n_steps, rho, theta_list, sigma_list, delta):
     for i in tqdm(range(len(ts_pairs))):  # todo: parallelize
         theta, sigma = ts_pairs[i]
         T, S, E, N, W = ode_integrate_rk4(sigma, theta, rho, delta, stoptime=n_steps, nsteps=n_steps)
-        time_period, amplitude =  calculate_oscillation_period_amplitude(W[n_steps//2:], T[n_steps//2:])
-        oscillation_list.append({"theta": theta, "sigma": sigma, "time_period": time_period, "amplitude": amplitude})
+        time_period, amplitude, sensitivity =  calculate_oscillation_metrics(W[n_steps//2:], T[n_steps//2:])
+        oscillation_list.append({"theta": theta, "sigma": sigma, "time_period": time_period, "amplitude": amplitude, "sensitivity": sensitivity})
     return oscillation_list
 
 
@@ -79,29 +101,38 @@ def main():
     # Assuming oscillation_data is a pandas DataFrame
     period_pivot = oscillation_data.pivot(index='sigma', columns='theta', values='time_period')
     amplitude_pivot = oscillation_data.pivot(index='sigma', columns='theta', values='amplitude')
+    sensitivity_pivot = oscillation_data.pivot(index='sigma', columns='theta', values='sensitivity')
 
-    fig, axs = plt.subplots(1, 2, figsize=(16, 8))
+    fig, axs = plt.subplots(1, 3, figsize=(16, 8))
 
     plt.suptitle("Worm Oscillations: Period and Amplitude")
 
     # Period heatmap
     cax0 = axs[0].imshow(np.log10(period_pivot), aspect='auto', origin='lower', extent=[period_pivot.columns.min(), period_pivot.columns.max(), period_pivot.index.min(), period_pivot.index.max()])
-    fig.colorbar(cax0, ax=axs[0])
+    cbar0 = fig.colorbar(cax0, ax=axs[0], orientation='horizontal', pad=0.2)
     axs[0].set_xlabel(r"$\theta$ (Death rate)")
     axs[0].set_ylabel(r"$\sigma$ (Soil filling rate)")
     axs[0].set_title(r"$\log_{10}(T)$")
 
     # Amplitude heatmap
     cax1 = axs[1].imshow(amplitude_pivot, aspect='auto', origin='lower', extent=[amplitude_pivot.columns.min(), amplitude_pivot.columns.max(), amplitude_pivot.index.min(), amplitude_pivot.index.max()])
-    fig.colorbar(cax1, ax=axs[1])
-    axs[1].set_xlabel(r"$\theta$ (Deah rate)")
+    cbar1 = fig.colorbar(cax1, ax=axs[1], orientation='horizontal', pad=0.2)
+    axs[1].set_xlabel(r"$\theta$ (Death rate)")
     axs[1].set_ylabel(r"$\sigma$ (Soil filling rate)")
     axs[1].set_title(r"$A$")
 
-    plt.savefig("src/nutrient_model/plots/oscillation_heatmap.png", dpi=300)
+    # Sensitivity heatmap
+    cax2 = axs[2].imshow(np.log10(sensitivity_pivot), aspect='auto', origin='lower', extent=[sensitivity_pivot.columns.min(), sensitivity_pivot.columns.max(), sensitivity_pivot.index.min(), sensitivity_pivot.index.max()])
+    cbar2 = fig.colorbar(cax2, ax=axs[2], orientation='horizontal', pad=0.2)
+    axs[2].set_xlabel(r"$\theta$ (Death rate)")
+    axs[2].set_ylabel(r"$\sigma$ (Soil filling rate)")
+    axs[2].set_title(r"$\log_{10}$((Max - Min) / Min)")
+
+    plt.tight_layout()
+
+    plt.savefig("src/nutrient_model/plots/mean_field_oscillations.png")
 
     plt.show()
-    
 
 
 if __name__ == "__main__":
