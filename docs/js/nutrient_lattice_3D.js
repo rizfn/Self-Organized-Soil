@@ -2,7 +2,11 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 
-const { default: data } = await import('../data/nutrient/lattice3D_rho=1_delta=0.json', { assert: { type: "json" } });
+const { default: data } = await import('../data/nutrient/lattice3D_L=50_rho=1_delta=0.json', { assert: { type: "json" } });
+// const { default: data } = await import('../data/nutrient/lattice3D_rho=1_delta=0.json', { assert: { type: "json" } });  // L=75
+
+
+
 
 var step_list = data.reduce(function (a, d) {
     if (a.indexOf(d.step) === -1) {

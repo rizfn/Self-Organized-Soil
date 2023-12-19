@@ -80,30 +80,31 @@ def main():
 
     # initialize the parameters
     steps_per_latticepoint = 500  # number of bacteria worm per lattice point
-    L = 400  # side length of the square lattice
+    L = 50  # side length of the square lattice
     n_steps = steps_per_latticepoint * L**2  # number of bacteria moves
     rho = 1  # reproduction rate
     delta = 0
     theta_list = np.linspace(0, 0.3, 20)  # death rate
     sigma_list = np.linspace(0, 1, 20)  # soil filling rate
 
-    # # NEIGHBOURS
+    # NEIGHBOURS
     # soil_lattice_data = run_raster_stochastic(n_steps, L, rho, theta_list, sigma_list, delta, np.geomspace(100, n_steps, int(np.log10(n_steps/100))+1, dtype=np.int32))
-    # soil_lattice_data = pd.DataFrame(soil_lattice_data)
-    # soil_lattice_data.to_json(f"docs/data/nutrient/lattice_{rho=}_{delta=}.json", orient="records")
+    soil_lattice_data = run_raster_stochastic(n_steps, L, rho, theta_list, sigma_list, delta, np.linspace(n_steps//2, n_steps, 5, dtype=np.int32))
+    soil_lattice_data = pd.DataFrame(soil_lattice_data)
+    soil_lattice_data.to_json(f"docs/data/nutrient/lattice_oscillation_{L=}_{rho=}_{delta=}.json", orient="records")
 
     # # NEIGHBOURS, large lattice max timestep
     # soil_lattice_data = run_raster_stochastic(n_steps, L, rho, theta_list, sigma_list, delta, np.array([n_steps]))
     # soil_lattice_data = pd.DataFrame(soil_lattice_data)
     # soil_lattice_data.to_json(f"docs/data/nutrient/large_lattice_{rho=}_{delta=}.json", orient="records")
 
-    # 3D
-    L = 50
-    n_steps = steps_per_latticepoint * L**3
-    # soil_lattice_data = run_raster_stochastic_3D(n_steps, L, rho, theta_list, sigma_list, delta, np.array([n_steps]))  # max timestep
-    soil_lattice_data = run_raster_stochastic_3D(n_steps, L, rho, theta_list, sigma_list, delta, np.linspace(n_steps//2, n_steps, 5, dtype=np.int32))
-    soil_lattice_data = pd.DataFrame(soil_lattice_data)
-    soil_lattice_data.to_json(f"docs/data/nutrient/lattice3D_{rho=}_{delta=}.json", orient="records")
+    # # 3D
+    # L = 75
+    # n_steps = steps_per_latticepoint * L**3
+    # # soil_lattice_data = run_raster_stochastic_3D(n_steps, L, rho, theta_list, sigma_list, delta, np.array([n_steps]))  # max timestep
+    # soil_lattice_data = run_raster_stochastic_3D(n_steps, L, rho, theta_list, sigma_list, delta, np.linspace(n_steps//2, n_steps, 5, dtype=np.int32))
+    # soil_lattice_data = pd.DataFrame(soil_lattice_data)
+    # soil_lattice_data.to_json(f"docs/data/nutrient/lattice3D_{rho=}_{delta=}.json", orient="records")
 
     # # WELLMIXED
     # soil_lattice_data = run_raster_stochastic_wellmixed(n_steps, L, r, d, s, np.geomspace(100, n_steps, int(np.log10(n_steps/100))+1, dtype=np.int32))

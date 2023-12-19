@@ -176,7 +176,6 @@ def run_stochastic(n_steps, L, rho, theta, sigma, delta, steps_to_record=np.arra
     soil_lattice_data : ndarray
         List of soil_lattice data for specific timesteps.
     """
-    N = int(L**2 / 10)  # initial number of bacteria
     soil_lattice = init_lattice(L)
 
     soil_lattice_data = np.zeros((len(steps_to_record), L, L), dtype=np.int8)
