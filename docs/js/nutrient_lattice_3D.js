@@ -2,46 +2,27 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 
-const { default: data } = await import('../data/nutrient/lattice3D_L=50_rho=1_delta=0.json', { assert: { type: "json" } });
+// const { default: data } = await import('../data/nutrient/lattice3D_L=50_rho=1_delta=0.json', { assert: { type: "json" } });
 // const { default: data } = await import('../data/nutrient/lattice3D_rho=1_delta=0.json', { assert: { type: "json" } });  // L=75
 
+let current_file_idx = 0;
+const data_prefix = `../data/nutrient/lattice3D_L=50_rho=1_delta=0/`
+// const data_prefix = `../data/nutrient/lattice3D_L=75_rho=1_delta=0/`
+
+let { default: data } = await import(data_prefix + `step${current_file_idx}.json`, { assert: { type: "json" } });
 
 
-
-var step_list = data.reduce(function (a, d) {
-    if (a.indexOf(d.step) === -1) {
-        a.push(d.step);
+// on spacebar, call update_step
+document.addEventListener('keydown', function (event) {
+    if (event.code === 'Space') {
+        update_step()
     }
-    return a;
-}, []);
-
-// on spacebar, call refilterdata
-document.addEventListener('keydown', function(event) {
-	if (event.code === 'Space') {
-		refilter_data()
-	}
 });
 
-
-data.forEach((d) => {
-    const lattice = d.soil_lattice;
-    const L = lattice.length
-    // calculate the fraction of 1s, 2s, 3s and 0s in the 3D matrix
-    const zeros = lattice.reduce((a, b) => a + b.reduce((c, d) => c + d.filter((x) => x === 0).length, 0), 0);
-    const ones = lattice.reduce((a, b) => a + b.reduce((c, d) => c + d.filter((x) => x === 1).length, 0), 0);
-    const twos = lattice.reduce((a, b) => a + b.reduce((c, d) => c + d.filter((x) => x === 2).length, 0), 0);
-    const threes = lattice.reduce((a, b) => a + b.reduce((c, d) => c + d.filter((x) => x === 3).length, 0), 0);
-    d.vacancy = zeros / L ** 3;
-    d.nutrient = ones / L ** 3;
-    d.soil = twos / L ** 3;
-    d.worm = threes / L ** 3;
-});
 
 console.log(data);
 
-let step = step_list[0]
-
-let filteredData = data.filter(function (d) { return d.step == step });
+let step = data[0].step;
 
 // set the dimensions and margins of the graph
 var margin = { top: 10, right: 10, bottom: 40, left: 40 },
@@ -60,19 +41,19 @@ var svg = d3.select("div#raster")
 
 // label axes
 svg.append("text")
-	.attr("class", "axis_label")
-	.attr("transform", "translate(" + (width/2) + " ," + (height + margin.bottom/2) + ")")
-	.style("text-anchor", "middle")
-	.text("Death rate (θ)");
+    .attr("class", "axis_label")
+    .attr("transform", "translate(" + (width / 2) + " ," + (height + margin.bottom / 2) + ")")
+    .style("text-anchor", "middle")
+    .text("Death rate (θ)");
 
 svg.append("text")
-	.attr("class", "axis_label")
-	.attr("transform", "rotate(-90)")
-	.attr("y", 0 - margin.left/1.5)
-	.attr("x",0 - (height / 2))
-	.attr("dy", "1em")
-	.style("text-anchor", "middle")
-	.text("Soil-filling rate (σ)");
+    .attr("class", "axis_label")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 0 - margin.left / 1.5)
+    .attr("x", 0 - (height / 2))
+    .attr("dy", "1em")
+    .style("text-anchor", "middle")
+    .text("Soil-filling rate (σ)");
 
 
 var rows = d3.map(data, function (d) { return d.theta; })
@@ -88,14 +69,14 @@ var y = d3.scaleBand()
     .domain(cols)
     .padding(0.05);
 
-    function getOffset(element) {
-        const rect = element.getBoundingClientRect();
-        return {
-          left: rect.left + window.scrollX,
-          top: rect.top + window.scrollY
-        };
-      }
-      
+function getOffset(element) {
+    const rect = element.getBoundingClientRect();
+    return {
+        left: rect.left + window.scrollX,
+        top: rect.top + window.scrollY
+    };
+}
+
 
 var Tooltip = d3.select("div#raster")
     .append("div")
@@ -112,8 +93,8 @@ var mouseover = function (event, d) {
 var mousemove = function (event, d) {
     var heatmap_location = getOffset(document.getElementById("soil_amounts"))
     Tooltip
-    .html("d=" + d3.format("0.2f")(d.theta) + ", " + "s=" + d3.format("0.2f")(d.sigma) + "<br>" + d3.format("0.2")(d.soil) + ", " + d3.format("0.2")(d.vacancy) + ", " + d3.format("0.2")(d.nutrient) + ", " + d3.format("0.2")(d.worm))
-    .style("left", (d3.pointer(event)[0] + heatmap_location.left + 30) + "px")
+        .html("d=" + d3.format("0.2f")(d.theta) + ", " + "s=" + d3.format("0.2f")(d.sigma) + "<br>" + d3.format("0.2")(d.soil) + ", " + d3.format("0.2")(d.vacancy) + ", " + d3.format("0.2")(d.nutrient) + ", " + d3.format("0.2")(d.worm))
+        .style("left", (d3.pointer(event)[0] + heatmap_location.left + 30) + "px")
         .style("top", (d3.pointer(event)[1] + heatmap_location.top - 20) + "px")
 }
 var mouseleave = function (event, d) {
@@ -133,7 +114,7 @@ var mousedown = function (event, d) {
 }
 
 svg.selectAll(".cell")
-    .data(filteredData)
+    .data(data)
     .enter()
     .append("rect")
     .attr("class", "cell")
@@ -141,7 +122,7 @@ svg.selectAll(".cell")
     .attr("y", function (d) { return y(d.sigma) })
     .attr("width", x.bandwidth())
     .attr("height", y.bandwidth())
-    .style("fill", function(d) { return "rgb(" + d.soil*255 + "," + d.vacancy*255 + "," + d.worm*255 + ")" } )
+    .style("fill", function (d) { return "rgb(" + d.soil * 255 + "," + d.vacancy * 255 + "," + d.worm * 255 + ")" })
     .on("mouseover", mouseover)
     .on("mousemove", mousemove)
     .on("mouseleave", mouseleave)
@@ -149,12 +130,8 @@ svg.selectAll(".cell")
 
 
 
-// var filteredData = data.filter(function (d) {
-//     return d.sigma === 0.1578947368 && d.theta === 0.0947368421;
-// });
 
-
-let lattice = filteredData[0].soil_lattice;
+let lattice = data[0].soil_lattice;
 const L = lattice.length;
 console.log(lattice);
 
@@ -310,7 +287,7 @@ function update_soil_lattice(newData) {
     lattice = newData;
 
     // Add a mesh for each checked checkbox
-    checkboxSelection.each(function(d) {
+    checkboxSelection.each(function (d) {
         var checkbox = d3.select(this);
         if (checkbox.property('checked')) {
             var target_site;
@@ -375,35 +352,44 @@ function animate() {
 animate();
 
 
-function refilter_data() {
-	
-	const t = d3.transition().duration(750)
+function update_data(new_data) {
+    step = new_data[0].step;
 
-	console.log('Refiltering data')
+    const t = d3.transition().duration(750);
+    // add a 0.5s popup window  to show the current step
+    var popup = d3.select("div#visualization")
+        .append("div")
+        .attr("class", "popup")
+        .html(step)
+        .transition(t)
+        .style("opacity", 1)
+        .transition(t)
+        .style("opacity", 0)
+        .remove();
 
-	// select the next entry in steplist
-	step = step_list[(step_list.indexOf(step) + 1) % step_list.length]
+    // update the rgb heatmap
+    svg.selectAll(".cell")
+        .data(new_data)
+        .transition(t)
+        .style("fill", function (d) { return "rgb(" + d.soil * 255 + "," + d.vacancy * 255 + "," + d.worm * 255 + ")" })
 
-	filteredData = data.filter(function(d){ return d.step == step });
+    const soil_lattice = new_data.filter(function (d) { return d.theta == current_soil_lattice_state.theta && d.sigma == current_soil_lattice_state.sigma })[0].soil_lattice
+    // update the lattice
+    update_soil_lattice(soil_lattice)
+}
 
-	// add a 0.5s popup window  to show the current step
-	var popup = d3.select("div#visualization")
-		.append("div")
-		.attr("class", "popup")	
-		.html(step)
-		.transition(t)
-		.style("opacity", 1)
-		.transition(t)
-		.style("opacity", 0)
-		.remove();
+async function update_step() {
 
-	// update the rgb heatmap
-	svg.selectAll(".cell")
-		.data(filteredData)
-		.transition(t)
-		.style("fill", function(d) { return "rgb(" + d.soil*255 + "," + d.vacancy*255 + "," + d.worm*255 + ")" } )
+    console.log('Refiltering data');
 
-	const soil_lattice = filteredData.filter(function(d) {return d.theta == current_soil_lattice_state.theta && d.sigma == current_soil_lattice_state.sigma})[0].soil_lattice
-	// update the lattice
-	update_soil_lattice(soil_lattice)
+    current_file_idx += 1;
+
+    try {
+        data = await import(data_prefix + `step${current_file_idx}.json`, { assert: { type: "json" } });
+        update_data(data.default);
+    } catch (error) {
+        current_file_idx = 0;
+        data = await import(data_prefix + `step${current_file_idx}.json`, { assert: { type: "json" } });
+        update_data(data.default);
+    }
 }

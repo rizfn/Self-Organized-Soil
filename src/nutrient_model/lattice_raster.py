@@ -98,13 +98,22 @@ def main():
     # soil_lattice_data = pd.DataFrame(soil_lattice_data)
     # soil_lattice_data.to_json(f"docs/data/nutrient/large_lattice_{rho=}_{delta=}.json", orient="records")
 
-    # # 3D
+    # # 3D  # todo: double check the saving algorithm works
+    # def calculate_fractions(matrix):
+    #     flattened = np.array(matrix).flatten()
+    #     fractions = pd.Series(flattened).value_counts(normalize=True).sort_index()
+    #     fractions = fractions.reindex(range(4), fill_value=0)
+    #     return fractions
+
     # L = 75
     # n_steps = steps_per_latticepoint * L**3
     # # soil_lattice_data = run_raster_stochastic_3D(n_steps, L, rho, theta_list, sigma_list, delta, np.array([n_steps]))  # max timestep
     # soil_lattice_data = run_raster_stochastic_3D(n_steps, L, rho, theta_list, sigma_list, delta, np.linspace(n_steps//2, n_steps, 5, dtype=np.int32))
     # soil_lattice_data = pd.DataFrame(soil_lattice_data)
-    # soil_lattice_data.to_json(f"docs/data/nutrient/lattice3D_{rho=}_{delta=}.json", orient="records")
+    # soil_lattice_data[['vacancy', 'nutrient', 'soil', 'worm']] = soil_lattice_data['soil_lattice'].apply(calculate_fractions).apply(pd.Series)
+    # grouped = soil_lattice_data.groupby('step')
+    # for i, (group_name, group_data) in enumerate(grouped):
+    #     group_data.to_json(f'docs/data/nutrient/lattice3D_{L=}_{rho=}_{delta=}/step{i}.json', orient='records')
 
     # # WELLMIXED
     # soil_lattice_data = run_raster_stochastic_wellmixed(n_steps, L, r, d, s, np.geomspace(100, n_steps, int(np.log10(n_steps/100))+1, dtype=np.int32))

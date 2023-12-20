@@ -1,7 +1,6 @@
 src/venv_thesis
 __pycache__/
 docs/data/nutrient/large_lattice_rho=1_delta=0.json
-docs/data/nutrient/lattice3D_L=50_rho=1_delta=0.json
-docs/data/nutrient/lattice3D_L=75_rho=1_delta=0.json
 docs/data/nutrient/lattice_oscillation_L=200_rho=1_delta=0.json
 docs/data/nutrient/lattice_oscillation_L=400_rho=1_delta=0.json
+docs/data/nutrient/lattice3D_L=75_rho=1_delta=0/
