@@ -2,9 +2,6 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 
-// const { default: data } = await import('../data/nutrient/lattice3D_L=50_rho=1_delta=0.json', { assert: { type: "json" } });
-// const { default: data } = await import('../data/nutrient/lattice3D_rho=1_delta=0.json', { assert: { type: "json" } });  // L=75
-
 let current_file_idx = 0;
 const data_prefix = `../data/nutrient/lattice3D_L=50_rho=1_delta=0/`
 // const data_prefix = `../data/nutrient/lattice3D_L=75_rho=1_delta=0/`
@@ -304,7 +301,7 @@ function update_soil_lattice(newData) {
                     break;
                 case 'soil':
                     target_site = 2;
-                    color = 0xa52a2a; // brown
+                    color = 0xa54a2a; // brown
                     break;
                 case 'worm':
                     target_site = 3;

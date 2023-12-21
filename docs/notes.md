@@ -285,3 +285,15 @@ Try the two species model
 
 
 # Meeting 21: 21st December 2023:
+
+Try to keep a limit at 10^-6 in the meanfield
+
+Try seeing if it comes back
+
+2D, look at time series of the entire system, half system, quarter system, etc
+
+Increase soil filling rate: multiple tries?
+
+Try two species
+
+Time distribution between soil disappearing and soil reappearing at a point
