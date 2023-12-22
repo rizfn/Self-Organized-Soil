@@ -123,7 +123,7 @@ def plot_single_run():
     sigma = 0.39
     # T, S, E, N, W = ode_integrate_fast(sigma, theta, rho, delta, stoptime=n_steps, nsteps=100_000)
 
-    T, S, E, N, W = ode_integrate_rk4(sigma, theta, rho, delta, stoptime=n_steps, nsteps=100_000)
+    T, S, E, N, W = ode_integrate_rk4(sigma, theta, rho, delta, stoptime=n_steps, nsteps=n_steps)
 
     import matplotlib.pyplot as plt
 
