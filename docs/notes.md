@@ -297,3 +297,26 @@ Increase soil filling rate: multiple tries?
 Try two species
 
 Time distribution between soil disappearing and soil reappearing at a point
+
+
+## Meeting 22: 28th December 2024:
+
+Look for oscillation in region where it survives in lattice but dies in mean-field
+
+Check time period correlation between lattice and mean-field
+
+Check how soil filling rate and death rate affect the exp decay rate
+
+Check other lifetimes such as worm
+
+Check meanfield death due to worm/empty/soil (in both regions, left and down, what's the cause?)
+
+Check if oscillatory counts in 2spec
+
+Check counts of simulations (see if coherent-oscillatory)
+
+Try two spec with the same nutrient needed for both (maybe adding nutrient increases death rate)
+
+
+## Meeting 23: 4th January 2024:
+
