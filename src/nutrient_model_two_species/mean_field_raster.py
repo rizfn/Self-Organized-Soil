@@ -67,10 +67,10 @@ def plot_single_run():
     n_steps = 10_000  # number of worm moves
     rho1 = 1
     rho2 = 1
-    theta1 = 0.05
+    theta1 = 0.005
     delta = 0  # nutrient decay rate   
 
-    theta2 = 0.1
+    theta2 = 0.005
     sigma = 0.8
 
     T, S, E, NG, NB, WG, WB = ode_integrate_rk4(sigma, theta1, theta2, rho1, rho2, delta, stoptime=n_steps, nsteps=n_steps)

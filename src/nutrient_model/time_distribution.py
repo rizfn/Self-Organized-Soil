@@ -317,6 +317,98 @@ def update_soil_lifetimes_3D(soil_lattice, L, rho, theta, sigma, delta, target_t
 
 
 @njit
+def update_worm_lifetimes_3D(soil_lattice, L, rho, theta, sigma, delta, target_time_period):
+    """Updates the lattice and calculates lifetimes. Called once every timestep.
+
+    The function mutates a global variable, to avoid slowdowns from numba primitives.
+    It works by choosing a random site, and then giving a dynamics ascribed to the said site.
+    
+    Parameters:
+    -----------
+    soil_lattice : numpy.ndarray
+        Lattice with bacteria randomly placed on it.
+    L : int
+        Side length of the square lattice.
+    rho : float
+        Reproduction rate.
+    theta : float
+        Death rate.
+    sigma : float
+        Soil filling rate.
+    delta : float
+        Nutrient decay rate.
+    target_time_period : numpy.ndarray
+        Lattice with the lifetimes of the target site.
+    
+    Returns:
+    --------
+    time_period : int
+        The lifetime of the target site that died this step (0 if no deaths).
+    """
+
+    target_time_period += 1  # increment all time periods by 1
+    time_period = 0  # default value of return
+
+    # select a random site
+    site = np.random.randint(0, L), np.random.randint(0, L), np.random.randint(0, L)
+
+    if soil_lattice[site[0], site[1], site[2]] == 0:
+        # choose a random neighbour
+        nbr = get_random_neighbour_3D(site, L)
+        if soil_lattice[nbr[0], nbr[1], nbr[2]] == 2:  # if neighbour is soil
+            # fill with soil-filling rate
+            if np.random.rand() < sigma:
+                soil_lattice[site[0], site[1], site[2]] = 2
+                time_period = target_time_period[site[0], site[1], site[2]]
+
+    elif soil_lattice[site[0], site[1], site[2]] == 1:
+        is_filled = False
+        # choose a random neighbour
+        nbr = get_random_neighbour_3D(site, L)
+        if soil_lattice[nbr[0], nbr[1], nbr[2]] == 2:  # if neighbour is soil
+            # fill with soil-filling rate
+            if np.random.rand() < sigma:
+                soil_lattice[site[0], site[1], site[2]] = 2
+                is_filled = True
+        if not is_filled:
+            # decay to empty with rate delta
+            if np.random.rand() < delta:
+                soil_lattice[site[0], site[1], site[2]] = 0
+                target_time_period[site[0], site[1], site[2]] = 0
+
+    elif soil_lattice[site[0], site[1], site[2]] == 3:
+        # check for death
+        if np.random.rand() < theta:
+            soil_lattice[site[0], site[1], site[2]] = 0
+            target_time_period[site[0], site[1], site[2]] = 0
+        else:
+            # move into a neighbour
+            new_site = get_random_neighbour_3D(site, L)
+            # check the value of the new site
+            new_site_value = soil_lattice[new_site[0], new_site[1], new_site[2]]
+            # move the worm
+            soil_lattice[new_site[0], new_site[1], new_site[2]] = 3
+            if new_site_value == 0:
+                time_period = target_time_period[site[0], site[1], site[2]]
+            soil_lattice[site[0], site[1], site[2]] = 0
+            target_time_period[site[0], site[1], site[2]] = 0
+            # check if the new site is nutrient
+            if new_site_value == 1:
+                # reproduce behind you
+                if np.random.rand() < rho:
+                    soil_lattice[site[0], site[1], site[2]] = 3
+            # check if the new site is soil
+            elif new_site_value == 2:
+                # leave nutrient behind
+                soil_lattice[site[0], site[1], site[2]] = 1
+            # check if the new site is a worm
+            elif new_site_value == 3:
+                # keep both with worms (undo the vacant space in original site)
+                soil_lattice[site[0], site[1], site[2]] = 3
+    return time_period
+
+
+@njit
 def calc_soil_lifetimes_3D(n_steps, L, rho, theta, sigma, delta):
     """Calculate the time distributions for target lifetimes.
 
@@ -348,7 +440,8 @@ def calc_soil_lifetimes_3D(n_steps, L, rho, theta, sigma, delta):
     time_period_data = np.zeros(n_steps, dtype=np.int32)
 
     for step in range(n_steps):
-        time_period = update_soil_lifetimes_3D(soil_lattice, L, rho, theta, sigma, delta, target_time_period)
+        # time_period = update_soil_lifetimes_3D(soil_lattice, L, rho, theta, sigma, delta, target_time_period)
+        time_period = update_worm_lifetimes_3D(soil_lattice, L, rho, theta, sigma, delta, target_time_period)
         time_period_data[step] = time_period
 
     return time_period_data[time_period_data != 0]
@@ -387,14 +480,18 @@ def main():
 
     time_period_data = time_period_data / L**3
     axs[0].hist(time_period_data, bins=100, alpha=0.8, linewidth=0.5, edgecolor="black")
-    axs[0].set_xlabel('Soil Lifetime (steps / L^3)')
+    # axs[0].set_xlabel('Soil Lifetime (steps / L^3)')
+    axs[0].set_xlabel('Worm Lifetime (steps / L^3)')
     axs[0].set_ylabel('Frequency')
     axs[1].hist(time_period_data, bins=100, alpha=0.8, linewidth=0.5, edgecolor="black")
-    axs[1].set_xlabel('Soil Lifetime (steps / L^3)')
+    # axs[1].set_xlabel('Soil Lifetime (steps / L^3)')
+    axs[1].set_xlabel('Worm Lifetime (steps / L^3)')
     axs[1].set_ylabel('Frequency')
     axs[1].set_yscale("log")
-    plt.savefig(f"src/nutrient_model/plots/soil_lifetimes_{theta=}_{sigma=}.png", dpi=300)
+    # plt.savefig(f"src/nutrient_model/plots/soil_lifetimes_{theta=}_{sigma=}.png", dpi=300)
+    plt.savefig(f"src/nutrient_model/plots/worm_lifetimes_{theta=}_{sigma=}.png", dpi=300)
     plt.show()
+
 
 
 if __name__ == "__main__":
