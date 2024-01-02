@@ -440,8 +440,8 @@ def calc_soil_lifetimes_3D(n_steps, L, rho, theta, sigma, delta):
     time_period_data = np.zeros(n_steps, dtype=np.int32)
 
     for step in range(n_steps):
-        # time_period = update_soil_lifetimes_3D(soil_lattice, L, rho, theta, sigma, delta, target_time_period)
-        time_period = update_worm_lifetimes_3D(soil_lattice, L, rho, theta, sigma, delta, target_time_period)
+        time_period = update_soil_lifetimes_3D(soil_lattice, L, rho, theta, sigma, delta, target_time_period)
+        # time_period = update_worm_lifetimes_3D(soil_lattice, L, rho, theta, sigma, delta, target_time_period)
         time_period_data[step] = time_period
 
     return time_period_data[time_period_data != 0]
@@ -453,8 +453,8 @@ def main():
     steps_per_latticepoint = 500
     rho = 1
     delta = 0
-    theta = 0.06
-    sigma = 0.37
+    theta = 0.13
+    sigma = 0.16
 
     target_site = 2  # soil lifetimes
 
@@ -477,19 +477,20 @@ def main():
     axs[1].grid(True, alpha=0.5)
 
     plt.suptitle(f"Time distribution for soil\n{L=}, {rho=}, {theta=}, {sigma=}, {delta=}")
+    # plt.suptitle(f"Time distribution for worm\n{L=}, {rho=}, {theta=}, {sigma=}, {delta=}")
 
     time_period_data = time_period_data / L**3
     axs[0].hist(time_period_data, bins=100, alpha=0.8, linewidth=0.5, edgecolor="black")
-    # axs[0].set_xlabel('Soil Lifetime (steps / L^3)')
-    axs[0].set_xlabel('Worm Lifetime (steps / L^3)')
+    axs[0].set_xlabel('Soil Lifetime (steps / L^3)')
+    # axs[0].set_xlabel('Worm Lifetime (steps / L^3)')
     axs[0].set_ylabel('Frequency')
     axs[1].hist(time_period_data, bins=100, alpha=0.8, linewidth=0.5, edgecolor="black")
     # axs[1].set_xlabel('Soil Lifetime (steps / L^3)')
     axs[1].set_xlabel('Worm Lifetime (steps / L^3)')
     axs[1].set_ylabel('Frequency')
     axs[1].set_yscale("log")
-    # plt.savefig(f"src/nutrient_model/plots/soil_lifetimes_{theta=}_{sigma=}.png", dpi=300)
-    plt.savefig(f"src/nutrient_model/plots/worm_lifetimes_{theta=}_{sigma=}.png", dpi=300)
+    plt.savefig(f"src/nutrient_model/plots/soil_lifetimes_{theta=}_{sigma=}.png", dpi=300)
+    # plt.savefig(f"src/nutrient_model/plots/worm_lifetimes_{theta=}_{sigma=}.png", dpi=300)
     plt.show()
 
 
