@@ -320,3 +320,10 @@ Try two spec with the same nutrient needed for both (maybe adding nutrient incre
 
 ## Meeting 23: 4th January 2024:
 
+Plot oscillation amplitude vs system size
+
+Never let worm go below 10^-6
+
+Check oscillations in 2d
+
+Do well-mixed
