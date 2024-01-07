@@ -1,77 +1,76 @@
 import numpy as np
-from tqdm import tqdm
 import matplotlib.pyplot as plt
-from nutrient_utils import run_stochastic
+from nutrient_utils import run_stochastic, run_stochastic_3D, ode_integrate_rk4
 
-
-def run_raster_stochastic(n_steps, L, rho, theta_list, sigma_list, delta, steps_to_record=np.array([100, 1000, 10000, 100000])):
-    """Run the rasterscan for the stochastic case for n_steps timesteps.
-    
-    Parameters
-    ----------
-    n_steps : int
-        Number of timesteps to run the simulation for.
-    L : int
-        Side length of the square lattice.
-    rho : float
-        Reproduction rate.
-    theta_list : ndarray
-        List of death rates.
-    sigma_list : ndarray
-        List of soil filling rates.
-    delta : float
-        Nutrient decay rate.
-    steps_to_record : ndarray, optional
-        Array of timesteps to record the lattice data for, by default [100, 1000, 10000, 100000].
-    
-    Returns
-    -------
-    soil_lattice_list : list
-        List of soil_lattice data for specific timesteps and parameters.
-    """
-    grid = np.meshgrid(theta_list, sigma_list)
-    ts_pairs = np.reshape(grid, (2, -1)).T  # all possible pairs of d and s
-    soil_lattice_list = []
-    for i in tqdm(range(len(ts_pairs))):  # todo: parallelize
-        theta, sigma = ts_pairs[i]
-        soil_lattice_data = run_stochastic(n_steps, L, rho, theta, sigma, delta, steps_to_record=steps_to_record)
-        for step in steps_to_record:
-            soil_lattice_list.append({"theta": theta, "sigma": sigma, "step":step, "soil_lattice": soil_lattice_data[steps_to_record == step][0]})
-    return soil_lattice_list
 
 
 def main():
 
     # initialize the parameters
     steps_per_latticepoint = 1000  # number of bacteria moves per lattice point
-    L = 100  # side length of the square lattice
-    n_steps = steps_per_latticepoint * L**2  # number of timesteps to run the simulation for
+    # L = 100  # side length of the square lattice
+    # n_steps = steps_per_latticepoint * L**2  # number of timesteps to run the simulation for
+    L = 10  # side length of the cubic lattice
+    n_steps = steps_per_latticepoint * L**3  # 3D
     rho = 1  # reproduction rate
     delta = 0
-    theta = 0.14
-    # sigma = 0.5
-    sigma = 0.75
+    # theta = 0.09
+    # sigma = 0.16
+    # sigma = 0.37
+    theta = 0.16
+    sigma = 0.47
 
-    steps_to_record = np.arange(1, n_steps+1, L**2, dtype=np.int32)
+    # steps_to_record = np.arange(1, n_steps+1, L**2, dtype=np.int32)
+    # soil_lattice_data = run_stochastic(n_steps, L, rho, theta, sigma, delta, steps_to_record=steps_to_record)
 
-    soil_lattice_data = run_stochastic(n_steps, L, rho, theta, sigma, delta, steps_to_record=steps_to_record)
-    print("done running")
+    steps_to_record = np.arange(1, n_steps+1, L**3, dtype=np.int32)
+    soil_lattice_data = run_stochastic_3D(n_steps, L, rho, theta, sigma, delta, steps_to_record=steps_to_record)
 
-    emptys = np.sum(soil_lattice_data == 0, axis=(1, 2)) / L**2
-    nutrients = np.sum(soil_lattice_data == 1, axis=(1, 2)) / L**2
-    soil = np.sum(soil_lattice_data == 2, axis=(1, 2)) / L**2
-    worms = np.sum(soil_lattice_data == 3, axis=(1, 2)) / L**2
+    # emptys = np.sum(soil_lattice_data == 0, axis=(1, 2)) / L**2
+    # nutrients = np.sum(soil_lattice_data == 1, axis=(1, 2)) / L**2
+    # soil = np.sum(soil_lattice_data == 2, axis=(1, 2)) / L**2
+    # worms = np.sum(soil_lattice_data == 3, axis=(1, 2)) / L**2
 
-    plt.plot(steps_to_record, emptys, label="emptys")
-    plt.plot(steps_to_record, nutrients, label="nutrients")
-    plt.plot(steps_to_record, soil, label="soil")
-    plt.plot(steps_to_record, worms, label="worms")
-    plt.title(f"{L=}, {rho=}, {theta=}, {sigma=}, {delta=}")
-    plt.xlabel("Timestep")
-    plt.ylabel("Fraction of lattice points")
-    plt.legend()
+    def calculate_fractions(matrix):
+        flattened = matrix.flatten()
+        counts = np.bincount(flattened, minlength=4)
+        fractions = counts / counts.sum()
+        return fractions
+
+    # Assuming soil_lattice_data is a list of 3D numpy arrays
+    fractions = np.array([calculate_fractions(matrix) for matrix in soil_lattice_data])
+
+    emptys = fractions[:, 0]
+    soil = fractions[:, 1]
+    worms = fractions[:, 2]
+    nutrients = fractions[:, 3]
+
+    fig, axs = plt.subplots(2)
+
+    steps_to_record = steps_to_record / L**3
+    # First subplot
+    axs[0].plot(steps_to_record, soil, label="soil")
+    axs[0].plot(steps_to_record, emptys, label="emptys")
+    axs[0].plot(steps_to_record, nutrients, label="nutrients")
+    axs[0].plot(steps_to_record, worms, label="worms")
+    axs[0].set_title(f"{L=}, {rho=}, {theta=}, {sigma=}, {delta=}")
+    axs[0].set_xlabel("Timestep / L^3")
+    axs[0].set_ylabel("Fraction of lattice points")
+    axs[0].legend()
+
+    # Second subplot
+    T, S, E, N, W = ode_integrate_rk4(sigma, theta, rho, delta, stoptime=steps_per_latticepoint, nsteps=steps_per_latticepoint)
+
+    axs[1].plot(T, S, label="soil")
+    axs[1].plot(T, E, label="vacancy")
+    axs[1].plot(T, N, label="nutrient")
+    axs[1].plot(T, W, label="worm")
+    axs[1].set_xlabel("Timestep")
+    axs[1].set_ylabel("Fractions")
+    axs[1].legend()
+
+    plt.tight_layout()
     plt.show()
-
 
 
 if __name__ == "__main__":
