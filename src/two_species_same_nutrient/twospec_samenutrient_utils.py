@@ -56,7 +56,7 @@ def init_lattice(L):
     return soil_lattice
 
 
-@njit
+@njit  # TODO: update
 def update(soil_lattice, L, rho1, rho2, theta1, theta2, sigma, delta):
     """Update the lattice stochastically. Called once every timestep.
 
@@ -180,7 +180,7 @@ def update(soil_lattice, L, rho1, rho2, theta1, theta2, sigma, delta):
                 soil_lattice[site[0], site[1]] = new_site_value
 
 
-@njit
+@njit  # TODO: update
 def run(n_steps, L, rho1, rho2, theta1, theta2, sigma, delta, steps_to_record=np.array([100, 1000, 10000, 100000])):
     """Run the stochastic simulation for n_steps timesteps.
 
@@ -309,18 +309,17 @@ def init_lattice_3D(L):
 
     # note about lattice:
     #   0 = empty
-    #   1 = green nutrient
-    #   2 = blue nutrient
-    #   3 = soil
-    #   4 = green worm
-    #   5 = blue worm
+    #   1 = nutrient
+    #   2 = soil
+    #   3 = green worm
+    #   4 = blue worm
     # start with equal number of everything
-    soil_lattice = np.random.choice(np.arange(0, 6), size=(L, L, L))
+    soil_lattice = np.random.choice(np.arange(0, 5), size=(L, L, L))
 
     return soil_lattice
 
 @njit
-def update_stochastic_3D(soil_lattice, L, rho1, rho2, theta1, theta2, sigma, delta):
+def update_3D(soil_lattice, L, sigma, theta, rho1, rho2, mu1, mu2):
     """Update the lattice stochastically. Called once every timestep.
 
     The function mutates a global variable, to avoid slowdowns from numba primitives.
@@ -332,19 +331,19 @@ def update_stochastic_3D(soil_lattice, L, rho1, rho2, theta1, theta2, sigma, del
         Lattice with bacteria randomly placed on it.
     L : int
         Side length of the square lattice.
-    rho1 : float
-        Reproduction rate of green worms.
-    rho2 : float
-        Reproduction rate of blue worms.
-    theta1 : float
-        Death rate of green worms.
-    theta2 : float
-        Death rate of blue worms.
     sigma : float
         Soil filling rate.
-    delta : float
-        Nutrient decay rate.
-    
+    theta : float
+        Worm death rate.
+    rho1 : float
+        Green worm reproduction rate.
+    rho2 : float
+        Blue worm reproduction rate.
+    mu1 : float
+        Green worm nutrient-creating rate.
+    mu2 : float
+        Blue worm nutrient-creating rate.
+            
     Returns:
     --------
     None
@@ -353,31 +352,45 @@ def update_stochastic_3D(soil_lattice, L, rho1, rho2, theta1, theta2, sigma, del
     # select a random site
     site = np.random.randint(0, L), np.random.randint(0, L), np.random.randint(0, L)
 
-    if soil_lattice[site[0], site[1], site[2]] == 0:  # if empty
+    if (soil_lattice[site[0], site[1], site[2]] == 0) or (soil_lattice[site[0], site[1], site[2]] == 1):  # if empty or nutrient
         # choose a random neighbour
         nbr = get_random_neighbour_3D(site, L)
-        if soil_lattice[nbr[0], nbr[1], nbr[2]] == 3:  # if neighbour is soil
+        if soil_lattice[nbr[0], nbr[1], nbr[2]] == 2:  # if neighbour is soil
             # fill with soil-filling rate
             if np.random.rand() < sigma:
-                soil_lattice[site[0], site[1], site[2]] = 3
+                soil_lattice[site[0], site[1], site[2]] = 2
 
-    elif (soil_lattice[site[0], site[1], site[2]] == 1) or (soil_lattice[site[0], site[1], site[2]] == 2):  # if nutrient
-        is_filled = False
-        # choose a random neighbour
-        nbr = get_random_neighbour_3D(site, L)
-        if soil_lattice[nbr[0], nbr[1], nbr[2]] == 3:  # if neighbour is soil
-            # fill with soil-filling rate
-            if np.random.rand() < sigma:
-                soil_lattice[site[0], site[1], site[2]] = 3
-                is_filled = True
-        if not is_filled:
-            # decay to empty with rate delta
-            if np.random.rand() < delta:
-                soil_lattice[site[0], site[1], site[2]] = 0
 
-    elif soil_lattice[site[0], site[1], site[2]] == 4:  # if green worm
+    elif soil_lattice[site[0], site[1], site[2]] == 3:  # if green worm
         # check for death
-        if np.random.rand() < theta1:
+        if np.random.rand() < theta:
+            soil_lattice[site[0], site[1], site[2]] = 0
+        else:
+            # move into a neighbour
+            new_site = get_random_neighbour_3D(site, L)
+            # check the value of the new site
+            new_site_value = soil_lattice[new_site[0], new_site[1], new_site[2]]
+            # move the worm
+            soil_lattice[new_site[0], new_site[1], new_site[2]] = 3
+            soil_lattice[site[0], site[1], site[2]] = 0
+            # check if the new site is nutrient
+            if new_site_value == 1:
+                # reproduce behind you
+                if np.random.rand() < rho1:
+                    soil_lattice[site[0], site[1], site[2]] = 3
+            # check if the new site is soil
+            elif new_site_value == 2:
+                # leave nutrient behind
+                if np.random.rand() < mu1:
+                    soil_lattice[site[0], site[1], site[2]] = 1
+            # check if the new site is a worm
+            elif (new_site_value == 3) or (new_site_value == 4):
+                # keep both with worms (undo the vacant space in original site)
+                soil_lattice[site[0], site[1], site[2]] = new_site_value
+
+    elif soil_lattice[site[0], site[1], site[2]] == 4:  # if blue worm
+        # check for death
+        if np.random.rand() < theta:
             soil_lattice[site[0], site[1], site[2]] = 0
         else:
             # move into a neighbour
@@ -387,49 +400,24 @@ def update_stochastic_3D(soil_lattice, L, rho1, rho2, theta1, theta2, sigma, del
             # move the worm
             soil_lattice[new_site[0], new_site[1], new_site[2]] = 4
             soil_lattice[site[0], site[1], site[2]] = 0
-            # check if the new site is blue nutrient
-            if new_site_value == 2:
-                # reproduce behind you
-                if np.random.rand() < rho1:
-                    soil_lattice[site[0], site[1], site[2]] = 4
-            # check if the new site is soil
-            elif new_site_value == 3:
-                # leave nutrient behind
-                soil_lattice[site[0], site[1], site[2]] = 1
-            # check if the new site is a worm
-            elif (new_site_value == 4) or (new_site_value == 5):
-                # keep both with worms (undo the vacant space in original site)
-                soil_lattice[site[0], site[1], site[2]] = new_site_value
-
-    elif soil_lattice[site[0], site[1], site[2]] == 5:  # if blue worm
-        # check for death
-        if np.random.rand() < theta2:
-            soil_lattice[site[0], site[1], site[2]] = 0
-        else:
-            # move into a neighbour
-            new_site = get_random_neighbour_3D(site, L)
-            # check the value of the new site
-            new_site_value = soil_lattice[new_site[0], new_site[1], new_site[2]]
-            # move the worm
-            soil_lattice[new_site[0], new_site[1], new_site[2]] = 5
-            soil_lattice[site[0], site[1], site[2]] = 0
-            # check if the new site is green nutrient
+            # check if the new site is nutrient
             if new_site_value == 1:
                 # reproduce behind you
                 if np.random.rand() < rho2:
-                    soil_lattice[site[0], site[1], site[2]] = 5
+                    soil_lattice[site[0], site[1], site[2]] = 4
             # check if the new site is soil
-            elif new_site_value == 3:
+            elif new_site_value == 2:
                 # leave nutrient behind
-                soil_lattice[site[0], site[1], site[2]] = 2
+                if np.random.rand() < mu2:
+                    soil_lattice[site[0], site[1], site[2]] = 1
             # check if the new site is a worm
-            elif (new_site_value == 4) or (new_site_value == 5):
+            elif (new_site_value == 3) or (new_site_value == 4):
                 # keep both with worms (undo the vacant space in original site)
                 soil_lattice[site[0], site[1], site[2]] = new_site_value
 
 
 @njit
-def run_stochastic_3D(n_steps, L, rho1, rho2, theta1, theta2, sigma, delta, steps_to_record=np.array([100, 1000, 10000, 100000])):
+def run_3D(n_steps, L, sigma, theta, rho1, rho2, mu1, mu2, steps_to_record=np.array([100, 1000, 10000, 100000])):
     """Run the stochastic simulation for n_steps timesteps.
 
     Parameters
@@ -438,18 +426,18 @@ def run_stochastic_3D(n_steps, L, rho1, rho2, theta1, theta2, sigma, delta, step
         Number of timesteps to run the simulation for.
     L : int
         Side length of the square lattice.
+    sigma : float
+        Soil filling rate.
+    theta : float
+        Death rate of worms.
     rho1 : float
         Reproduction rate of green worms.
     rho2 : float
         Reproduction rate of blue worms.
-    theta1 : float
-        Death rate of green worms.
-    theta2 : float
-        Death rate of blue worms.
-    sigma : float
-        Soil filling rate.
-    delta : float
-        Nutrient decay rate.
+    mu1 : float
+        Nutrient-creating rate of green worms.
+    mu2 : float
+        Nutrient-creating rate of blue worms.
     steps_to_record : ndarray, optional
         Array of timesteps to record the lattice data for, by default [100, 1000, 10000, 100000].
 
@@ -463,7 +451,7 @@ def run_stochastic_3D(n_steps, L, rho1, rho2, theta1, theta2, sigma, delta, step
     soil_lattice_data = np.zeros((len(steps_to_record), L, L, L), dtype=np.int8)
 
     for step in range(1, n_steps+1):
-        update_stochastic_3D(soil_lattice, L, rho1, rho2, theta1, theta2, sigma, delta)
+        update_3D(soil_lattice, L, sigma, theta, rho1, rho2, mu1, mu2)
         if step in steps_to_record:
             soil_lattice_data[steps_to_record == step] = soil_lattice
 
@@ -472,63 +460,8 @@ def run_stochastic_3D(n_steps, L, rho1, rho2, theta1, theta2, sigma, delta, step
 
 
 
-def ode_integrate(sigma, theta, rho, delta, stoptime=100_000, nsteps=100_000):
-    """Integrate the ODEs for the nutrient model.
-
-    Parameters
-    ----------
-    sigma : float
-        Soil filling rate.
-    theta : float
-        Worm death rate.
-    rho : float
-        Worm reproduction rate.
-    delta : float
-        Nutrient decay rate.
-    stoptime : int, optional
-        Time to stop the integration. The default is 100.
-    nsteps : int, optional
-        Number of steps to take. The default is 100_000.
-    
-    Returns
-    -------
-    T : list
-        List of times.
-    S : list
-        List of soil fractions.
-    E : list
-        List of empty fractions.
-    N : list
-        List of nutrient fractions.
-    W : list
-        List of worm fractions.
-    """
-
-    W_0 = 0.1  # initial fraction of worms
-    E_0 = (1 - W_0) / 3  # initial number of empty sites
-    S_0 = (1 - W_0) / 3 # initial number of soil sites
-    N_0 = 1 - W_0 - E_0 - S_0  # initial number of nutrient sites
-
-    dt = stoptime / nsteps
-
-    S = [S_0]
-    W = [W_0]
-    E = [E_0]
-    N = [N_0]
-    T = [0]
-
-
-    for i in range(nsteps):
-        S.append(S[i] + dt * (sigma*S[i]*(E[i]+N[i]) - W[i]*S[i]))
-        E.append(E[i] + dt * ((1-rho)*W[i]*N[i] + theta*W[i] - sigma*S[i]*E[i] + delta*N[i]))
-        N.append(N[i] + dt * (W[i]*S[i] - W[i]*N[i] - sigma*S[i]*N[i] - delta*N[i]))
-        W.append(W[i] + dt * (rho*W[i]*N[i] - theta*W[i]))
-        T.append(T[i] + dt)
-    
-    return T, S, E, N, W
-
 @njit
-def ode_derivatives(S, E, N_G, N_B, W_G, W_B, sigma, theta1, theta2, rho1, rho2, delta):
+def ode_derivatives(S, E, N, W_G, W_B, sigma, theta, rho1, rho2, mu1, mu2):
     """Calculate the derivatives of S, E, N, W.
 
     This function is not called directly, but rather through `ode_integrate_rk4`
@@ -539,26 +472,24 @@ def ode_derivatives(S, E, N_G, N_B, W_G, W_B, sigma, theta1, theta2, rho1, rho2,
         Soil fraction.
     E : float
         Empty fraction.
-    N_G : float
-        Green nutrient fraction.
-    N_B : float
-        Blue nutrient fraction.
+    N : float
+        Nutrient fraction.
     W_G : float
         Green worm fraction.
     W_B : float
         Blue worm fraction.
     sigma : float
         Soil filling rate.
-    theta1 : float
-        Green worm death rate.
-    theta2 : float
-        Blue worm death rate.
+    theta : float
+        Worm death rate.
     rho1 : float
         Green worm reproduction rate.
     rho2 : float
         Blue worm reproduction rate.
-    delta : float
-        Nutrient decay rate.
+    mu1 : float
+        Green worm nutrient-creating rate.
+    mu2 : float
+        Blue worm nutrient-creating rate.
 
     Returns
     -------
@@ -566,28 +497,25 @@ def ode_derivatives(S, E, N_G, N_B, W_G, W_B, sigma, theta1, theta2, rho1, rho2,
         Derivative of soil fraction.
     dE : float
         Derivative of empty fraction.
-    dN_G : float
-        Derivative of green nutrient fraction.
-    dN_B : float
-        Derivative of blue nutrient fraction.
+    dN : float
+        Derivative of nutrient fraction.
     dW_G : float
         Derivative of green worm fraction.
     dW_B : float
         Derivative of blue worm fraction.
     """
 
-    dS = sigma*S*(E+N_G+N_B) - (W_G+W_B)*S
-    dE = (1-rho1)*W_G*N_B + (1-rho2)*W_B*N_G + theta1*W_G + theta2*W_B - sigma*S*E + delta*(N_G+N_B)
-    dN_G = W_G*S - W_B*N_G - sigma*S*N_G - delta*N_G
-    dN_B = W_B*S - W_G*N_B - sigma*S*N_B - delta*N_B
-    dW_G = rho1*W_G*N_B - theta1*W_G
-    dW_B = rho2*W_B*N_G - theta2*W_B
+    dS = sigma*S*(E+N) - S*(W_G+W_B)
+    dE = S*((1-mu1)*W_G + (1-mu2)*W_B) + N*((1-rho1)*W_G + (1-rho2)*W_B) + theta*(W_G+W_B) - sigma*S*E
+    dN = S*(mu1*W_G + mu2*W_B) - N*(W_G+W_B) - sigma*S*N
+    dW_G = rho1*W_G*N - theta*W_G
+    dW_B = rho2*W_B*N - theta*W_B
 
-    return dS, dE, dN_G, dN_B, dW_G, dW_B
+    return dS, dE, dN, dW_G, dW_B
 
 
 @njit
-def ode_integrate_rk4(sigma, theta1, theta2, rho1, rho2, delta, stoptime=100_000, nsteps=100_000):
+def ode_integrate_rk4(sigma, theta, rho1, rho2, mu1, mu2, stoptime=100_000, nsteps=100_000):
     """Integrate the ODEs for the nutrient model using Runge-Kutta 4th order method.
     
     Parameters
@@ -595,20 +523,20 @@ def ode_integrate_rk4(sigma, theta1, theta2, rho1, rho2, delta, stoptime=100_000
     
     sigma : float
         Soil filling rate.
-    theta1 : float
-        Green worm death rate.
-    theta2 : float
-        Blue worm death rate.
+    theta : float
+        Worm death rate.
     rho1 : float
         Green worm reproduction rate.
     rho2 : float
         Blue worm reproduction rate.
-    delta : float
-        Nutrient decay rate.
+    mu1 : float
+        Green worm nutrient-creating rate.
+    mu2 : float
+        Blue worm nutrient-creating rate.
     stoptime : int, optional
-        Time to stop the integration. The default is 100_000.
+        Time to stop the integration at, by default 100_000.
     nsteps : int, optional
-        Number of steps to take. The default is 100_000.
+        Number of steps to take, by default 100_000.
 
     Returns
     -------
@@ -618,10 +546,8 @@ def ode_integrate_rk4(sigma, theta1, theta2, rho1, rho2, delta, stoptime=100_000
         List of soil fractions.
     E : ndarray
         List of empty fractions.
-    NG : ndarray
-        List of green nutrient fractions.
-    NB : ndarray
-        List of blue nutrient fractions.
+    N : ndarray
+        List of nutrient fractions.
     WG : ndarray
         List of green worm fractions.
     WB : ndarray
@@ -629,59 +555,53 @@ def ode_integrate_rk4(sigma, theta1, theta2, rho1, rho2, delta, stoptime=100_000
     """
 
     # initial condition with equal fractions: todo: Play around to see absorbing boundaries change in param space
-    E_0, NG_0, NB_0, S_0, WG_0, WB_0 = 1/6, 1/6, 1/6, 1/6, 1/6, 1/6
+    E_0, N_0, S_0, WG_0, WB_0 = 1/5, 1/5, 1/5, 1/5, 1/5
 
     dt = stoptime / nsteps
 
     S = np.zeros(nsteps+1)
     E = np.zeros(nsteps+1)
-    NG = np.zeros(nsteps+1)
-    NB = np.zeros(nsteps+1)
+    N = np.zeros(nsteps+1)
     WG = np.zeros(nsteps+1)
     WB = np.zeros(nsteps+1)
     T = np.zeros(nsteps+1)
 
     S[0] = S_0
     E[0] = E_0
-    NG[0] = NG_0
-    NB[0] = NB_0
+    N[0] = N_0
     WG[0] = WG_0
     WB[0] = WB_0
     T[0] = 0
 
     for i in range(nsteps):
-        k1_S, k1_E, k1_NG, k1_NB, k1_WG, k1_WB = ode_derivatives(S[i], E[i], NG[i], NB[i], WG[i], WB[i], sigma, theta1, theta2, rho1, rho2, delta)
+        k1_S, k1_E, k1_N, k1_WG, k1_WB = ode_derivatives(S[i], E[i], N[i], WG[i], WB[i], sigma, theta, rho1, rho2, mu1, mu2)
 
         S_temp = S[i] + 0.5 * dt * k1_S
         E_temp = E[i] + 0.5 * dt * k1_E
-        NG_temp = NG[i] + 0.5 * dt * k1_NG
-        NB_temp = NB[i] + 0.5 * dt * k1_NB
+        N_temp = N[i] + 0.5 * dt * k1_N
         WG_temp = WG[i] + 0.5 * dt * k1_WG
         WB_temp = WB[i] + 0.5 * dt * k1_WB
-        k2_S, k2_E, k2_NG, k2_NB, k2_WG, k2_WB = ode_derivatives(S_temp, E_temp, NG_temp, NB_temp, WG_temp, WB_temp, sigma, theta1, theta2, rho1, rho2, delta)
+        k2_S, k2_E, k2_N, k2_WG, k2_WB = ode_derivatives(S_temp, E_temp, N_temp, WG_temp, WB_temp, sigma, theta, rho1, rho2, mu1, mu2)
 
         S_temp = S[i] + 0.5 * dt * k2_S
         E_temp = E[i] + 0.5 * dt * k2_E
-        NG_temp = NG[i] + 0.5 * dt * k2_NG
-        NB_temp = NB[i] + 0.5 * dt * k2_NB
+        N_temp = N[i] + 0.5 * dt * k2_N
         WG_temp = WG[i] + 0.5 * dt * k2_WG
         WB_temp = WB[i] + 0.5 * dt * k2_WB
-        k3_S, k3_E, k3_NG, k3_NB, k3_WG, k3_WB = ode_derivatives(S_temp, E_temp, NG_temp, NB_temp, WG_temp, WB_temp, sigma, theta1, theta2, rho1, rho2, delta)
+        k3_S, k3_E, k3_N, k3_WG, k3_WB = ode_derivatives(S_temp, E_temp, N_temp, WG_temp, WB_temp, sigma, theta, rho1, rho2, mu1, mu2)
 
         S_temp = S[i] + dt * k3_S
         E_temp = E[i] + dt * k3_E
-        NG_temp = NG[i] + dt * k3_NG
-        NB_temp = NB[i] + dt * k3_NB
+        N_temp = N[i] + dt * k3_N
         WG_temp = WG[i] + dt * k3_WG
         WB_temp = WB[i] + dt * k3_WB
-        k4_S, k4_E, k4_NG, k4_NB, k4_WG, k4_WB = ode_derivatives(S_temp, E_temp, NG_temp, NB_temp, WG_temp, WB_temp, sigma, theta1, theta2, rho1, rho2, delta)
+        k4_S, k4_E, k4_N, k4_WG, k4_WB = ode_derivatives(S_temp, E_temp, N_temp, WG_temp, WB_temp, sigma, theta, rho1, rho2, mu1, mu2)
 
         S[i+1] = S[i] + (dt / 6) * (k1_S + 2 * k2_S + 2 * k3_S + k4_S)
         E[i+1] = E[i] + (dt / 6) * (k1_E + 2 * k2_E + 2 * k3_E + k4_E)
-        NG[i+1] = NG[i] + (dt / 6) * (k1_NG + 2 * k2_NG + 2 * k3_NG + k4_NG)
-        NB[i+1] = NB[i] + (dt / 6) * (k1_NB + 2 * k2_NB + 2 * k3_NB + k4_NB)
+        N[i+1] = N[i] + (dt / 6) * (k1_N + 2 * k2_N + 2 * k3_N + k4_N)
         WG[i+1] = WG[i] + (dt / 6) * (k1_WG + 2 * k2_WG + 2 * k3_WG + k4_WG)
         WB[i+1] = WB[i] + (dt / 6) * (k1_WB + 2 * k2_WB + 2 * k3_WB + k4_WB)
         T[i+1] = T[i] + dt
 
-    return T, S, E, NG, NB, WG, WB
+    return T, S, E, N, WG, WB
