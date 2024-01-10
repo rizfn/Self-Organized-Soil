@@ -2,64 +2,90 @@ import numpy as np
 from tqdm import tqdm
 import pandas as pd
 from twospec_samenutrient_utils import ode_integrate_rk4
+import matplotlib.pyplot as plt
+import matplotlib.colors as colors
+from matplotlib.ticker import FuncFormatter
 
 
-def run_raster(n_steps, rho1, rho2, theta1, theta2_list, sigma_list, delta, steps_to_record=np.array([100, 1000, 10000, 100000])):
-    """Scans the ODE integrator over sigma and theta2 for n_steps timesteps.
+def run_raster_alive(n_steps, sigma, theta, rho1, mu1, rho2_list, mu2_list, tolerance=1e-6):
+    """Scans the ODE integrator over rho2 and mu2 for n_steps timesteps.
     
     Parameters
     ----------
     n_steps : int
         Number of timesteps to run the simulation for.
+    sigma : float
+        Soil filling rate.
+    theta : float
+        Death rate.
     rho1 : float
         Reproduction rate of green worms.
-    rho2 : float
-        Reproduction rate of blue worms.
-    theta1 : float
-        Death rate of green worms.
-    theta2_list : ndarray
-        Array of death rates of blue worms.
-    sigma_list : ndarray
-        Array of soil filling rates.
-    delta : float
-        Nutrient decay rate.
-    steps_to_record : ndarray, optional
-        Array of timesteps to record the lattice data for, by default [100, 1000, 10000, 100000].
+    mu1 : float
+        Nutrient creation rate of green worms.
+    rho2_list : list
+        List of reproduction rates of blue worms.
+    mu2_list : list
+        List of nutrient creation rates of blue worms.
+    tolerance : float
+        Tolerance for the worms to be considered alive.
     
     Returns
     -------
-    soil_fractions_list : list
-        List of soil_fraction data for specific timesteps and parameters.
+    alive_information : list
+        List of soil_fraction data for the final timesteps and parameters.
     """
-    grid = np.meshgrid(theta2_list, sigma_list)
-    ts_pairs = np.reshape(grid, (2, -1)).T  # all possible pairs of d and s
-    soil_fractions_list = []
-    for i in tqdm(range(len(ts_pairs))):  # todo: parallelize
-        theta2, sigma = ts_pairs[i]
-        T, S, E, NG, NB, WG, WB = ode_integrate_rk4(sigma, theta1, theta2, rho1, rho2, delta, stoptime=n_steps, nsteps=n_steps)
-        for step in steps_to_record:
-            soil_fractions_list.append({"theta2":theta2, "sigma": sigma, "step":step, "vacancy": E[step], "nutrient_g": NG[step],
-                                         "nutrient_b": NB[step], "worm_g":WG[step], "worm_b":WB[step], "soil": S[step]})
-    return soil_fractions_list
+    grid = np.meshgrid(rho2_list, mu2_list)
+    rho_mu_pairs = np.reshape(grid, (2, -1)).T  # all possible pairs of d and s
+    alive_information = []
+    for i in tqdm(range(len(rho_mu_pairs))):  # todo: parallelize
+        rho2, mu2 = rho_mu_pairs[i]
+        T, S, E, N, WG, WB = ode_integrate_rk4(sigma, theta, rho1, rho2, mu1, mu2, stoptime=n_steps, nsteps=n_steps)
+        alive_information.append({"rho1": rho1, "rho2":rho2, "mu1": mu1, "mu2":mu2, "soil_alive":S[-1]>tolerance, "green_alive": WG[-1]>tolerance, "blue_alive": WB[-1]>tolerance})
+    return alive_information
 
 
 def main():  # TODO: fix
 
-    # initialize the parameters
     n_steps = 100_000  # number of worm moves
-    rho1 = 1  # green reproduction rate
-    rho2 = 1  # blue reproduction rate
-    delta = 0  # nutrient decay rate
-    theta1 = 0.1  # death rate of green worms
-    theta2_list = np.linspace(0, 0.3, 20)  # death rate of blue worms
-    sigma_list = np.linspace(0, 1, 20)  # soil filling rate
+    sigma = 0.5
+    theta = 0.05
+    rho1 = 0.5
+    mu1 = 0.5
+    rho2_list = np.linspace(0, 1, 40)
+    mu2_list = np.linspace(0, 1, 40)
 
-    soil_lattice_data = run_raster(n_steps, rho1, rho2, theta1, theta2_list, sigma_list, delta, np.array([n_steps]))
+    alive_information = run_raster_alive(n_steps, sigma, theta, rho1, mu1, rho2_list, mu2_list)
 
-    soil_lattice_data = pd.DataFrame(soil_lattice_data)
+    alive_information = pd.DataFrame(alive_information)
 
-    # save the data
-    # soil_lattice_data.to_json(f"docs/data/nutrient_twospec/meanfield_{rho1=}_{rho2=}_{delta=}_{theta1=}.json", orient="records")
+    def map_colors(row):
+        if row['green_alive'] and row['blue_alive']:
+            return 0  # Yellow
+        elif row['green_alive']:
+            return 1  # Green
+        elif row['blue_alive']:
+            return 2  # Blue
+        elif row['soil_alive']:
+            return 3  # Brown
+        else:
+            return 4  # Empty
+
+    alive_information['color'] = alive_information.apply(map_colors, axis=1)
+    pivot_df = alive_information.pivot(index='rho2', columns='mu2', values='color')
+    cmap = colors.ListedColormap(['yellow', 'green', 'blue', 'brown', 'white'])
+
+    data = pivot_df.to_numpy()
+
+    fig, ax = plt.subplots(figsize=(8, 8))
+    ax.set_title(f"Alive worms\n{n_steps=:}, {sigma=}, {theta=}, {rho1=}, {mu1=}")
+    ax.imshow(data, cmap=cmap, origin='lower', vmin=0, vmax=4)  # Use origin='lower' to start the plot from the bottom left
+    ax.xaxis.set_major_formatter(FuncFormatter(lambda v, t:round (mu2_list[int(v)],2) if v<len(mu2_list) else ''))
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda v, t: round(rho2_list[int(v)],2) if v<len(rho2_list) else ''))
+    ax.set_xlabel('mu2')
+    ax.set_ylabel('rho2')
+    plt.savefig(f'src/two_species_same_nutrient/plots/alive_raster/meanfield_{sigma=}_{theta=}.png', dpi=300)
+    plt.show()
+
     
 
 
@@ -89,5 +115,5 @@ def plot_single_run():
 
 
 if __name__ == "__main__":
-    # main()
-    plot_single_run()
+    main()
+    # plot_single_run()
