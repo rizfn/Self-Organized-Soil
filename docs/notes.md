@@ -200,7 +200,7 @@ Correlation function in space
 Try reducing parameters by a facter and see if it changes stuff
 
 
-## Meeting 14: 8th November 2023:
+## Meeting 14: 8th November 2023
 
 Start from different survival rates:
 
@@ -211,7 +211,7 @@ Try CML with new dynamics
 Check cluster size dist for nutrient
 
 
-## Meeting 15: 13th November 2023:
+## Meeting 15: 13th November 2023
 
 Try changing the death rate and look for changes in the exponential for the worm-worm correlation
 
@@ -224,7 +224,7 @@ maybe check bistability in lattice model
 Try adding nutrient to CML
 
 
-## Meeting 16: 16th November 2023:
+## Meeting 16: 16th November 2023
 
 So 200x200 and see if power law changes
 
@@ -239,7 +239,7 @@ Check in what region the power law is seen
 Check if power law changes with soil filling rate
 
 
-## Meeting 17: 23rd November 2023:
+## Meeting 17: 23rd November 2023
 
 Worm -> Worm: kill the other worm
 
@@ -247,7 +247,7 @@ Small difference in the soil methodology
 
 Try to calculate CSD for weird fractal dimension plot
 
-## Meeting 18: 4th December 2023:
+## Meeting 18: 4th December 2023
 
 At what point does the cutoff enter in 2d
 
@@ -258,7 +258,7 @@ Do the 3D raster
 Try largest linear dimensions: both cumulative and in fractal dim
 
 
-# Meeting 19: 7th December 2023:
+# Meeting 19: 7th December 2023
 
 Normalize by the amount of soil in the system: cluster as % of total soil
 
@@ -273,7 +273,7 @@ Calculate effective soil filling rate
 Show 3D over time (CSD)
 
 
-# Meeting 20: 14th December 2023:
+# Meeting 20: 14th December 2023
 
 Make 2D oscillations
 
@@ -284,7 +284,7 @@ Max divided by min (or mean), to see the sensititity. Want to see how close it g
 Try the two species model
 
 
-# Meeting 21: 21st December 2023:
+# Meeting 21: 21st December 2023
 
 Try to keep a limit at 10^-6 in the meanfield
 
@@ -299,7 +299,7 @@ Try two species
 Time distribution between soil disappearing and soil reappearing at a point
 
 
-## Meeting 22: 28th December 2024:
+## Meeting 22: 28th December 2024
 
 Look for oscillation in region where it survives in lattice but dies in mean-field
 
@@ -318,7 +318,7 @@ Check counts of simulations (see if coherent-oscillatory)
 Try two spec with the same nutrient needed for both (maybe adding nutrient increases death rate)
 
 
-## Meeting 23: 4th January 2024:
+## Meeting 23: 4th January 2024
 
 Plot oscillation amplitude vs system size
 
@@ -327,3 +327,25 @@ Never let worm go below 10^-6
 Check oscillations in 2d
 
 Do well-mixed
+
+
+## Meeting 24: 11th January 2024
+
+Look up spiral simulation 
+
+Try extreme case, 1 parasite, and 1 good worm
+
+Look up other examples where oscillations => survival in lattice
+
+Play around with tradeoff on death rate / nutrient production
+
+Consider a distribution in parameters or allow parameters to mutate
+
+Try parasite model in 2D
+
+Population dynamics with delay DE : chaos
+
+
+## Meeting 25: 18th January 2024
+
+
