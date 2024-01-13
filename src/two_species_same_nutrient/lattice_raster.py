@@ -10,11 +10,50 @@ from multiprocessing import Pool
 
 
 def run_simulation(params):
+    """Run the stochastic simulation for n_steps timesteps, and return if green/blue worms are alive in the end.
+    
+    Parameters
+    ----------
+    params : tuple
+        Tuple of parameters to run the simulation with.
+        
+    Returns
+    -------
+    alive_information : dict
+        Dictionary of the parameters and whether the soil and green/blue worms are alive at the end of the simulation.
+    """
     n_steps, L, sigma, theta, rho1, mu1, rho2, mu2 = params
     soil_alive, green_alive, blue_alive = run_alive_3D(n_steps, L, sigma, theta, rho1, rho2, mu1, mu2)
     return {"rho1": rho1, "rho2":rho2, "mu1": mu1, "mu2":mu2, "soil_alive":soil_alive, "green_alive": green_alive, "blue_alive": blue_alive}
 
 def run_raster_living_3D(n_steps, L, sigma, theta, rho1, mu1, rho2_list, mu2_list):
+    """Run the parallelized rasterscan for the 3D case for n_steps timesteps.
+    
+    Parameters
+    ----------
+    n_steps : int
+        Number of timesteps to run the simulation for.
+    L : int
+        Side length of the cubic lattice.
+    sigma : float
+        Soil filling rate.
+    theta : float
+        Death rate.
+    rho1 : float
+        Reproduction rate of green worms.
+    mu1 : float
+        Nutrient creation rate of green worms.
+    rho2_list : list
+        List of reproduction rates of blue worms.
+    mu2_list : list
+        List of nutrient creation rates of blue worms.
+        
+    Returns
+    -------
+    alive_information : list
+        List of information on whether the soil and green/blue worms are alive at the end of the simulation and parameters.
+    """
+
     grid = np.meshgrid(rho2_list, mu2_list)
     rho_mu_pairs = np.reshape(grid, (2, -1)).T  # all possible pairs of rho and mu
     # Add the other parameters to each pair of rho and mu
@@ -26,42 +65,6 @@ def run_raster_living_3D(n_steps, L, sigma, theta, rho1, mu1, rho2_list, mu2_lis
                 pbar.update()
                 alive_information.append(result)
     return alive_information
-
-# def run_raster_living_3D(n_steps, L, sigma, theta, rho1, mu1, rho2_list, mu2_list):
-#     """Run the rasterscan for the 3D case for n_steps timesteps.
-    
-#     Parameters
-#     ----------
-#     n_steps : int
-#         Number of timesteps to run the simulation for.
-#     L : int
-#         Side length of the cubic lattice.
-#     sigma : float
-#         Soil filling rate.
-#     theta : float
-#         Death rate.
-#     rho1 : float
-#         Reproduction rate of green worms.
-#     rho2 : float
-#         Reproduction rate of blue worms.
-#     mu1 : float
-#         Nutrient creation rate of green worms.
-#     mu2 : float
-#         Nutrient creation rate of blue worms.
-
-#     Returns
-#     -------
-#     living_information : list
-#         List of information on whether the green/blue worms are alive at the end of the simulation and parameters.
-#     """
-#     grid = np.meshgrid(rho2_list, mu2_list)
-#     rho_mu_pairs = np.reshape(grid, (2, -1)).T  # all possible pairs of rho and mu
-#     alive_information = []
-#     for i in tqdm(range(len(rho_mu_pairs))):  # todo: parallelize
-#         rho2, mu2 = rho_mu_pairs[i]
-#         soil_alive, green_alive, blue_alive = run_alive_3D(n_steps, L, sigma, theta, rho1, rho2, mu1, mu2)
-#         alive_information.append({"rho1": rho1, "rho2":rho2, "mu1": mu1, "mu2":mu2, "soil_alive":soil_alive, "green_alive": green_alive, "blue_alive": blue_alive})
-#     return alive_information
 
 
 @njit
@@ -117,9 +120,9 @@ def main():
     n_steps = steps_per_latticepoint * L**3  # 3D
     sigma = 0.5
     theta = 0.025
-    rho1 = 0.5
+    rho1 = 1
+    mu1 = 0.1
     rho2_list = np.linspace(0, 1, 20)
-    mu1 = 0.5
     mu2_list = np.linspace(0, 1, 20)
 
     alive_information = run_raster_living_3D(n_steps, L, sigma, theta, rho1, mu1, rho2_list, mu2_list)
@@ -150,7 +153,7 @@ def main():
     ax.yaxis.set_major_formatter(FuncFormatter(lambda v, t: round(rho2_list[int(v)],2) if v<len(rho2_list) else ''))
     ax.set_xlabel('mu2')
     ax.set_ylabel('rho2')
-    plt.savefig(f'src/two_species_same_nutrient/plots/alive_raster/lattice_{L=}_{sigma=}_{theta=}.png', dpi=300)
+    plt.savefig(f'src/two_species_same_nutrient/plots/alive_raster/test_lattice_{L=}_{sigma=}_{theta=}.png', dpi=300)
     plt.show()
 
 

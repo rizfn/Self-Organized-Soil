@@ -115,5 +115,5 @@ def plot_single_run():
 
 
 if __name__ == "__main__":
-    main()
-    # plot_single_run()
+    # main()
+    plot_single_run()

@@ -54,7 +54,7 @@ def run_timeseries_3D(n_steps, L, sigma, theta, rho1, rho2, mu1, mu2, steps_to_r
     blues = np.zeros_like(emptys)
     i = 0  # indexing for recording steps
 
-    for step in range(1, n_steps+1):
+    for step in range(n_steps+1):
         update_3D(soil_lattice, L, sigma, theta, rho1, rho2, mu1, mu2)
         if step in steps_to_record:
             flattened = soil_lattice.flatten()
@@ -79,20 +79,20 @@ def main():
 
     # initialize the parameters
     steps_per_latticepoint = 1000  # number of bacteria moves per lattice point
-    L = 25  # side length of the cubic lattice
+    L = 40  # side length of the cubic lattice
     n_steps = steps_per_latticepoint * L**3  # 3D
-    sigma = 0.2
-    theta = 0.05
-    rho1 = 1
-    rho2 = 0.9
+    sigma = 0.5
+    theta = 0.025
+    rho1 = 0.5
     mu1 = 0.5
-    mu2 = 1
+    rho2 = 1
+    mu2 = 0
 
     steps_to_record = np.arange(0, n_steps+1, L**3, dtype=np.int32)
 
     emptys, nutrients, soil, greens, blues = run_timeseries_3D(n_steps, L, sigma, theta, rho1, rho2, mu1, mu2, steps_to_record=steps_to_record)
     
-    fig, axs = plt.subplots()
+    fig, axs = plt.subplots(figsize=(10, 6))
 
     steps_to_record = steps_to_record / L**3
 
@@ -101,11 +101,13 @@ def main():
     axs.plot(steps_to_record, nutrients, label="nutrients", c="lawngreen")
     axs.plot(steps_to_record, greens, label="green worms", c="green")
     axs.plot(steps_to_record, blues, label="blue worms", c="blue")
-    axs.set_title(f"{L=}, {sigma=}, {theta=}, {rho1=}, {rho2=}, {mu1=}, {mu2=}")
-    axs.set_xlabel("Timestep / L^3")
+    axs.set_title(f"{L=}, {sigma=}, {theta=}, {rho1=}, {mu1=}, {rho2=}, {mu2=}")
+    axs.set_xlabel(r"Timestep / L$^3$")
     axs.set_ylabel("Fraction of lattice points")
     axs.legend()
     axs.grid()
+
+    # plt.savefig('src/two_species_same_nutrient/plots/lattice_timeseries/parasite_test.png', dpi=300)
 
     plt.show()
 
