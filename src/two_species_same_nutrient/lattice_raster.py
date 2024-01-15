@@ -2,14 +2,119 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from matplotlib.ticker import FuncFormatter
-from twospec_samenutrient_utils import update_3D, init_lattice_3D
+from twospec_samenutrient_utils import init_lattice, update, init_lattice_3D, update_3D
 import pandas as pd
 from numba import njit
 from tqdm import tqdm
 from multiprocessing import Pool
 
 
-def run_simulation(params):
+
+
+def run_simulation_2D(params):
+    """Run the stochastic simulation for n_steps timesteps, and return if green/blue worms are alive in the end.
+    
+    Parameters
+    ----------
+    params : tuple
+        Tuple of parameters to run the simulation with.
+        
+    Returns
+    -------
+    alive_information : dict
+        Dictionary of the parameters and whether the soil and green/blue worms are alive at the end of the simulation.
+    """
+    n_steps, L, sigma, theta, rho1, mu1, rho2, mu2 = params
+    soil_alive, green_alive, blue_alive = run_alive_2D(n_steps, L, sigma, theta, rho1, rho2, mu1, mu2)
+    return {"rho1": rho1, "rho2":rho2, "mu1": mu1, "mu2":mu2, "soil_alive":soil_alive, "green_alive": green_alive, "blue_alive": blue_alive}
+
+def run_raster_living_2D(n_steps, L, sigma, theta, rho1, mu1, rho2_list, mu2_list):
+    """Run the parallelized rasterscan for the 2D case for n_steps timesteps.
+    
+    Parameters
+    ----------
+    n_steps : int
+        Number of timesteps to run the simulation for.
+    L : int
+        Side length of the square lattice.
+    sigma : float
+        Soil filling rate.
+    theta : float
+        Death rate.
+    rho1 : float
+        Reproduction rate of green worms.
+    mu1 : float
+        Nutrient creation rate of green worms.
+    rho2_list : list
+        List of reproduction rates of blue worms.
+    mu2_list : list
+        List of nutrient creation rates of blue worms.
+        
+    Returns
+    -------
+    alive_information : list
+        List of information on whether the soil and green/blue worms are alive at the end of the simulation and parameters.
+    """
+
+    grid = np.meshgrid(rho2_list, mu2_list)
+    rho_mu_pairs = np.reshape(grid, (2, -1)).T  # all possible pairs of rho and mu
+    # Add the other parameters to each pair of rho and mu
+    params = [(n_steps, L, sigma, theta, rho1, mu1, rho2, mu2) for rho2, mu2 in rho_mu_pairs]
+    alive_information = []
+    with Pool() as p:
+        with tqdm(total=len(params)) as pbar:
+            for result in p.imap(run_simulation_2D, params):
+                pbar.update()
+                alive_information.append(result)
+    return alive_information
+
+@njit
+def run_alive_2D(n_steps, L, sigma, theta, rho1, rho2, mu1, mu2):
+    """Run the stochastic simulation for n_steps timesteps, and return if green/blue worms are alive in the end.
+
+    Parameters
+    ----------
+    n_steps : int
+        Number of timesteps to run the simulation for.
+    L : int
+        Side length of the square lattice.
+    sigma : float
+        Soil filling rate.
+    theta : float
+        Death rate.
+    rho1 : float
+        Reproduction rate of green worms.
+    rho2 : float
+        Reproduction rate of blue worms.
+    mu1 : float
+        Nutrient creation rate of green worms.
+    mu2 : float
+        Nutrient creation rate of blue worms.
+    steps_to_record : ndarray, optional
+        Array of timesteps to record the lattice data for, by default [100, 1000, 10000, 100000].
+
+    Returns
+    -------
+    soilAlive : bool
+        Whether soil is alive at the end of the simulation.
+    greenAlive : bool
+        Whether green worms are alive at the end of the simulation.
+    blueAlive : bool
+        Whether blue worms are alive at the end of the simulation.
+    """
+    soil_lattice = init_lattice(L)
+    for i in range(1, n_steps+1):
+        update(soil_lattice, L, sigma, theta, rho1, rho2, mu1, mu2)
+    flattened = soil_lattice.flatten()
+    counts = np.bincount(flattened, minlength=5)
+    soil_alive = counts[2] > 0
+    green_alive = counts[3] > 0
+    blue_alive = counts[4] > 0
+    return soil_alive, green_alive, blue_alive
+
+
+
+def run_simulation_3D(params):
     """Run the stochastic simulation for n_steps timesteps, and return if green/blue worms are alive in the end.
     
     Parameters
@@ -61,11 +166,10 @@ def run_raster_living_3D(n_steps, L, sigma, theta, rho1, mu1, rho2_list, mu2_lis
     alive_information = []
     with Pool() as p:
         with tqdm(total=len(params)) as pbar:
-            for result in p.imap(run_simulation, params):
+            for result in p.imap(run_simulation_3D, params):
                 pbar.update()
                 alive_information.append(result)
     return alive_information
-
 
 @njit
 def run_alive_3D(n_steps, L, sigma, theta, rho1, rho2, mu1, mu2):
@@ -76,7 +180,7 @@ def run_alive_3D(n_steps, L, sigma, theta, rho1, rho2, mu1, mu2):
     n_steps : int
         Number of timesteps to run the simulation for.
     L : int
-        Side length of the square lattice.
+        Side length of the cubic lattice.
     sigma : float
         Soil filling rate.
     theta : float
@@ -112,20 +216,31 @@ def run_alive_3D(n_steps, L, sigma, theta, rho1, rho2, mu1, mu2):
     return soil_alive, green_alive, blue_alive
 
 
+
+
+
 def main():
 
     # initialize the parameters
     steps_per_latticepoint = 1000  # number of bacteria moves per lattice point
-    L = 50  # side length of the cubic lattice
-    n_steps = steps_per_latticepoint * L**3  # 3D
     sigma = 0.5
-    theta = 0.025
-    rho1 = 1
-    mu1 = 0.1
+    theta = 0.05
+    rho1 = 0.5
+    mu1 = 0.5
     rho2_list = np.linspace(0, 1, 20)
     mu2_list = np.linspace(0, 1, 20)
 
-    alive_information = run_raster_living_3D(n_steps, L, sigma, theta, rho1, mu1, rho2_list, mu2_list)
+    # # 3D
+    # L = 50  # side length of the cubic lattice
+    # n_steps = steps_per_latticepoint * L**3  # 3D
+    # alive_information = run_raster_living_3D(n_steps, L, sigma, theta, rho1, mu1, rho2_list, mu2_list)
+
+    # 2D
+    L = 250  # side length of the squaer lattice
+    n_steps = steps_per_latticepoint * L**2  # 2D
+    alive_information = run_raster_living_2D(n_steps, L, sigma, theta, rho1, mu1, rho2_list, mu2_list)
+
+
     alive_information = pd.DataFrame(alive_information)
 
     def map_colors(row):
@@ -153,7 +268,8 @@ def main():
     ax.yaxis.set_major_formatter(FuncFormatter(lambda v, t: round(rho2_list[int(v)],2) if v<len(rho2_list) else ''))
     ax.set_xlabel('mu2')
     ax.set_ylabel('rho2')
-    plt.savefig(f'src/two_species_same_nutrient/plots/alive_raster/test_lattice_{L=}_{sigma=}_{theta=}.png', dpi=300)
+    # plt.savefig(f'src/two_species_same_nutrient/plots/alive_raster/test_lattice_{L=}_{sigma=}_{theta=}.png', dpi=300)
+    plt.savefig(f'src/two_species_same_nutrient/plots/alive_raster/lattice_2D_{L=}_{sigma=}_{theta=}.png', dpi=300)
     plt.show()
 
 

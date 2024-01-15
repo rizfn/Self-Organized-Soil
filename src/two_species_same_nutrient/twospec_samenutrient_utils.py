@@ -45,19 +45,18 @@ def init_lattice(L):
 
     # note about lattice:
     #   0 = empty
-    #   1 = nutrient green
-    #   2 = nutrient blue
-    #   3 = soil
-    #   4 = worm green
-    #   5 = worm blue
+    #   1 = nutrient
+    #   2 = soil
+    #   3 = worm green
+    #   4 = worm blue
 
     # start with equal number of everything
-    soil_lattice = np.random.choice(np.arange(0, 6), size=(L, L)).astype(np.int8)
+    soil_lattice = np.random.choice(np.arange(0, 5), size=(L, L)).astype(np.int8)
     return soil_lattice
 
 
-@njit  # TODO: update
-def update(soil_lattice, L, rho1, rho2, theta1, theta2, sigma, delta):
+@njit
+def update(soil_lattice, L, sigma, theta, rho1, rho2, mu1, mu2):
     """Update the lattice stochastically. Called once every timestep.
 
     The function mutates a global variable, to avoid slowdowns from numba primitives.
@@ -66,22 +65,22 @@ def update(soil_lattice, L, rho1, rho2, theta1, theta2, sigma, delta):
     Parameters:
     -----------
     soil_lattice : numpy.ndarray
-        Lattice with bacteria randomly placed on it.
+        Lattice with worms randomly placed on it.
     L : int
         Side length of the square lattice.
-    rho1 : float
-        Reproduction rate for green worms.
-    rho2 : float
-        Reproduction rate for blue worms.
-    theta1 : float
-        Death rate for green worms.
-    theta2 : float
-        Death rate for blue worms.
     sigma : float
         Soil filling rate.
-    delta : float
-        Nutrient decay rate.
-    
+    theta : float
+        Worm death rate.
+    rho1 : float
+        Reproduction rate of green worms.
+    rho2 : float
+        Reproduction rate of blue worms.
+    mu1 : float
+        Nutrient creation rate of green worms.
+    mu2 : float
+        Nutrient creation rate of blue worms.
+
     Returns:
     --------
     None
@@ -90,46 +89,44 @@ def update(soil_lattice, L, rho1, rho2, theta1, theta2, sigma, delta):
     # select a random site
     site = np.random.randint(0, L), np.random.randint(0, L)
 
-    if soil_lattice[site[0], site[1]] == 0:  # empty
+    if (soil_lattice[site[0], site[1]] == 0) or (soil_lattice[site[0], site[1]] == 1):  # empty or nutrient
         # choose a random neighbour
         nbr = get_random_neighbour(site, L)
-        if soil_lattice[nbr[0], nbr[1]] == 3:  # if neighbour is soil
+        if soil_lattice[nbr[0], nbr[1]] == 2:  # if neighbour is soil
             # fill with soil-filling rate
             if np.random.rand() < sigma:
-                soil_lattice[site[0], site[1]] = 3
+                soil_lattice[site[0], site[1]] = 2
 
-    elif soil_lattice[site[0], site[1]] == 1:  # green nutrient
-        is_filled = False
-        # choose a random neighbour
-        nbr = get_random_neighbour(site, L)
-        if soil_lattice[nbr[0], nbr[1]] == 3:  # if neighbour is soil
-            # fill with soil-filling rate
-            if np.random.rand() < sigma:
-                soil_lattice[site[0], site[1]] = 3
-                is_filled = True
-        if not is_filled:
-            # decay to empty with rate delta
-            if np.random.rand() < delta:
-                soil_lattice[site[0], site[1]] = 0
-
-    elif soil_lattice[site[0], site[1]] == 2:  # blue nutrient
-        is_filled = False
-        # choose a random neighbour
-        nbr = get_random_neighbour(site, L)
-        if soil_lattice[nbr[0], nbr[1]] == 3:  # if neighbour is soil
-            # fill with soil-filling rate
-            if np.random.rand() < sigma:
-                soil_lattice[site[0], site[1]] = 3
-                is_filled = True
-        if not is_filled:
-            # decay to empty with rate delta
-            if np.random.rand() < delta:
-                soil_lattice[site[0], site[1]] = 0
-
-
-    elif soil_lattice[site[0], site[1]] == 4:  # green worm
+    elif soil_lattice[site[0], site[1]] == 3:  # green worm
         # check for death
-        if np.random.rand() < theta1:
+        if np.random.rand() < theta:
+            soil_lattice[site[0], site[1]] = 0
+        else:
+            # move into a neighbour
+            new_site = get_random_neighbour(site, L)
+            # check the value of the new site
+            new_site_value = soil_lattice[new_site[0], new_site[1]]
+            # move the worm
+            soil_lattice[new_site[0], new_site[1]] = 3
+            soil_lattice[site[0], site[1]] = 0
+            # check if the new site is nutrient
+            if new_site_value == 1:
+                # reproduce behind you
+                if np.random.rand() < rho1:
+                    soil_lattice[site[0], site[1]] = 3
+            # check if the new site is soil
+            elif new_site_value == 2:
+                # leave nutrient behind
+                if np.random.rand() < mu1:
+                    soil_lattice[site[0], site[1]] = 1
+            # check if the new site is a worm
+            elif (new_site_value == 3) or (new_site_value == 4):
+                # keep both with worms (undo the vacant space in original site)
+                soil_lattice[site[0], site[1]] = new_site_value
+
+    elif soil_lattice[site[0], site[1]] == 4:  # blue worm
+        # check for death
+        if np.random.rand() < theta:
             soil_lattice[site[0], site[1]] = 0
         else:
             # move into a neighbour
@@ -139,49 +136,24 @@ def update(soil_lattice, L, rho1, rho2, theta1, theta2, sigma, delta):
             # move the worm
             soil_lattice[new_site[0], new_site[1]] = 4
             soil_lattice[site[0], site[1]] = 0
-            # check if the new site is blue nutrient
-            if new_site_value == 2:
-                # reproduce behind you
-                if np.random.rand() < rho1:
-                    soil_lattice[site[0], site[1]] = 4
-            # check if the new site is soil
-            elif new_site_value == 3:
-                # leave nutrient behind
-                soil_lattice[site[0], site[1]] = 1
-            # check if the new site is a worm
-            elif (new_site_value == 4) or (new_site_value == 5):
-                # keep both with worms (undo the vacant space in original site)
-                soil_lattice[site[0], site[1]] = new_site_value
-
-    elif soil_lattice[site[0], site[1]] == 5:  # blue worm
-        # check for death
-        if np.random.rand() < theta2:
-            soil_lattice[site[0], site[1]] = 0
-        else:
-            # move into a neighbour
-            new_site = get_random_neighbour(site, L)
-            # check the value of the new site
-            new_site_value = soil_lattice[new_site[0], new_site[1]]
-            # move the worm
-            soil_lattice[new_site[0], new_site[1]] = 5
-            soil_lattice[site[0], site[1]] = 0
-            # check if the new site is green nutrient
+            # check if the new site is nutrient
             if new_site_value == 1:
                 # reproduce behind you
                 if np.random.rand() < rho2:
-                    soil_lattice[site[0], site[1]] = 5
+                    soil_lattice[site[0], site[1]] = 4
             # check if the new site is soil
-            elif new_site_value == 3:
+            elif new_site_value == 2:
                 # leave nutrient behind
-                soil_lattice[site[0], site[1]] = 2
+                if np.random.rand() < mu2:
+                    soil_lattice[site[0], site[1]] = 1
             # check if the new site is a worm
-            elif (new_site_value == 4) or (new_site_value == 5):
+            elif (new_site_value == 3) or (new_site_value == 4):
                 # keep both with worms (undo the vacant space in original site)
                 soil_lattice[site[0], site[1]] = new_site_value
 
 
-@njit  # TODO: update
-def run(n_steps, L, rho1, rho2, theta1, theta2, sigma, delta, steps_to_record=np.array([100, 1000, 10000, 100000])):
+@njit
+def run(n_steps, L, sigma, theta, rho1, rho2, mu1, mu2, steps_to_record=np.array([100, 1000, 10000, 100000])):
     """Run the stochastic simulation for n_steps timesteps.
 
     Parameters
@@ -190,18 +162,18 @@ def run(n_steps, L, rho1, rho2, theta1, theta2, sigma, delta, steps_to_record=np
         Number of timesteps to run the simulation for.
     L : int
         Side length of the square lattice.
+    sigma : float
+        Soil filling rate.
+    theta : float
+        Death rate.
     rho1 : float
         Reproduction rate of green worms.
     rho2 : float
         Reproduction rate of blue worms.
-    theta1 : float
-        Death rate of green worms.
-    theta2 : float
-        Death rate of blue worms.
-    sigma : float
-        Soil filling rate.
-    delta : float
-        Nutrient decay rate.
+    mu1 : float 
+        Nutrient creation rate of green worms.
+    mu2 : float
+        Nutrient creation rate of blue worms.
     steps_to_record : ndarray, optional
         Array of timesteps to record the lattice data for, by default [100, 1000, 10000, 100000].
 
@@ -215,7 +187,7 @@ def run(n_steps, L, rho1, rho2, theta1, theta2, sigma, delta, steps_to_record=np
     soil_lattice_data = np.zeros((len(steps_to_record), L, L), dtype=np.int8)
 
     for step in range(1, n_steps+1):
-        update(soil_lattice, L, rho1, rho2, theta1, theta2, sigma, delta)
+        update(soil_lattice, L, sigma, theta, rho1, rho2, mu1, mu2)
         if step in steps_to_record:
             soil_lattice_data[steps_to_record == step] = soil_lattice
 

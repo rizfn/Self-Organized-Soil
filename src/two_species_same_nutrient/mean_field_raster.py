@@ -86,21 +86,19 @@ def main():  # TODO: fix
     plt.savefig(f'src/two_species_same_nutrient/plots/alive_raster/meanfield_{sigma=}_{theta=}.png', dpi=300)
     plt.show()
 
-    
+
 
 
 def plot_single_run():
     n_steps = 10_000  # number of worm moves
-    rho1 = 1
-    rho2 = 0.99
-    theta = 0.05
-    mu1 = 0.3
-    mu2 = 1
-    sigma = 0.8
+    rho1 = 0.5
+    rho2 = 1
+    theta = 0.025
+    mu1 = 0.5
+    mu2 = 0
+    sigma = 0.5
 
     T, S, E, N, WG, WB = ode_integrate_rk4(sigma, theta, rho1, rho2, mu1, mu2, stoptime=n_steps, nsteps=n_steps)
-
-    import matplotlib.pyplot as plt
 
     plt.grid()
     plt.plot(T, S, label="soil", c='brown')
