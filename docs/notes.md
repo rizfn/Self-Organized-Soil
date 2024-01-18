@@ -348,4 +348,20 @@ Population dynamics with delay DE : chaos
 
 ## Meeting 25: 18th January 2024
 
+Check oscillation in yellow region
+
+Check structure in yellow region
+
+Can sustain multiple parasiets?
+
+In parasite model, check lifetimes.
+
+Run Lotka volterra for nutrient without nutrient to see difference for IUPAB
+
+Play around with mu tradeoff being theta instead of rho
+
+
+## Meeting 26: 24th January 2024
+
+
 
