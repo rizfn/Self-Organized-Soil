@@ -99,10 +99,6 @@ var y = d3.scaleBand()
 	.padding(0.05);
 
 
-var colors = d3.scaleSequential()
-	.interpolator(d3.interpolateViridis)
-	.domain([d3.min(data, function(d) {return d.soil_boundaries;}), d3.max(data, function(d) {return d.soil_boundaries;})])  
-
 let current_soil_lattice_state = {"mu2": 0, "rho2": 0};
 
 // create a heatmap on mouseclick
@@ -112,6 +108,10 @@ var mousedown = function(event, d) {
 	update_soil_lattice(d.soil_lattice)
 }
 		
+function colour_raster(d) {
+    const RGBtotal = (d.soil + d.green + d.blue) || 1;
+    return "rgba(" + d.soil * 255 / RGBtotal + "," + d.green * 255 / RGBtotal + "," + d.blue * 255 / RGBtotal + "," + (1-d.vacancy**2) + ")"
+}
 
 // append the svg object to the body of the page
 var svg_soil = d3.select("div#raster")
@@ -160,7 +160,7 @@ svg_soil.selectAll(".cell")
 		.attr("y", function(d) { return y(d.rho2) })
 		.attr("width", x.bandwidth() )
 		.attr("height", y.bandwidth() )
-		.style("fill", function(d) { return "rgb(" + d.soil*255 + "," + d.vacancy*255 + "," + (d.green + d.blue)*255 + ")" } )
+		.style("fill", function(d) { return colour_raster(d) } )
 		.on("mouseover", mouseover_rgb)
 		.on("mousemove", mousemove_rgb)
 		.on("mouseleave", mouseleave_rgb)
@@ -268,7 +268,7 @@ function refilter_data() {
 	svg_soil.selectAll(".cell")
 		.data(filtereddata)
 		.transition(t)
-		.style("fill", function(d) { return "rgb(" + d.soil*255 + "," + d.vacancy*255 + "," + (d.green + d.blue)*255 + ")" } )
+		.style("fill", function(d) { return colour_raster(d) } )
 
 	const soil_lattice = filtereddata.filter(function(d) {return d.mu2 == current_soil_lattice_state.mu2 && d.rho2 == current_soil_lattice_state.rho2})[0].soil_lattice
 	// update the lattice

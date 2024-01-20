@@ -1,10 +1,7 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.colors as colors
-from matplotlib.ticker import FuncFormatter
 from twospec_samenutrient_utils import run, run_3D
 import pandas as pd
-from numba import njit
+import os
 from tqdm import tqdm
 from multiprocessing import Pool
 
@@ -148,13 +145,26 @@ def main():
     mu2_list = np.linspace(0, 1, 20)
 
     # 3D
-    L = 20  # side length of the cubic lattice
+    L = 50  # side length of the cubic lattice
     n_steps = steps_per_latticepoint * L**3  # 3D
     steps_to_record = np.linspace(n_steps//2, n_steps, 5, dtype=np.int32)
     raster_data = run_raster_3D(n_steps, L, sigma, theta, rho1, mu1, rho2_list, mu2_list, steps_to_record)
     raster_data = pd.DataFrame(raster_data)
-    # Todo: correct saving algorithm
-    raster_data.to_json(f"docs/data/twospec_samenutrient/lattice3D_{L=}_{sigma=}_{theta=}_{rho1=}_{mu1=}.json", orient="records")
+
+    def calculate_fractions(matrix):
+        flattened = np.array(matrix).flatten()
+        fractions = pd.Series(flattened).value_counts(normalize=True).sort_index()
+        fractions = fractions.reindex(range(5), fill_value=0)
+        return fractions
+    
+    raster_data[['vacancy', 'nutrient', 'soil', 'green', 'blue']] = raster_data['soil_lattice'].apply(calculate_fractions).apply(pd.Series)
+    grouped = raster_data.groupby('step')
+    dir_path = f'docs/data/twospec_samenutrient/lattice3D_{L=}_{sigma=}_{theta=}_{rho1=}_{mu1=}/'
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+    for i, (group_name, group_data) in enumerate(grouped):
+        group_data.to_json(dir_path + f'/step{i}.json', orient='records')
+
 
     # # 2D
     # L = 100  # side length of the square lattice
