@@ -1,9 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from twospec_samenutrient_utils import init_lattice, init_lattice_3D, update, update_3D
-from scipy.signal import find_peaks
 from numba import njit
-from tqdm import tqdm
 
 
 @njit
@@ -161,7 +159,7 @@ def main():
 
 
     # L = 250  # side length of the square lattice
-    # n_steps = steps_per_latticepoint * L**2  # 3D
+    # n_steps = steps_per_latticepoint * L**2  # 2D
     # steps_to_record = np.arange(0, n_steps+1, L**2, dtype=np.int32)
     # emptys, nutrients, soil, greens, blues = run_timeseries(n_steps, L, sigma, theta, rho1, rho2, mu1, mu2, steps_to_record=steps_to_record)
     # steps_to_record = steps_to_record / L**2

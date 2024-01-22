@@ -316,4 +316,3 @@ function change_data(state) {
 		.style("fill", function(d) { return "rgb(" + d.soil*255 + "," + (d.redvacancy+d.bluevacancy)*255 + "," + (d.red+d.blue)*255 + ")" } );
 
 }
-	

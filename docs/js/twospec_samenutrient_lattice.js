@@ -71,7 +71,7 @@ let filtereddata = data.filter(function(d){ return d.step == step });
 console.log(filtereddata);
 
 // set the dimensions and margins of the graph
-var margin = {top: 10, right: 10, bottom: 10, left: 10},
+var margin = {top: 10, right: 10, bottom: 40, left: 40},
   width = innerWidth/2 - margin.left - margin.right,
   height = innerHeight - margin.top - margin.bottom;
 
@@ -122,6 +122,23 @@ var svg_soil = d3.select("div#raster")
   .append("g")
     .attr("transform",
           "translate(" + margin.left + "," + margin.top + ")");
+
+// label axes
+svg_soil.append("text")
+    .attr("class", "axis_label")
+    .attr("transform", "translate(" + (width / 2) + " ," + (height + margin.bottom / 2) + ")")
+    .style("text-anchor", "middle")
+    .text("Blue nutrient-creation rate (μ2)");
+
+svg_soil.append("text")
+    .attr("class", "axis_label")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 0 - margin.left / 1.5)
+    .attr("x", 0 - (height / 2))
+    .attr("dy", "1em")
+    .style("text-anchor", "middle")
+    .text("Blue reproduction rate (ρ2)");
+
 
     var Tooltip = d3.select("div#raster")
 	.append("div")

@@ -23,8 +23,6 @@ body {
     position: absolute;
     left: innerWidth/2 - 50px;
     top: innerHeight/2 - 50px;
-    width: 200px;
-    height: 100px;
     background-color: white;
     border: 1px solid black;
     border-radius: 50px;
