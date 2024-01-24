@@ -363,5 +363,21 @@ Play around with mu tradeoff being theta instead of rho
 
 ## Meeting 26: 24th January 2024
 
+Check if power law at the top left point for CSD
+
+Do more exhaustive check for oscillatory parasite, by checking lifetimes
+
+Work on IUPAB abstract
+
+Check 2D front or oscillations for large systems: maybe with rigid boundaries?
+
+Lotka-Volterra: `soil_neighbour_rasterscan.html`, try to look for oscillations
+
+Make the blocks smaller
+
+
+## Meeting 27: 1st February 2024
+
+
 
 
