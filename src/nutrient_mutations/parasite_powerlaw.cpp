@@ -254,15 +254,23 @@ void run_csd(int n_steps, int L, double sigma, double theta, double rho1, double
     }
 }
 
-int main()
+int main(int argc, char* argv[])
 {
     // initialize the parameters
     int n_steps = STEPS_PER_LATTICEPOINT * L * L; // 2D
 
+    // Check if command line arguments are provided
+    double sigma = SIGMA;
+    double theta = THETA;
+    if(argc > 1) sigma = std::stod(argv[1]);
+    if(argc > 2) theta = std::stod(argv[2]);
+
     wchar_t exePath[MAX_PATH];
     GetModuleFileNameW(NULL, exePath, MAX_PATH);
     std::string exeDir = std::filesystem::path(exePath).parent_path().string();
-    std::string filePath = exeDir + "\\outputs\\parasite_CSD.csv";
+    std::ostringstream filename;
+    filename << exeDir << "\\outputs\\parasite_CSD\\sigma_" << sigma << "_theta_" << theta << ".csv";
+    std::string filePath = filename.str();
 
     std::ofstream file;
     file.open(filePath);
@@ -271,7 +279,7 @@ int main()
     file << "step,cluster_sizes\n";
 
     // Run the time series
-    run_csd(n_steps, L, SIGMA, THETA, RHO1, RHO2, MU1, MU2, file);
+    run_csd(n_steps, L, sigma, theta, RHO1, RHO2, MU1, MU2, file);
 
     file.close();
 

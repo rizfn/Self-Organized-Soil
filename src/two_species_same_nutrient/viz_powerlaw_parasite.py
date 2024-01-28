@@ -15,7 +15,8 @@ def load_csv(filename):
 
 
 def main():
-    steps, cluster_sizes = load_csv('src/nutrient_mutations/outputs/parasite_CSD.csv')
+    # steps, cluster_sizes = load_csv('src/nutrient_mutations/outputs/parasite_CSD.csv')
+    steps, cluster_sizes = load_csv('src/nutrient_mutations/outputs/parasite_CSD/sigma_0.6_theta_0.04.csv')
     # histogram and plot all the cluster sizes
     plt.figure(figsize=(12, 8))
     num_bins = 100
