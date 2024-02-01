@@ -378,6 +378,13 @@ Make the blocks smaller
 
 ## Meeting 27: 1st February 2024
 
+Let blue swap places with soil, and see if oscillations retrun
+
+Check correlation of diversity with power law
+
+Read more about soil composition: empty fraction, living fraction, inorganic fraction
+
+Try to generate a ton of differently-sized particles, from a power law dist of varying exp, and drop them and see the packing fraction
 
 
-
+## Meeting 28: 8th February 2024
