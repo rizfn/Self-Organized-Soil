@@ -39,7 +39,7 @@ svg.append("text")
     .attr("class", "axis_label")
     .attr("transform", "translate(" + (width / 2) + " ," + (height + margin.bottom / 2) + ")")
     .style("text-anchor", "middle")
-    .text("Blue nutrient-creation rate (μ2)");
+    .text("Worm death rate (θ)");
 
 svg.append("text")
     .attr("class", "axis_label")
@@ -48,7 +48,7 @@ svg.append("text")
     .attr("x", 0 - (height / 2))
     .attr("dy", "1em")
     .style("text-anchor", "middle")
-    .text("Blue reproduction rate (ρ2)");
+    .text("Soil filling rate (σ)");
 
 
 var rows = d3.map(data, function (d) { return d.theta; })

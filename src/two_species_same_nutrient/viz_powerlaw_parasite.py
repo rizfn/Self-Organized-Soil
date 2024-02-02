@@ -16,9 +16,12 @@ def load_csv(filename):
 
 def main():
     # steps, cluster_sizes = load_csv('src/nutrient_mutations/outputs/parasite_CSD.csv')
-    steps, cluster_sizes = load_csv('src/nutrient_mutations/outputs/parasite_CSD/sigma_0.6_theta_0.04.csv')
+    # steps, cluster_sizes = load_csv('src/nutrient_mutations/outputs/parasite_CSD/sigma_1_theta_0.038.csv')
+    # steps, cluster_sizes = load_csv('src/nutrient_mutations/outputs/parasite_CSD/sigma_0.6_theta_0.04.csv')
+    steps, cluster_sizes = load_csv('src/nutrient_mutations/outputs/parasite_CSD_3D/sigma_1_theta_0.01.csv')
+    # steps, cluster_sizes = load_csv('src/nutrient_mutations/outputs/parasite_CSD_3D/sigma_0.6_theta_0.03.csv')
     # histogram and plot all the cluster sizes
-    plt.figure(figsize=(12, 8))
+    plt.figure(figsize=(6, 4))
     num_bins = 100
     min_size = 1  # smallest cluster size
     max_size = max(max(sublist) for sublist in cluster_sizes[500:])
@@ -29,42 +32,43 @@ def main():
     hist, edges = np.histogram(flat_cluster_sizes, bins=bins, density=False)
     bin_widths = np.diff(edges)
     hist = hist / bin_widths  # Normalize by bin width
-    plt.plot(edges[:-1], hist, 'x', label='data')
+    plt.plot(edges[:-1], hist, 'x', label='Simulation')
     plt.grid()
     plt.xlabel('Cluster size')
     plt.ylabel('Probability density')
 
-    tau1, tau2 = 2, 2.3
-    x = np.array(edges[:-1])
-    plt.plot(x, 3e7*x**-tau1, label=r'$\tau=$' + f'{tau1} power law', linestyle='--', alpha=0.5)
-    # plt.plot(x, 1e8*x**-tau2, label=r'$\tau=$' + f'{tau2} power law', linestyle='--', alpha=0.5)
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.legend()
-    plt.show()
-
-
-
-    max_size = max(max(sublist) for sublist in cluster_sizes)
-    bins = np.logspace(np.log10(min_size), np.log10(max_size), num=num_bins)
-    flat_cluster_sizes = [item for sublist in cluster_sizes for item in sublist]
-    hist, edges = np.histogram(flat_cluster_sizes, bins=bins, density=False)
-    bin_widths = np.diff(edges)
-    hist = hist / bin_widths  # Normalize by bin width
-    plt.plot(edges[:-1], hist, 'x', label='data')
-    plt.grid()
-    plt.xlabel('Cluster size')
-    plt.ylabel('Probability density')
-    plt.title("All data, including transients")
-
-    tau1, tau2 = 2, 2.3
+    tau1, tau2 = 2, 1.7
     x = np.array(edges[:-1])
     plt.plot(x, 1e7*x**-tau1, label=r'$\tau=$' + f'{tau1} power law', linestyle='--', alpha=0.5)
-    plt.plot(x, 1e8*x**-tau2, label=r'$\tau=$' + f'{tau2} power law', linestyle='--', alpha=0.5)
+    plt.plot(x, 6e6*x**-tau2, label=r'$\tau=$' + f'{tau2} power law', linestyle='--', alpha=0.5)
     plt.xscale('log')
     plt.yscale('log')
     plt.legend()
+    # plt.savefig('src/nutrient_mutations/outputs/parasite_CSD_3D/sigma_1_theta_0.0095.png', dpi=300)
     plt.show()
+
+
+
+    # max_size = max(max(sublist) for sublist in cluster_sizes)
+    # bins = np.logspace(np.log10(min_size), np.log10(max_size), num=num_bins)
+    # flat_cluster_sizes = [item for sublist in cluster_sizes for item in sublist]
+    # hist, edges = np.histogram(flat_cluster_sizes, bins=bins, density=False)
+    # bin_widths = np.diff(edges)
+    # hist = hist / bin_widths  # Normalize by bin width
+    # plt.plot(edges[:-1], hist, 'x', label='data')
+    # plt.grid()
+    # plt.xlabel('Cluster size')
+    # plt.ylabel('Probability density')
+    # plt.title("All data, including transients")
+
+    # tau1, tau2 = 2, 2.3
+    # x = np.array(edges[:-1])
+    # plt.plot(x, 1e7*x**-tau1, label=r'$\tau=$' + f'{tau1} power law', linestyle='--', alpha=0.5)
+    # plt.plot(x, 1e8*x**-tau2, label=r'$\tau=$' + f'{tau2} power law', linestyle='--', alpha=0.5)
+    # plt.xscale('log')
+    # plt.yscale('log')
+    # plt.legend()
+    # plt.show()
 
 
 def histogram_key_points():
