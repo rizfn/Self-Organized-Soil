@@ -143,9 +143,9 @@ def run_timeseries_3D(n_steps, L, sigma, theta, rho1, rho2, mu1, mu2, steps_to_r
 def main():
 
     # initialize the parameters
-    steps_per_latticepoint = 1000  # number of bacteria moves per lattice point
-    sigma = 0.5
-    theta = 0.025
+    steps_per_latticepoint = 2000  # number of bacteria moves per lattice point
+    sigma = 1
+    theta = 0.03
     rho1 = 0.5
     mu1 = 0.5
     rho2 = 1
@@ -180,7 +180,7 @@ def main():
     axs.legend()
     axs.grid()
 
-    plt.savefig('src/two_species_same_nutrient/plots/lattice_timeseries/_parasite_test.png', dpi=300)
+    # plt.savefig('src/two_species_same_nutrient/plots/lattice_timeseries/parasite_oscillations.png', dpi=300)
 
     plt.show()
 
