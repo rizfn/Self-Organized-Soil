@@ -388,3 +388,24 @@ Try to generate a ton of differently-sized particles, from a power law dist of v
 
 
 ## Meeting 28: 8th February 2024
+
+Try to do multiple worms in hogweg paper
+
+Try to put a 3rd species in to eat the parasite
+
+Check soil lifetimes calc
+
+Check that blue dying doesn't give oscillations
+
+Change mu1 to 1
+
+Check if reducing deathrate of blue gives oscillations
+
+Try to see if you can get a big clump + poweralw in nature
+
+Look into dust powerlaw some more
+
+
+## Meeting 29: 15th February 2024
+
+
