@@ -6,7 +6,7 @@ def main():
     # 3D
     L = 50
     sigma = 1
-    theta = 0.03
+    theta = 0.02
     n_steps = L**3 * 2000  # from sim
 
     step, soil_lifetimes = np.loadtxt(f"src/two_species_same_nutrient/outputs/soil_lifetimes/sigma_{sigma}_theta_{theta}.csv", skiprows=1, delimiter=",", unpack=True)

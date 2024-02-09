@@ -258,7 +258,7 @@ def main():
     axs.legend()
     axs.grid()
 
-    # plt.savefig('src/two_species_same_nutrient/plots/lattice_timeseries/parasite_displace_soil.png', dpi=300)
+    plt.savefig('src/two_species_same_nutrient/plots/lattice_timeseries/parasite_displace_soil.png', dpi=300)
 
     plt.show()
 

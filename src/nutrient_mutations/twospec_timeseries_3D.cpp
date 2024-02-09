@@ -20,9 +20,9 @@ struct Coordinate
 };
 
 // Define constants
-constexpr int STEPS_PER_LATTICEPOINT = 10000;
-constexpr double SIGMA = 1;
-constexpr double THETA = 0.03;
+constexpr int STEPS_PER_LATTICEPOINT = 16000;
+constexpr double SIGMA = 0.5;
+constexpr double THETA = 0.0395;
 constexpr double RHO1 = 0.5;
 constexpr double MU1 = 0.5;
 constexpr double RHO2 = 1;

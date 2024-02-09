@@ -5,8 +5,10 @@ import numpy as np
 def main():
     # 3D
     L = 50
-    sigma = 1
-    theta = 0.03
+    # sigma = 1
+    # theta = 0.03
+    sigma = 0.5
+    theta = 0.0395
 
     step, E, N, S, G, B = np.loadtxt(f"src/nutrient_mutations/outputs/timeseries/sigma_{sigma}_theta_{theta}.csv", skiprows=1, delimiter=",", unpack=True)
 
