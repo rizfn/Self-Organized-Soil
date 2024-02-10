@@ -7,4 +7,5 @@ docs/data/nutrient/lattice3D_L=75_rho=1_delta=0/
 .vscode/
 src/nutrient_mutations/outputs/
 src/two_species_same_nutrient/outputs/
+src/IUPAB_abstract/outputs/
 *.exe
