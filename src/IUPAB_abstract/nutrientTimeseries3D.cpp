@@ -24,7 +24,7 @@ struct Coordinate
 constexpr int STEPS_PER_LATTICEPOINT = 1000;
 constexpr double RHO1 = 1;
 constexpr double MU1 = 1;
-constexpr int L = 50; // side length of the cubic lattice
+constexpr int L = 75; // side length of the cubic lattice
 constexpr int N_STEPS = STEPS_PER_LATTICEPOINT * L * L * L;
 
 constexpr int EMPTY = 0;
