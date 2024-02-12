@@ -140,7 +140,7 @@ def main():
     sigma_list = np.linspace(0, 1, 20)
     theta_list = np.linspace(0, 0.1, 20)
     rho1 = 0.5
-    mu1 = 0.5
+    mu1 = 1
     rho2 = 1
     mu2 = 0
 

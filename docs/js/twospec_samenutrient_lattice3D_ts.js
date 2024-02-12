@@ -3,7 +3,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 
 let current_file_idx = 0;
-const data_prefix = `../data/twospec_samenutrient/lattice3D_L=50_rho1=0.5_mu1=0.5_rho2=1_mu2=0/`
+// const data_prefix = `../data/twospec_samenutrient/lattice3D_L=50_rho1=0.5_mu1=0.5_rho2=1_mu2=0/`
+const data_prefix = `../data/twospec_samenutrient/lattice3D_L=50_rho1=0.5_mu1=1_rho2=1_mu2=0/`
 
 let { default: data } = await import(data_prefix + `step${current_file_idx}.json`, { assert: { type: "json" } });
 
