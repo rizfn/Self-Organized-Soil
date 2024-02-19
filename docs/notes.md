@@ -408,4 +408,18 @@ Look into dust powerlaw some more
 
 ## Meeting 29: 15th February 2024
 
+Not much to discuss, showed Kuni the Hogweg plots
+
+
+## Meeting 30: 19th February 2024
+
+See if there's a long-term segregation in 2D hogweg
+
+Dragon king state, chimera state (with decoherence)
+
+Try 3D lattice visualization
+
+Try different number of species
+
+Try removing soil
 
