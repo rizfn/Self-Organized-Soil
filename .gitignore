@@ -9,6 +9,7 @@ src/nutrient_mutations/outputs/
 src/two_species_same_nutrient/outputs/
 src/IUPAB_abstract/outputs/
 src/multi_species_nutrient/outputs/
-src/multi_species_nutrient/plots/lattice2D/4spec_sigma_0.5_theta_0.015.gif
-src/multi_species_nutrient/plots/lattice2D/5spec_sigma_0.5_theta_0.012.gif
+src/multi_species_nutrient/plots/lattice2D/3spec/sigma_0.5_theta_0.0237.gif
+src/multi_species_nutrient/plots/lattice2D/4spec/sigma_0.5_theta_0.015.gif
+src/multi_species_nutrient/plots/lattice2D/5spec/sigma_0.5_theta_0.012.gif
 *.exe

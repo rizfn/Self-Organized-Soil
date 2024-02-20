@@ -21,15 +21,15 @@ struct Coordinate
 };
 
 // Define constants
-constexpr int STEPS_PER_LATTICEPOINT = 5000;
+constexpr int STEPS_PER_LATTICEPOINT = 8000;
 constexpr double SIGMA = 0.5;
-constexpr double THETA = 0.01;
+constexpr double THETA = 0.023;
 constexpr double RHO = 1;
 constexpr double MU = 1;
 constexpr int L = 500; // side length of the square lattice
-constexpr int N_STEPS = STEPS_PER_LATTICEPOINT * L * L;
+constexpr long long N_STEPS = static_cast<long long>(STEPS_PER_LATTICEPOINT) * L * L;
 
-constexpr int N = 5; // number of species
+constexpr int N = 3; // number of species
 constexpr int EMPTY = 0;
 constexpr std::array<int, N> NUTRIENTS = []
 {
@@ -220,13 +220,13 @@ void update(std::vector<std::vector<int>> &soil_lattice, int L, double sigma, do
     }
 }
 
-void run_timeseries(int N_STEPS, int L, double sigma, double theta, double rho, double mu, std::ofstream &file)
+void run_timeseries(long long N_STEPS, int L, double sigma, double theta, double rho, double mu, std::ofstream &file)
 {
     std::vector<std::vector<int>> soil_lattice = init_lattice(L); // Changed to 2D vector
 
     int i = 0; // indexing for recording steps
 
-    for (int step = 0; step <= N_STEPS; ++step)
+    for (long long step = 0; step <= N_STEPS; ++step)
     {
         update(soil_lattice, L, sigma, theta, rho, mu);
         if (step % (L * L) == 0) // Changed to 2D
