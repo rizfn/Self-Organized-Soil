@@ -1,8 +1,6 @@
 #include <bits/stdc++.h>
 #include <windows.h>
 
-// FIX: BIG ERROR
-
 // #pragma GCC optimize("Ofast","inline","fast-math","unroll-loops","no-stack-protector")
 #pragma GCC optimize("inline", "unroll-loops", "no-stack-protector")
 #pragma GCC target("sse,sse2,sse3,ssse3,sse4,popcnt,abm,mmx,avx,avx2,tune=native", "f16c")
