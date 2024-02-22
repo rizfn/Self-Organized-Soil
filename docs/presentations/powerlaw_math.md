@@ -1,5 +1,5 @@
 ---
-marp: false
+marp: true
 theme: uncover
 math: mathjax
 paginate: true

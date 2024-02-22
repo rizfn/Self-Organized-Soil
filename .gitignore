@@ -4,6 +4,7 @@ docs/data/nutrient/large_lattice_rho=1_delta=0.json
 docs/data/nutrient/lattice_oscillation_L=200_rho=1_delta=0.json
 docs/data/nutrient/lattice_oscillation_L=400_rho=1_delta=0.json
 docs/data/nutrient/lattice3D_L=75_rho=1_delta=0/
+docs/presentations/images/feb29/hq_anim/
 .vscode/
 src/nutrient_mutations/outputs/
 src/two_species_same_nutrient/outputs/
