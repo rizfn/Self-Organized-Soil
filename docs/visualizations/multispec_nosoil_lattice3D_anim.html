@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Lattice</title>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@v0.159.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@v0.159.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module" src="../js/multispec_nosoil_lattice3D_anim.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"
+        integrity="sha512-M7nHCiNUOwFt6Us3r8alutZLm9qMt4s9951uo8jqO4UwJ1hziseL6O3ndFyigx6+LREfZqnhHxYjKRJ8ZQ69DQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+        </script>
+    <link rel="stylesheet" href="../style/rasterscan.css">
+    <link rel="stylesheet" href="../style/lattice_3D.css">
+</head>
+
+<body>
+    <div id="lattice">
+        <div id="controls" style="left:0"></div>
+        <canvas id="c"></canvas>
+    </div>
+</body>
+
+</html>
