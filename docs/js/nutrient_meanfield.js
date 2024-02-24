@@ -1,8 +1,8 @@
 let { default: data_meanfield } = await import("../data/nutrient/meanfield_rho=1_delta=0.json", { assert: { type: "json" } });
 let { default: data_rho_05 } = await import("../data/nutrient/meanfield_rho=0.5_delta=0.json", { assert: { type: "json" } });
 let { default: data_delta_05 } = await import("../data/nutrient/meanfield_rho=1_delta=0.5.json", { assert: { type: "json" } });
-// let { default: data_lattice } = await import("../data/nutrient/lattice_rho=1_delta=0.json", { assert: { type: "json" } });
-let { default: data_lattice } = await import("../data/nutrient/large_lattice_rho=1_delta=0.json", { assert: { type: "json" } });
+let { default: data_lattice } = await import("../data/nutrient/lattice_rho=1_delta=0.json", { assert: { type: "json" } });
+// let { default: data_lattice } = await import("../data/nutrient/large_lattice_rho=1_delta=0.json", { assert: { type: "json" } });
 let { default: data_lattice_rho_05 } = await import("../data/nutrient/lattice_rho=0.5_delta=0.json", { assert: { type: "json" } });
 let { default: data_lattice_delta_05 } = await import("../data/nutrient/lattice_rho=1_delta=0.5.json", { assert: { type: "json" } });
 // let { default: data_3D } = await import("../data/nutrient/lattice3D_rho=1_delta=0.json", { assert: { type: "json" } });
@@ -89,7 +89,7 @@ document.addEventListener('keydown', function (event) {
 	}
 	if (event.code === 'Digit9') {
 		// set radio button to lattice delta 0.5
-		document.getElementById("radio-buttons").elements[7].checked = true;
+		document.getElementById("radio-buttons").elements[8].checked = true;
 		change_data('3D_cluster')
 	}
 });
