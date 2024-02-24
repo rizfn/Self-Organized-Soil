@@ -90,20 +90,55 @@ Supervised by Kim Sneppen and Kunihiko Kaneko
 
 ---
 
-### Survival in lattice vs Meanfield
-
-![w:1100px](images/feb29/raster_row.png)
+<iframe width="auto" height="1000px" src="https://rizfn.github.io/Self-Organized-Soil/visualizations/nutrient_lattice.html"style="border: 1px solid #ccc" frameborder=0>
+</iframe>
 
 ---
 
-### Parasite Problem
+### Mean-Field Equations
+
+$$
+\definecolor{darkergrey}{rgb}{0.35, 0.35, 0.35}
+\begin{align}
+\frac{\mathrm{d}\textcolor{brown}{S}}{\mathrm{d}t} &= \sigma \textcolor{brown}{S} (\textcolor{darkergrey}{E} + \textcolor{teal}{N}) - \textcolor{green}{W} \textcolor{brown}{S} \\
+\frac{\mathrm{d}\textcolor{darkergrey}{E}}{\mathrm{d}t} &= (1-\rho) \textcolor{green}{W} \textcolor{teal}{N} + (1-\mu) \textcolor{green}{W} \textcolor{brown}{S} + \theta \textcolor{green}{W} - \sigma \textcolor{brown}{S} \textcolor{darkergrey}{E} \\
+\frac{\mathrm{d}\textcolor{teal}{N}}{\mathrm{d}t} &= \mu \textcolor{green}{W} \textcolor{brown}{S} - \textcolor{green}{W} \textcolor{teal}{N} - \sigma \textcolor{brown}{S} \textcolor{teal}{N} \\
+\frac{\mathrm{d}\textcolor{green}{W}}{\mathrm{d}t} &= \rho \textcolor{green}{W} \textcolor{teal}{N} - \theta \textcolor{green}{W}
+\end{align}
+$$
+
+---
+
+<iframe width="auto" height="1000px" src="https://rizfn.github.io/Self-Organized-Soil/visualizations/nutrient_meanfield.html"style="border: 1px solid #ccc" frameborder=0>
+</iframe>
+
+---
+
+### Survival in lattice vs Meanfield
+
+![w:1150px](images/feb29/raster_row.png)
+
+---
+
+### Two Species
 
 - Add a second species, and make it asymmetric in terms of:
   - $\mu$, nutrient generation rate
-  - $\rho$, reproductive rate
+  - $\rho$, reproduction rate
 <br>
 - $\mu=0$ is a *parasite*.
-- In mean-field, **the species with higher $\mu$ wins**.
+
+---
+
+#### Mean-Field: Parasite Problem
+
+<br>
+
+![w:800px](images/feb29/competitive_exclusion.png)
+
+- Worms don't care who creates the nutrient
+- A slight advantage mean you dominate
+- **Competitive Exclusion:** Higher $\rho$ always wins
 
 ---
 
@@ -112,7 +147,19 @@ Supervised by Kim Sneppen and Kunihiko Kaneko
 
 ---
 
-### Multiple Species
+### Multiple Nutrients
+<br>
+
+- Have worms eat all other nutrients, besides their own
+  - Worms simply oscillate in phase
+  - Similar to single-species model
+
+- Have worms eat nutrients in a cycle
+  - 1 > 2 > 3 > 4 > 1, etc
+
+
+---
+
 
 <div class="columns">
 
@@ -148,7 +195,6 @@ Literature suggests **spiral waves**...
 
 </div>
 
-
 ---
 
 ##### After removing soil
@@ -172,7 +218,7 @@ Literature suggests **spiral waves**...
 
 - *All species* must be present on the expansion boundary
 
-- Expansion is **hard**!
+- Expansion is hard!
 
 ---
 
@@ -192,4 +238,10 @@ Literature suggests **spiral waves**...
 - For certain parameter values, we do see power-law distributed "particle sizes".
 
 - More work is necessary to draw conclusions.
+
+
+---
+
+<iframe width="auto" height="1000px" src="https://rizfn.github.io/Self-Organized-Soil/visualizations/multispec_nosoil_lattice3D_anim.html" frameborder=0>
+</iframe>
 

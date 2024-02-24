@@ -5,7 +5,8 @@ let { default: data_delta_05 } = await import("../data/nutrient/meanfield_rho=1_
 let { default: data_lattice } = await import("../data/nutrient/large_lattice_rho=1_delta=0.json", { assert: { type: "json" } });
 let { default: data_lattice_rho_05 } = await import("../data/nutrient/lattice_rho=0.5_delta=0.json", { assert: { type: "json" } });
 let { default: data_lattice_delta_05 } = await import("../data/nutrient/lattice_rho=1_delta=0.5.json", { assert: { type: "json" } });
-let { default: data_3D } = await import("../data/nutrient/lattice3D_rho=1_delta=0.json", { assert: { type: "json" } });
+// let { default: data_3D } = await import("../data/nutrient/lattice3D_rho=1_delta=0.json", { assert: { type: "json" } });
+let { default: data_3D } = await import("../data/nutrient/lattice3D_L=50_rho=1_delta=0/step4.json", { assert: { type: "json" } });
 
 // add 4 radio buttons to switch between meanfield, stochastic, parallel, 3d, wellmixed data
 var form = d3.select("div#select-data")
@@ -73,17 +74,17 @@ document.addEventListener('keydown', function (event) {
 	}
 	if (event.code === 'Digit6') {
 		// set radio button to lattice rho 0.5
-		document.getElementById("radio-buttons").elements[4].checked = true;
+		document.getElementById("radio-buttons").elements[5].checked = true;
 		change_data('lattice_rho05')
 	}
 	if (event.code === 'Digit7') {
 		// set radio button to lattice delta 0.5
-		document.getElementById("radio-buttons").elements[5].checked = true;
+		document.getElementById("radio-buttons").elements[6].checked = true;
 		change_data('lattice_delta05')
 	}
 	if (event.code === 'Digit8') {
 		// set radio button to lattice delta 0.5
-		document.getElementById("radio-buttons").elements[6].checked = true;
+		document.getElementById("radio-buttons").elements[7].checked = true;
 		change_data('3D')
 	}
 	if (event.code === 'Digit9') {

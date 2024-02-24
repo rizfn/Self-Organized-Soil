@@ -2,8 +2,8 @@
 // const { default: data } = await import("../data/nutrient/lattice_rho=0.5_delta=0.json", { assert: { type: "json" } });
 // const { default: data } = await import("../data/nutrient/lattice_rho=1_delta=0.5.json", { assert: { type: "json" } });
 // const { default: data } = await import("../data/nutrient/lattice_oscillation_L=50_rho=1_delta=0.json", { assert: { type: "json" } });
-// const { default: data } = await import("../data/nutrient/lattice_oscillation_L=100_rho=1_delta=0.json", { assert: { type: "json" } });
-const { default: data } = await import("../data/nutrient/lattice_oscillation_L=200_rho=1_delta=0.json", { assert: { type: "json" } });
+const { default: data } = await import("../data/nutrient/lattice_oscillation_L=100_rho=1_delta=0.json", { assert: { type: "json" } });
+// const { default: data } = await import("../data/nutrient/lattice_oscillation_L=200_rho=1_delta=0.json", { assert: { type: "json" } });
 
 // check if mobile
 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
