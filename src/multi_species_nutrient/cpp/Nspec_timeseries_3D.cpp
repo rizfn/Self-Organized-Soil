@@ -22,13 +22,13 @@ struct Coordinate
 // Define constants
 constexpr int STEPS_PER_LATTICEPOINT = 5000;
 constexpr double SIGMA = 0.5;
-constexpr double THETA = 0.02;
+constexpr double THETA = 0.039;
 constexpr double RHO = 1;
 constexpr double MU = 1;
-constexpr int L = 50; // side length of the cubic lattice
-constexpr int N_STEPS = STEPS_PER_LATTICEPOINT * L * L * L;
+constexpr int L = 100; // side length of the cubic lattice
+constexpr long long N_STEPS = static_cast<long long>(STEPS_PER_LATTICEPOINT) * L * L * L;
 
-constexpr int N = 4; // number of species
+constexpr int N = 3; // number of species
 constexpr int EMPTY = 0;
 constexpr std::array<int, N> NUTRIENTS = []
 {
@@ -225,13 +225,13 @@ void update(std::vector<std::vector<std::vector<int>>> &soil_lattice, int L, dou
 }
 
 
-void run_timeseries(int N_STEPS, int L, double sigma, double theta, double rho, double mu, std::ofstream &file)
+void run_timeseries(long long N_STEPS, int L, double sigma, double theta, double rho, double mu, std::ofstream &file)
 {
     std::vector<std::vector<std::vector<int>>> soil_lattice = init_lattice(L);
 
     int i = 0; // indexing for recording steps
 
-    for (int step = 0; step <= N_STEPS; ++step)
+    for (long long step = 0; step <= N_STEPS; ++step)
     {
         update(soil_lattice, L, sigma, theta, rho, mu);
         if (step % (L * L * L) == 0)
@@ -277,7 +277,8 @@ int main(int argc, char *argv[])
     GetModuleFileNameW(NULL, exePath, MAX_PATH);
     std::string exeDir = std::filesystem::path(exePath).parent_path().string();
     std::ostringstream filePathStream;
-    filePathStream << exeDir << "\\..\\outputs\\timeseries3D\\Nspec\\" << N << "spec_sigma_" << sigma << "_theta_" << theta << ".csv";
+    // filePathStream << exeDir << "\\..\\outputs\\timeseries3D\\Nspec\\" << N << "spec_sigma_" << sigma << "_theta_" << theta << ".csv";
+    filePathStream << exeDir << "\\..\\outputs\\timeseries3D\\Nspec_L_100\\" << N << "spec_sigma_" << sigma << "_theta_" << theta << ".csv";
     std::string filePath = filePathStream.str();
 
     std::ofstream file;
