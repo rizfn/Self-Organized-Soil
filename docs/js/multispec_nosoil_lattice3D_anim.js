@@ -33,7 +33,7 @@ d3.tsv(`../data/multispec_nutrient/${N_spec}spec/nosoil_theta_${theta}.tsv`).the
 
     // Create a renderer
     var renderer = new THREE.WebGLRenderer({ canvas: canvas.node() });
-    // renderer.setSize(window.innerWidth / 1.2, window.innerHeight / 1.5);
+    renderer.setSize(window.innerWidth, window.innerHeight);
     d3.select('div#lattice').node().appendChild(renderer.domElement);
 
 

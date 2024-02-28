@@ -142,6 +142,19 @@ $$
 
 ---
 
+#### Mean-Field: Higher $\rho$ always wins
+
+<div class="columns">
+
+<img src="images/feb29/parasite_meanfield.png" style="max-width: 100%; "></img>
+
+<img src="images/feb29/parasite_lattice.png" style="max-width: 100%; "></img>
+
+</div>
+
+
+---
+
 <iframe width="auto" height="1000px" src="https://rizfn.github.io/Self-Organized-Soil/visualizations/twospec_samenutrient_lattice.html"style="border: 1px solid #ccc" frameborder=0>
 </iframe>
 
@@ -237,7 +250,18 @@ Literature suggests **spiral waves**...
 
 - For certain parameter values, we do see power-law distributed "particle sizes".
 
-- More work is necessary to draw conclusions.
+<div class="columns">
+
+<img src="images/feb29/CSD_sigma_1_theta_0.038.png" style="max-width: 100%; "></img>
+
+- Size ~ Cluster size
+
+- Potentially, _oscillations_ span across the critical point
+
+- More work is needed! 
+
+</div>
+
 
 
 ---
