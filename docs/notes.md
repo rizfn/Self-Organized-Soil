@@ -423,3 +423,21 @@ Try different number of species
 
 Try removing soil
 
+
+## Meeting 31: 29th February 2024
+
+Try moving into soil and replicating, and see if that changes localization
+
+Try getting better params for localization
+
+Check localization characteristic size
+
+Check 2 clumps evolutions
+
+Check cluster size of non-soil
+
+Check if inside the cluster, you have soil as a power law
+
+Try to do with parasite model localization
+
+Try nutrient fast and worm slow
