@@ -14,8 +14,20 @@ constexpr double SIGMA = 0.5;
 constexpr double THETA = 0.015;
 constexpr double RHO = 1;
 constexpr double MU = 1;
-constexpr int L = 2048; // 2^10 = 1024
+constexpr int L = 4096; // 2^10 = 1024
 constexpr int N_STEPS = 10000;
+
+constexpr int calculateBlockLength(int L) {
+    int tempL = L;
+    int power = 0;
+    while (tempL > 4096) {  // up to 4096, bL=4. 8192, bL=8. 16384, bL=16, etc.
+        tempL >>= 1; // equivalent to tempL = tempL / 2;
+        power++;
+    }
+    return (1 << power) < 4 ? 4 : (1 << power); // equivalent to return pow(2, power);
+}
+// constexpr int blockLength = calculateBlockLength(L);  // TODO: Something seems off. For blocklengths of 8, I get larger clusters?
+constexpr int blockLength = 4;
 
 constexpr int N = 5; // number of species
 constexpr int EMPTY = 0;
@@ -40,7 +52,6 @@ constexpr std::array<int, N> WORMS = []
 }();
 __constant__ int d_WORMS[N];
 __constant__ int d_NUTRIENTS[N];
-
 
 std::vector<int> initLattice(int L)
 {
@@ -94,20 +105,23 @@ __device__ bool findInArray(const int *arr, int size, int value)
     return false;
 }
 
-__global__ void updateKernel(int *d_lattice, curandState *state, int L, double sigma, double theta, double rho, double mu, int offsetX, int offsetY)
+__global__ void updateKernel(int *d_lattice, curandState *state, int offsetX, int offsetY)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int idy = blockIdx.y * blockDim.y + threadIdx.y;
 
+    // Calculate the unique index for the thread
+    int index = idx + idy * blockDim.x * gridDim.x;
+
     // Initialize the RNG
-    curandState localState = state[idx * L + idy]; // Copy the state to local memory for efficiency
+    curandState localState = state[index]; // Copy the state to local memory for efficiency
 
-    int square_x = (blockIdx.x*4 + offsetX*2 + threadIdx.x) % L;
-    int square_y = (blockIdx.y*4 + offsetY*2 + threadIdx.y) % L;
+    int square_x = (blockIdx.x * blockLength + offsetX * blockLength/2 + threadIdx.x) % L;
+    int square_y = (blockIdx.y * blockLength + offsetY * blockLength/2 + threadIdx.y) % L;
 
-    // Select a random site in the 2x2 square
-    int site_x = square_x + curand(&localState) % 2;
-    int site_y = square_y + curand(&localState) % 2;
+    // Select a random site in the 4x4 square
+    int site_x = square_x + curand(&localState) % blockLength/2;
+    int site_y = square_y + curand(&localState) % blockLength/2;
 
     // Get the value at the selected site
     int site_value = d_lattice[site_x * L + site_y];
@@ -125,7 +139,7 @@ __global__ void updateKernel(int *d_lattice, curandState *state, int L, double s
         {
             // if neighbour is soil
             // fill with soil-filling rate
-            if (curand_uniform(&localState) < sigma)
+            if (curand_uniform(&localState) < SIGMA)
             {
                 d_lattice[site_x * L + site_y] = SOIL;
             }
@@ -139,7 +153,7 @@ __global__ void updateKernel(int *d_lattice, curandState *state, int L, double s
             {
                 // worm of species i
                 // check for death
-                if (curand_uniform(&localState) < theta)
+                if (curand_uniform(&localState) < THETA)
                 {
                     d_lattice[site_x * L + site_y] = EMPTY;
                 }
@@ -158,7 +172,7 @@ __global__ void updateKernel(int *d_lattice, curandState *state, int L, double s
                     if (new_site_value == d_NUTRIENTS[(i + 1) % N])
                     {
                         // reproduce behind you
-                        if (curand_uniform(&localState) < rho)
+                        if (curand_uniform(&localState) < RHO)
                         {
                             d_lattice[site_x * L + site_y] = d_WORMS[i];
                         }
@@ -167,7 +181,7 @@ __global__ void updateKernel(int *d_lattice, curandState *state, int L, double s
                     else if (new_site_value == SOIL)
                     {
                         // leave nutrient behind
-                        if (curand_uniform(&localState) < mu)
+                        if (curand_uniform(&localState) < MU)
                         {
                             d_lattice[site_x * L + site_y] = d_NUTRIENTS[i];
                         }
@@ -184,11 +198,10 @@ __global__ void updateKernel(int *d_lattice, curandState *state, int L, double s
     }
 
     // Update the state
-    state[idx*L + idy] = localState;
+    state[index] = localState;
 }
 
-
-void run(int N_STEPS, int L, double sigma, double theta, double rho, double mu, std::ofstream &file)
+void run(int N_STEPS, std::ofstream &file)
 {
     // Initialize the lattice
     std::vector<int> soil_lattice = initLattice(L);
@@ -203,34 +216,41 @@ void run(int N_STEPS, int L, double sigma, double theta, double rho, double mu, 
     cudaMalloc(&d_state, L * L * sizeof(curandState));
 
     // Initialize the RNG states
-    initCurand<<<L, L>>>(d_state, time(0));
+    initCurand<<<L / blockLength, L / blockLength>>>(d_state, time(0));
 
     // Copy the lattice data to the GPU
     cudaMemcpy(d_lattice, soil_lattice.data(), L * L * sizeof(int), cudaMemcpyHostToDevice);
 
     // Define the block and grid sizes
     dim3 blockSize(1, 1);
-    dim3 gridSize(L / 4, L / 4);
+    dim3 gridSize(L / blockLength, L / blockLength);
 
     // Copy the WORMS and NUTRIENTS data to the constant memory on the GPU
     cudaMemcpyToSymbol(d_WORMS, WORMS.data(), N * sizeof(int));
     cudaMemcpyToSymbol(d_NUTRIENTS, NUTRIENTS.data(), N * sizeof(int));
 
+    // print last cuda error
+    cudaError_t cudaError = cudaGetLastError();
+    if (cudaError != cudaSuccess)
+    {
+        std::cerr << "CUDA error: " << cudaGetErrorString(cudaError) << std::endl;
+    }
+
     // Launch the CUDA kernel for each of the A, B, C, and D squares
     for (int step = 1; step <= N_STEPS; ++step)
     {
-        for (int i = 0; i < 4; ++i)
+        for (int i = 0; i < blockLength/2 * blockLength/2; ++i)  // 1 teration per square in subblock
         {
-            updateKernel<<<gridSize, blockSize>>>(d_lattice, d_state, L, sigma, theta, rho, mu, 0, 0); // A squares
+            updateKernel<<<gridSize, blockSize>>>(d_lattice, d_state, 0, 0); // A squares
             cudaDeviceSynchronize();
-            updateKernel<<<gridSize, blockSize>>>(d_lattice, d_state, L, sigma, theta, rho, mu, 1, 0); // B squares
+            updateKernel<<<gridSize, blockSize>>>(d_lattice, d_state, 1, 0); // B squares
             cudaDeviceSynchronize();
-            updateKernel<<<gridSize, blockSize>>>(d_lattice, d_state, L, sigma, theta, rho, mu, 0, 1); // C squares
+            updateKernel<<<gridSize, blockSize>>>(d_lattice, d_state, 0, 1); // C squares
             cudaDeviceSynchronize();
-            updateKernel<<<gridSize, blockSize>>>(d_lattice, d_state, L, sigma, theta, rho, mu, 1, 1); // D squares
+            updateKernel<<<gridSize, blockSize>>>(d_lattice, d_state, 1, 1); // D squares
             cudaDeviceSynchronize();
         }
-        
+
         std::cout << "Progress: " << std::fixed << std::setprecision(2) << static_cast<double>(step) / N_STEPS * 100 << "%\r" << std::flush;
     }
 
@@ -262,7 +282,7 @@ int main(int argc, char *argv[])
 
     std::ofstream file;
     file.open(filePath);
-    run(N_STEPS, L, SIGMA, THETA, RHO, MU, file);
+    run(N_STEPS, file);
     file.close();
 
     return 0;
