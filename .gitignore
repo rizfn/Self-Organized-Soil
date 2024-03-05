@@ -5,6 +5,7 @@ docs/data/nutrient/lattice_oscillation_L=200_rho=1_delta=0.json
 docs/data/nutrient/lattice_oscillation_L=400_rho=1_delta=0.json
 docs/data/nutrient/lattice3D_L=75_rho=1_delta=0/
 docs/data/multispec_nutrient/4spec/nosoil_theta_0.05.tsv
+docs/data/multispec_nutrient/5spec/nosoil_theta_0.04.tsv
 docs/data/twospec_samenutrient/lattice_anim_L_1024_sigma_1_theta_0.042_rhofactor_4.bin
 docs/presentations/images/feb29/hq_anim/
 .vscode/

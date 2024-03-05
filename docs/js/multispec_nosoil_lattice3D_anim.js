@@ -2,8 +2,10 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 const N_spec = 4;
-// const theta = 0.05;
 const theta = 0.06;
+// const N_spec = 5;
+// const theta = 0.04;
+
 
 d3.tsv(`../data/multispec_nutrient/${N_spec}spec/nosoil_theta_${theta}.tsv`).then(data => {
     const steps = [];
@@ -84,8 +86,8 @@ d3.tsv(`../data/multispec_nutrient/${N_spec}spec/nosoil_theta_${theta}.tsv`).the
     };
 
     const nutrient_colours = [0x90EE90, 0xADD8E6, 0xEE82EE, 0xFF6347, 0xF5DEB3]; // lightgreen, lightblue, violet, tomato, wheat
-    // const worm_colours = [0x008000, 0x0000FF, 0x800080, 0xFF0000, 0xB8860B]; // green, blue, purple, red, darkgoldenrod
-    const worm_colours = [0x0079FF, 0x00DFA2, 0xF6FA70, 0xFF0060]  // only for temporary visualization
+    const worm_colours = [0x008000, 0x0000FF, 0x800080, 0xFF0000, 0xB8860B]; // green, blue, purple, red, darkgoldenrod
+    // const worm_colours = [0x0079FF, 0x00DFA2, 0xF6FA70, 0xFF0060]  // only for temporary visualization
 
     for (let i = 1; i <= N_spec; i++) {
         colors[`nutrient${i}`] = nutrient_colours[i - 1];
