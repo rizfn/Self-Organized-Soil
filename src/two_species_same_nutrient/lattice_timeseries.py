@@ -145,24 +145,24 @@ def main():
     # initialize the parameters
     steps_per_latticepoint = 2000  # number of bacteria moves per lattice point
     sigma = 1
-    theta = 0.03
-    rho1 = 0.5
-    mu1 = 0.5
+    theta = 0.042
+    rho1 = 0.25
+    mu1 = 1
     rho2 = 1
     mu2 = 0
 
-    L = 50  # side length of the cubic lattice
-    n_steps = steps_per_latticepoint * L**3  # 3D
-    steps_to_record = np.arange(0, n_steps+1, L**3, dtype=np.int32)
-    emptys, nutrients, soil, greens, blues = run_timeseries_3D(n_steps, L, sigma, theta, rho1, rho2, mu1, mu2, steps_to_record=steps_to_record)
-    steps_to_record = steps_to_record / L**3
+    # L = 50  # side length of the cubic lattice
+    # n_steps = steps_per_latticepoint * L**3  # 3D
+    # steps_to_record = np.arange(0, n_steps+1, L**3, dtype=np.int32)
+    # emptys, nutrients, soil, greens, blues = run_timeseries_3D(n_steps, L, sigma, theta, rho1, rho2, mu1, mu2, steps_to_record=steps_to_record)
+    # steps_to_record = steps_to_record / L**3
 
 
-    # L = 250  # side length of the square lattice
-    # n_steps = steps_per_latticepoint * L**2  # 2D
-    # steps_to_record = np.arange(0, n_steps+1, L**2, dtype=np.int32)
-    # emptys, nutrients, soil, greens, blues = run_timeseries(n_steps, L, sigma, theta, rho1, rho2, mu1, mu2, steps_to_record=steps_to_record)
-    # steps_to_record = steps_to_record / L**2
+    L = 250  # side length of the square lattice
+    n_steps = steps_per_latticepoint * L**2  # 2D
+    steps_to_record = np.arange(0, n_steps+1, L**2, dtype=np.int32)
+    emptys, nutrients, soil, greens, blues = run_timeseries(n_steps, L, sigma, theta, rho1, rho2, mu1, mu2, steps_to_record=steps_to_record)
+    steps_to_record = steps_to_record / L**2
 
     
     fig, axs = plt.subplots(figsize=(10, 6))
@@ -174,13 +174,13 @@ def main():
     axs.plot(steps_to_record, greens, label="green worms", c="green")
     axs.plot(steps_to_record, blues, label="blue worms", c="blue")
     axs.set_title(f"{L=}, {sigma=}, {theta=}, {rho1=}, {mu1=}, {rho2=}, {mu2=}")
-    axs.set_xlabel(r"Timestep / L$^3$")
-    # axs.set_xlabel(r"Timestep / L$^2$")
+    # axs.set_xlabel(r"Timestep / L$^3$")
+    axs.set_xlabel(r"Timestep / L$^2$")
     axs.set_ylabel("Fraction of lattice points")
     axs.legend()
     axs.grid()
 
-    # plt.savefig('src/two_species_same_nutrient/plots/lattice_timeseries/parasite_oscillations.png', dpi=300)
+    plt.savefig(f'src/two_species_same_nutrient/plots/lattice_timeseries/confinementtest/2D_{sigma=}_{theta=}_rhofactor_{rho2/rho1}.png', dpi=300)
 
     plt.show()
 
