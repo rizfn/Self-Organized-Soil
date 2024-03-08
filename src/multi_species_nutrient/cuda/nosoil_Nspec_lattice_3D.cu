@@ -10,7 +10,7 @@
 #include <filesystem>
 
 // Define constants
-constexpr double THETA = 0.04;
+constexpr double THETA = 0.05;
 constexpr double RHO = 1;
 constexpr double MU = 1;
 constexpr int L = 100; 
@@ -30,7 +30,7 @@ constexpr int calculateBlockLength(int L)
 }
 constexpr int BLOCK_LENGTH = 4;
 
-constexpr int N = 5; // number of species
+constexpr int N = 4; // number of species
 constexpr int EMPTY = 0;
 constexpr std::array<int, N> NUTRIENTS = []
 {

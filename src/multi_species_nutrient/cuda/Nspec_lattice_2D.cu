@@ -14,7 +14,7 @@ constexpr double SIGMA = 0.5;
 constexpr double THETA = 0.015;
 constexpr double RHO = 1;
 constexpr double MU = 1;
-constexpr int L = 4096; // 2^10 = 1024
+constexpr int L = 512; // 2^10 = 1024
 constexpr int N_STEPS = 10000;
 
 constexpr int calculateBlockLength(int L) {
@@ -26,8 +26,8 @@ constexpr int calculateBlockLength(int L) {
     }
     return (1 << power) < 4 ? 4 : (1 << power); // equivalent to return pow(2, power);
 }
-// constexpr int blockLength = calculateBlockLength(L);  // TODO: Something seems off. For blocklengths of 8, I get larger clusters?
-constexpr int blockLength = 4;
+// constexpr int BLOCK_LENGTH = calculateBlockLength(L);  // TODO: Something seems off. For blocklengths of 8, I get larger clusters?
+constexpr int BLOCK_LENGTH = 8;
 
 constexpr int N = 5; // number of species
 constexpr int EMPTY = 0;
@@ -53,16 +53,39 @@ constexpr std::array<int, N> WORMS = []
 __constant__ int d_WORMS[N];
 __constant__ int d_NUTRIENTS[N];
 
+// std::vector<int> initLattice(int L)
+// {
+//     std::random_device rd;
+//     std::mt19937 gen(rd());
+//     std::uniform_int_distribution<> dis_site(0, 2 * N + 1);
+
+//     std::vector<int> soil_lattice(L * L);
+//     for (int i = 0; i < L * L; ++i)
+//     {
+//         soil_lattice[i] = dis_site(gen);
+//     }
+//     return soil_lattice;
+// }
+
 std::vector<int> initLattice(int L)
 {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis_site(0, 2 * N + 1);
-
     std::vector<int> soil_lattice(L * L);
-    for (int i = 0; i < L * L; ++i)
+    for (int i = 0; i < L; ++i)
     {
-        soil_lattice[i] = dis_site(gen);
+        for (int j = 0; j < L; ++j)
+        {
+            int pattern_index = i % (2 * N);
+            if (pattern_index < N)
+            {
+                // Assign worm of species pattern_index + 1
+                soil_lattice[i * L + j] = WORMS[pattern_index];
+            }
+            else
+            {
+                // Assign soil
+                soil_lattice[i * L + j] = SOIL;
+            }
+        }
     }
     return soil_lattice;
 }
@@ -116,12 +139,12 @@ __global__ void updateKernel(int *d_lattice, curandState *state, int offsetX, in
     // Initialize the RNG
     curandState localState = state[index]; // Copy the state to local memory for efficiency
 
-    int square_x = (blockIdx.x * blockLength + offsetX * blockLength/2 + threadIdx.x) % L;
-    int square_y = (blockIdx.y * blockLength + offsetY * blockLength/2 + threadIdx.y) % L;
+    int square_x = (blockIdx.x * BLOCK_LENGTH + offsetX * BLOCK_LENGTH/2 + threadIdx.x) % L;
+    int square_y = (blockIdx.y * BLOCK_LENGTH + offsetY * BLOCK_LENGTH/2 + threadIdx.y) % L;
 
     // Select a random site in the 4x4 square
-    int site_x = square_x + curand(&localState) % blockLength/2;
-    int site_y = square_y + curand(&localState) % blockLength/2;
+    int site_x = square_x + curand(&localState) % BLOCK_LENGTH/2;
+    int site_y = square_y + curand(&localState) % BLOCK_LENGTH/2;
 
     // Get the value at the selected site
     int site_value = d_lattice[site_x * L + site_y];
@@ -216,14 +239,14 @@ void run(int N_STEPS, std::ofstream &file)
     cudaMalloc(&d_state, L * L * sizeof(curandState));
 
     // Initialize the RNG states
-    initCurand<<<L / blockLength, L / blockLength>>>(d_state, time(0));
+    initCurand<<<L / BLOCK_LENGTH, L / BLOCK_LENGTH>>>(d_state, time(0));
 
     // Copy the lattice data to the GPU
     cudaMemcpy(d_lattice, soil_lattice.data(), L * L * sizeof(int), cudaMemcpyHostToDevice);
 
     // Define the block and grid sizes
     dim3 blockSize(1, 1);
-    dim3 gridSize(L / blockLength, L / blockLength);
+    dim3 gridSize(L / BLOCK_LENGTH, L / BLOCK_LENGTH);
 
     // Copy the WORMS and NUTRIENTS data to the constant memory on the GPU
     cudaMemcpyToSymbol(d_WORMS, WORMS.data(), N * sizeof(int));
@@ -239,7 +262,7 @@ void run(int N_STEPS, std::ofstream &file)
     // Launch the CUDA kernel for each of the A, B, C, and D squares
     for (int step = 1; step <= N_STEPS; ++step)
     {
-        for (int i = 0; i < blockLength/2 * blockLength/2; ++i)  // 1 teration per square in subblock
+        for (int i = 0; i < BLOCK_LENGTH/2 * BLOCK_LENGTH/2; ++i)  // 1 teration per square in subblock
         {
             updateKernel<<<gridSize, blockSize>>>(d_lattice, d_state, 0, 0); // A squares
             cudaDeviceSynchronize();
@@ -277,7 +300,8 @@ int main(int argc, char *argv[])
     std::string exePath = argv[0];
     std::string exeDir = std::filesystem::path(exePath).parent_path().string();
     std::ostringstream filePathStream;
-    filePathStream << exeDir << "/../outputs/lattice2D/" << N << "spec/GPU_sigma_" << SIGMA << "_theta_" << THETA << ".tsv";
+    // filePathStream << exeDir << "/../outputs/lattice2D/" << N << "spec/GPU_sigma_" << SIGMA << "_theta_" << THETA << ".tsv";
+    filePathStream << exeDir << "/../outputs/confinement/algo_comparison/other2/cuda_b" << BLOCK_LENGTH << "_" << time(0) << ".tsv";
     std::string filePath = filePathStream.str();
 
     std::ofstream file;
