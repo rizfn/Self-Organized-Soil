@@ -61,6 +61,7 @@ def plot_from_cuda_bin():
 
     # Convert lists to numpy arrays for plotting
     E, N, S, G, B = map(np.array, [E, N, S, G, B])
+    E, N, S, G, B = E / portion_size, N / portion_size, S / portion_size, G / portion_size, B / portion_size
     step = np.arange(0, n_steps, record_every)
 
     fig, axs = plt.subplots(figsize=(10, 6))
@@ -70,8 +71,8 @@ def plot_from_cuda_bin():
     axs.plot(step, N, label="nutrients", c="lawngreen")
     axs.plot(step, G, label="green worms", c="green")
     axs.plot(step, B, label="blue worms", c="blue")
-    axs.set_title(f"{L=}, {sigma=}, {theta=}")
-    axs.set_xlabel(r"Timestep / L$^3$")
+    axs.set_title(f"{L=}, $\\sigma=${sigma}, $\\theta=${theta}, $\\rho_2/\\rho_1=${rhofactor}")
+    axs.set_xlabel(r"Timestep / L$^2$")
     axs.set_ylabel("Fraction of lattice points")
     axs.legend()
     axs.grid()
