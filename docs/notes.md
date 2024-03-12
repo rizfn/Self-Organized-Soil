@@ -441,3 +441,18 @@ Check if inside the cluster, you have soil as a power law
 Try to do with parasite model localization
 
 Try nutrient fast and worm slow
+
+## "Meeting" 32: 4th-15th March 2024
+
+(No kim, so spontaeneous meetings with Kuni)
+
+Check for parasite localization
+
+Check for powerlaw during parasite localization
+
+Check whether LargeCluster + power law occurs more for parasite than single species
+
+Potentially look at CML coarse-graining, with a spatial correlation for soil PSD?
+
+
+
