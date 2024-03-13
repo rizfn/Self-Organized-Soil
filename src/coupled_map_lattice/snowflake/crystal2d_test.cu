@@ -4,55 +4,62 @@
 #include <fstream>    // for std::ofstream
 #include <sstream>    // for std::ostringstream
 
-constexpr float Tc = 1.0f;
-constexpr float T0 = -0.5f;
-constexpr int L = 100;
-constexpr int N_STEPS = 1000;
+constexpr float Tc = -1.0f;
+constexpr float T0 = 0.5f;
+constexpr int L = 500;
+constexpr int N_STEPS = 100000;
 constexpr float D = 0.2f;
 constexpr float C1 = 0.3f;
 constexpr float C2 = 0.95f;
 
 // Initialize the data arrays
-void init(float *u1, float *u2, float *x1, float *x2)
+__global__ void init(float *t1, float *t2, float *x1, float *x2)
 {
-    for (int i = 0; i < L * L; i++)
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    int j = blockIdx.y * blockDim.y + threadIdx.y;
+    int index = i * L + j;
+
+    if (i < L && j < L)
     {
-        u1[i] = T0;
-        x1[i] = 0.0;
+        t1[index] = T0;
+        x1[index] = 0.0;
+        if (i == L / 2 && j == L / 2)
+        {
+            t1[index] = Tc;
+            x1[index] = 1.0;
+        }
     }
-    u1[L / 2 * L + L / 2] = Tc;
-    x1[L / 2 * L + L / 2] = 1.0;
 }
 
 // Diffusion kernel
-__global__ void diffuse(float *u1, float *u2)
+__global__ void diffuse(float *t1, float *t2)
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     int j = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (i > 0 && i < L - 1 && j > 0 && j < L - 1)
     {
-        u2[i * L + j] = u1[i * L + j] + D * (u1[(i + 1) * L + j] + u1[(i - 1) * L + j] + u1[i * L + j + 1] + u1[i * L + j - 1] - 4 * u1[i * L + j]);
+        t2[i * L + j] = t1[i * L + j] + D * (t1[(i + 1) * L + j] + t1[(i - 1) * L + j] + t1[i * L + j + 1] + t1[i * L + j - 1] - 4 * t1[i * L + j]);
     }
 }
 
 // Update kernel
-__global__ void update(float *u1, float *u2, float *x1, float *x2)
+__global__ void update(float *t1, float *t2, float *x1, float *x2)
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     int j = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (i > 0 && i < L - 1 && j > 0 && j < L - 1)
     {
-        if (u1[i * L + j] < Tc && (x1[(i + 1) * L + j] >= 1.0 || x1[i * L + j + 1] >= 1.0 || x1[(i - 1) * L + j] >= 1.0 || x1[i * L + j - 1] >= 1.0))
+        if (t1[i * L + j] > Tc && (x1[(i + 1) * L + j] >= 1.0 || x1[i * L + j + 1] >= 1.0 || x1[(i - 1) * L + j] >= 1.0 || x1[i * L + j - 1] >= 1.0))
         {
-            x2[i * L + j] = x1[i * L + j] + C1 * (Tc - u1[i * L + j]);
-            u2[i * L + j] = u1[i * L + j] + C2 * (Tc - u1[i * L + j]);
+            x2[i * L + j] = x1[i * L + j] + C1 * (t1[i * L + j] - Tc);
+            t2[i * L + j] = t1[i * L + j] - C2 * (t1[i * L + j] - Tc);
         }
         else
         {
             x2[i * L + j] = x1[i * L + j];
-            u2[i * L + j] = u1[i * L + j];
+            t2[i * L + j] = t1[i * L + j];
         }
     }
 }
@@ -65,56 +72,47 @@ __global__ void resetCenter(float *u)
 
 void run(std::ofstream &file)
 {
-    // Define the data arrays
-    float u1[L * L];
-    float u2[L * L];
-    float x1[L * L];
-    float x2[L * L];
-
-    init(u1, u2, x1, x2);
-
     // Copy the data to the GPU
-    float *d_u1;
-    float *d_u2;
+    float *d_t1;
+    float *d_t2;
     float *d_x1;
     float *d_x2;
-    cudaMalloc(&d_u1, L * L * sizeof(float));
-    cudaMalloc(&d_u2, L * L * sizeof(float));
+    cudaMalloc(&d_t1, L * L * sizeof(float));
+    cudaMalloc(&d_t2, L * L * sizeof(float));
     cudaMalloc(&d_x1, L * L * sizeof(float));
     cudaMalloc(&d_x2, L * L * sizeof(float));
-    cudaMemcpy(d_u1, u1, L * L * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_u2, u2, L * L * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_x1, x1, L * L * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_x2, x2, L * L * sizeof(float), cudaMemcpyHostToDevice);
 
-    // // Define the block and grid sizes
+    // Define the block and grid sizes
     dim3 blockSize(1, 1);
     dim3 gridSize(L, L);
+
+    init<<<gridSize, blockSize>>>(d_t1, d_t2, d_x1, d_x2);
+    cudaDeviceSynchronize(); // wait for init to finish
 
     // Run the update function on the GPU
     for (int step = 0; step < N_STEPS; step++)
     {
-        diffuse<<<gridSize, blockSize>>>(d_u1, d_u2);
+        diffuse<<<gridSize, blockSize>>>(d_t1, d_t2);
         cudaDeviceSynchronize(); // wait for diffuse to finish
 
-        resetCenter<<<1, 1>>>(d_u2);
+        resetCenter<<<1, 1>>>(d_t2);
         cudaDeviceSynchronize(); // wait for resetCenter to finish
 
-        // Swap the u1 and u2 pointers
-        float *temp = d_u1;
-        d_u1 = d_u2;
-        d_u2 = temp;
+        // Swap the t1 and t2 pointers
+        float *temp = d_t1;
+        d_t1 = d_t2;
+        d_t2 = temp;
 
-        update<<<gridSize, blockSize>>>(d_u1, d_u2, d_x1, d_x2);
+        update<<<gridSize, blockSize>>>(d_t1, d_t2, d_x1, d_x2);
         cudaDeviceSynchronize(); // wait for update to finish
 
-        resetCenter<<<1, 1>>>(d_u2);
+        resetCenter<<<1, 1>>>(d_t2);
         cudaDeviceSynchronize(); // wait for resetCenter to finish
 
-        // Swap the u1 and u2 pointers
-        temp = d_u1;
-        d_u1 = d_u2;
-        d_u2 = temp;
+        // Swap the t1 and t2 pointers
+        temp = d_t1;
+        d_t1 = d_t2;
+        d_t2 = temp;
 
         // Swap the x1 and x2 pointers
         temp = d_x1;
@@ -125,7 +123,9 @@ void run(std::ofstream &file)
     }
 
     // Copy the data back to the CPU
-    cudaMemcpy(u1, d_u1, L * L * sizeof(float), cudaMemcpyDeviceToHost);
+    float *t1 = new float[L * L];
+    float *x1 = new float[L * L];
+    cudaMemcpy(t1, d_t1, L * L * sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(x1, d_x1, L * L * sizeof(float), cudaMemcpyDeviceToHost);
 
     // Write the x array to the file
@@ -143,8 +143,8 @@ void run(std::ofstream &file)
     }
 
     // Free the GPU memory
-    cudaFree(d_u1);
-    cudaFree(d_u2);
+    cudaFree(d_t1);
+    cudaFree(d_t2);
     cudaFree(d_x1);
     cudaFree(d_x2);
 }

@@ -86,7 +86,7 @@ x2=np.zeros((L,L))
   
 fig=plt.figure()
 ani=anim.FuncAnimation(fig,update,init_func=init,frames=500,interval=1)
-ani.save("src/coupled_map_lattice/snowflake/plots/crystal2d-1.mp4", fps=10)
+ani.save(f"src/coupled_map_lattice/snowflake/plots/crystal2d-1.mp4", fps=10)
 
 #plt.show()
 
