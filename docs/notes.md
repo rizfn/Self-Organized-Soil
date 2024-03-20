@@ -455,4 +455,15 @@ Check whether LargeCluster + power law occurs more for parasite than single spec
 Potentially look at CML coarse-graining, with a spatial correlation for soil PSD?
 
 
+## Meeting 33: 20th March 2024
+
+How does the parasite affect the rasterscan: 2D with parasites, for rel rho = 4 and 2
+
+Check if coexistance is correlated to powerlaw (check powerlaw for various regions inside the rasterscan)
+
+Try to see if mutation can remove a parameter (relative birthrates)
+
+
+## Meeting 34: 
+
 
