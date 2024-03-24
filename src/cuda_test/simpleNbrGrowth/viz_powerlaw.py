@@ -65,6 +65,46 @@ def main():
     plt.show()
 
 
+def plot_one(filename):
+    fig, ax = plt.subplots(figsize=(6, 4))
+
+    steps, cluster_sizes = load_csv(filename)
+    # histogram and plot all the cluster sizes
+    num_bins = 100
+    min_size = 1  # smallest cluster size
+    max_size = max(max(sublist) for sublist in cluster_sizes)
+    bins = np.logspace(np.log10(min_size), np.log10(max_size), num=num_bins)
+
+    # Calculate histograms and plot
+    flat_cluster_sizes = [item for sublist in cluster_sizes for item in sublist]
+    hist, edges = np.histogram(flat_cluster_sizes, bins=bins, density=False)
+    bin_widths = np.diff(edges)
+    hist = hist / bin_widths  # Normalize by bin width
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax.plot(edges[:-1], hist, 'x', label='Simulation')
+    ax.grid()
+    ax.set_xlabel('Cluster size')
+    ax.set_ylabel('Probability density')
+    ylim = ax.get_ylim()
+
+    tau1, tau2 = 2, 3
+    x = np.array(edges[:-1])
+    ax.plot(x, 1e7*x**-tau1, label=r'$\tau=$' + f'{tau1} power law', linestyle='--', alpha=0.5)
+    ax.plot(x, 6e6*x**-tau2, label=r'$\tau=$' + f'{tau2} power law', linestyle='--', alpha=0.5)
+    ax.legend()
+    ax.set_ylim(ylim)
+
+    # Extract sigma and theta from filename and set as title
+    sigma, theta = filename.split('_')[2], filename.split('_')[4].rsplit('.', 1)[0]
+    ax.set_title(f'$\sigma$: {sigma}, $\\theta$: {theta}')
+
+    plt.tight_layout()
+    plt.savefig(filename.replace('outputs', 'plots').replace('.csv', '.png'), dpi=300)
+    plt.show()
+
+
 if __name__ == "__main__":
-    main()
+    # main()
+    plot_one('src/cuda_test/simpleNbrGrowth/outputs/csdNbrDeath/sigma_1_theta_1.csv')
 

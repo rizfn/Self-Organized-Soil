@@ -10,6 +10,7 @@ def main():
     theta = 0.5
     # find the number of files in the directory
     files = glob.glob(f"src/cuda_test/outputs/sigma_{sigma}_theta_{theta}/*")
+    # files = glob.glob(f"src/cuda_test/outputs/small/*")
 
     L_list = []
     bl_list = []

@@ -13,10 +13,10 @@
 // Define constants
 constexpr double SIGMA = 1;
 constexpr double THETA = 0.5;
-constexpr int L = 1024; // 2^10 = 1024
-constexpr int N_STEPS = 5000;
+constexpr int L = 128; // 2^10 = 1024
+constexpr int N_STEPS = 10000;
 
-constexpr int BLOCK_LENGTH = 4;
+constexpr int BLOCK_LENGTH = 32;
 
 std::vector<bool> initLattice(int L)
 {
@@ -208,7 +208,8 @@ int main(int argc, char *argv[])
     std::string exePath = argv[0];
     std::string exeDir = std::filesystem::path(exePath).parent_path().string();
     std::ostringstream filePathStream;
-    filePathStream << exeDir << "/outputs/sigma_" << SIGMA << "_theta_" << THETA << "/L_" << L << "_bl_" << BLOCK_LENGTH << ".csv";
+    // filePathStream << exeDir << "/outputs/sigma_" << SIGMA << "_theta_" << THETA << "/L_" << L << "_bl_" << BLOCK_LENGTH << ".csv";
+    filePathStream << exeDir << "/outputs/small/L_" << L << "_bl_" << BLOCK_LENGTH << ".csv";
     std::string filePath = filePathStream.str();
 
     std::ofstream file;
