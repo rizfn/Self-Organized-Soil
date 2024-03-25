@@ -21,4 +21,5 @@ src/multi_species_nutrient/plots/lattice2D/4spec/sigma_0.5_theta_0.015.gif
 src/multi_species_nutrient/plots/lattice2D/5spec/sigma_0.5_theta_0.012.gif
 src/multi_species_nutrient/plots/lattice2D/4spec/noSoil_theta_0.05.gif
 src/multi_species_nutrient/plots/lattice2D/5spec/noSoil_theta_0.05.gif
+src/multi_species_nutrient/plots/lattice2D/5spec/noSoilNoNutrient.gif
 *.exe
