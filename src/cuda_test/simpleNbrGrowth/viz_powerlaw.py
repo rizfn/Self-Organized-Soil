@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import csv
 import glob
+import re
 
 def load_csv(filename):
     with open(filename, 'r') as f:
@@ -96,7 +97,10 @@ def plot_one(filename):
     ax.set_ylim(ylim)
 
     # Extract sigma and theta from filename and set as title
-    sigma, theta = filename.split('_')[2], filename.split('_')[4].rsplit('.', 1)[0]
+    match = re.search(r'sigma_\d+(\.\d+)?_theta_\d+(\.\d+)?', filename)
+    if match:
+        sigma_theta_part = match.group()
+        sigma, theta = sigma_theta_part.split('_')[1], sigma_theta_part.split('_')[3]
     ax.set_title(f'$\sigma$: {sigma}, $\\theta$: {theta}')
 
     plt.tight_layout()
@@ -106,5 +110,6 @@ def plot_one(filename):
 
 if __name__ == "__main__":
     # main()
-    plot_one('src/cuda_test/simpleNbrGrowth/outputs/csdNbrDeath/sigma_1_theta_1.csv')
+    # plot_one('src/cuda_test/simpleNbrGrowth/outputs/csdNbrDeath/sigma_1_theta_1.csv')
+    plot_one('src/cuda_test/simpleNbrGrowth/outputs/csdNbrDeath/3D_sigma_1_theta_1.csv')
 
