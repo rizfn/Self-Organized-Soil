@@ -15,25 +15,24 @@ static auto _ = []()
 
 // Define constants
 constexpr double SIGMA = 1;
-constexpr double THETA = 0.2;
-constexpr int L = 1024; // 2^10 = 1024
+constexpr double THETA = 0.5;
+constexpr int L = 100; // 2^10 = 1024
 constexpr long long STEPS_PER_LATTICEPOINT = 2000;
-constexpr long long N_STEPS = STEPS_PER_LATTICEPOINT * L * L;
+constexpr long long N_STEPS = STEPS_PER_LATTICEPOINT * L * L * L;
 constexpr int RECORDING_INTERVAL = 20;
-constexpr long long RECORDING_STEP = 1000 * L *L;
+constexpr long long RECORDING_STEP = (STEPS_PER_LATTICEPOINT / 2) * L * L * L;
 
 std::random_device rd;
 std::mt19937 gen(rd());
 std::uniform_int_distribution<> dis(0, 1);
-std::uniform_int_distribution<> dis_site(0, L *L - 1);
-std::uniform_int_distribution<> dis_dir(0, 3);
+std::uniform_int_distribution<> dis_site(0, L * L * L - 1);
+std::uniform_int_distribution<> dis_dir(0, 5);
 std::uniform_real_distribution<> dis_prob(0, 1);
 
 std::vector<bool> initLattice(int L)
 {
-
-    std::vector<bool> soil_lattice(L * L);
-    for (int i = 0; i < L * L; ++i)
+    std::vector<bool> soil_lattice(L * L * L);
+    for (int i = 0; i < L * L * L; ++i)
     {
         soil_lattice[i] = dis(gen);
     }
@@ -43,19 +42,24 @@ std::vector<bool> initLattice(int L)
 struct Coordinate {
     int x;
     int y;
+    int z;
 };
 
 Coordinate get_random_neighbour(Coordinate site, int L) {
     int dir = dis_dir(gen);
     switch (dir) {
         case 0: // left
-            return {(site.x - 1 + L) % L, site.y};
+            return {(site.x - 1 + L) % L, site.y, site.z};
         case 1: // right
-            return {(site.x + 1) % L, site.y};
+            return {(site.x + 1) % L, site.y, site.z};
         case 2: // above
-            return {site.x, (site.y - 1 + L) % L};
+            return {site.x, (site.y - 1 + L) % L, site.z};
         case 3: // below
-            return {site.x, (site.y + 1) % L};
+            return {site.x, (site.y + 1) % L, site.z};
+        case 4: // in front
+            return {site.x, site.y, (site.z - 1 + L) % L};
+        case 5: // behind
+            return {site.x, site.y, (site.z + 1) % L};
     }
     return site; // should never reach here
 }
@@ -63,7 +67,7 @@ Coordinate get_random_neighbour(Coordinate site, int L) {
 void updateLattice(std::vector<bool> &lattice) {
     // Choose a random site
     int site_index = dis_site(gen);
-    Coordinate site = {site_index % L, site_index / L};
+    Coordinate site = {site_index % L, (site_index / L) % L, site_index / (L * L)};
 
     if (lattice[site_index]) // if the site is occupied
     {
@@ -77,7 +81,7 @@ void updateLattice(std::vector<bool> &lattice) {
     {
         // choose a random neighbour
         Coordinate nbr = get_random_neighbour(site, L);
-        int nbr_index = nbr.y * L + nbr.x;
+        int nbr_index = nbr.z * L * L + nbr.y * L + nbr.x;
 
         // if the neighbour is occupied, make it occupied with rate SIGMA
         if (lattice[nbr_index] && dis_prob(gen) < SIGMA)
@@ -86,7 +90,6 @@ void updateLattice(std::vector<bool> &lattice) {
         }
     }
 }
-
 
 class UnionFind {
 public:
@@ -120,20 +123,27 @@ private:
 };
 
 std::pair<std::vector<int>, std::vector<int>> get_cluster_sizes(const std::vector<bool>& lattice, int L) {
-    UnionFind uf_filled(L * L);
-    UnionFind uf_empty(L * L);
+    UnionFind uf_filled(L * L * L);
+    UnionFind uf_empty(L * L * L);
     for (int i = 0; i < L; ++i) {
         for (int j = 0; j < L; ++j) {
-            if (lattice[i * L + j]) {
-                if (i > 0 && lattice[(i - 1) * L + j])
-                    uf_filled.union_set(i * L + j, (i - 1) * L + j);
-                if (j > 0 && lattice[i * L + j - 1])
-                    uf_filled.union_set(i * L + j, i * L + j - 1);
-            } else {
-                if (i > 0 && !lattice[(i - 1) * L + j])
-                    uf_empty.union_set(i * L + j, (i - 1) * L + j);
-                if (j > 0 && !lattice[i * L + j - 1])
-                    uf_empty.union_set(i * L + j, i * L + j - 1);
+            for (int k = 0; k < L; ++k) {
+                int index = k * L * L + i * L + j;
+                if (lattice[index]) {
+                    if (i > 0 && lattice[(k * L * L) + ((i - 1) * L) + j])
+                        uf_filled.union_set(index, (k * L * L) + ((i - 1) * L) + j);
+                    if (j > 0 && lattice[(k * L * L) + (i * L) + (j - 1)])
+                        uf_filled.union_set(index, (k * L * L) + (i * L) + (j - 1));
+                    if (k > 0 && lattice[((k - 1) * L * L) + (i * L) + j])
+                        uf_filled.union_set(index, ((k - 1) * L * L) + (i * L) + j);
+                } else {
+                    if (i > 0 && !lattice[(k * L * L) + ((i - 1) * L) + j])
+                        uf_empty.union_set(index, (k * L * L) + ((i - 1) * L) + j);
+                    if (j > 0 && !lattice[(k * L * L) + (i * L) + (j - 1)])
+                        uf_empty.union_set(index, (k * L * L) + (i * L) + (j - 1));
+                    if (k > 0 && !lattice[((k - 1) * L * L) + (i * L) + j])
+                        uf_empty.union_set(index, ((k - 1) * L * L) + (i * L) + j);
+                }
             }
         }
     }
@@ -142,12 +152,15 @@ std::pair<std::vector<int>, std::vector<int>> get_cluster_sizes(const std::vecto
     std::unordered_map<int, int> cluster_sizes_empty;
     for (int i = 0; i < L; ++i) {
         for (int j = 0; j < L; ++j) {
-            if (lattice[i * L + j]) {
-                int root = uf_filled.find(i * L + j);
-                ++cluster_sizes_filled[root];
-            } else {
-                int root = uf_empty.find(i * L + j);
-                ++cluster_sizes_empty[root];
+            for (int k = 0; k < L; ++k) {
+                int index = k * L * L + i * L + j;
+                if (lattice[index]) {
+                    int root = uf_filled.find(index);
+                    ++cluster_sizes_filled[root];
+                } else {
+                    int root = uf_empty.find(index);
+                    ++cluster_sizes_empty[root];
+                }
             }
         }
     }
@@ -170,7 +183,7 @@ void run_csd(std::ofstream& file)
     for (int step = 1; step <= N_STEPS; ++step)
     {
         updateLattice(lattice);
-        if (step % (RECORDING_INTERVAL * L * L) == 0)
+        if (step % (RECORDING_INTERVAL * L * L * L) == 0) // Adjusted for 3D lattice
         {
             if (step >= RECORDING_STEP)
             {
@@ -204,13 +217,11 @@ void run_csd(std::ofstream& file)
 
 int main(int argc, char *argv[])
 {
-    std::vector<bool> lattice = initLattice(L);
-
     std::string exePath = argv[0];
     std::string exeDir = std::filesystem::path(exePath).parent_path().string();
 
     std::ostringstream filename;
-    filename << exeDir << "/outputs/csd/sigma_" << SIGMA << "_theta_" << THETA << ".tsv";
+    filename << exeDir << "/outputs/csd_3D/sigma_" << SIGMA << "_theta_" << THETA << ".tsv";
 
     std::ofstream file(filename.str());
 
