@@ -45,20 +45,23 @@ def animate():
     fig, ax = plt.subplots(1, 1, figsize=(8, 8))
 
     # Initial image
-    im = ax.imshow(lattices[0].reshape((L, L)), cmap='viridis', origin='lower')
+    im = ax.imshow(lattices[0].reshape((L, L)), cmap='viridis', origin='lower', vmin=0, vmax=1)
     ax.set_title(f'Step: {steps[0]}')
 
     def update(i):
-        # Update image data
-        im.set_data(lattices[i].reshape((L, L)))
+        # Clear the current axes.
+        ax.clear()
+        # Draw the new image.
+        im = ax.imshow(lattices[i].reshape((L, L)), cmap='viridis', origin='lower', vmin=0, vmax=1)
         ax.set_title(f'Step: {steps[i]}')
-        return im
+        return [im]
 
     pbar = tqdm(total=len(lattices))
+    
     def update_with_progress(i):
         pbar.update()
         return update(i)
-
+        
     ani = FuncAnimation(fig, update_with_progress, frames=len(lattices), blit=True)
     ani.save(f'src/cuda_test/simpleNbrGrowth/plots/lattice2D/sigma_{sigma}_theta_{theta}.gif', writer='ffmpeg', fps=10, dpi=200)
 
