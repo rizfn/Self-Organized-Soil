@@ -32,9 +32,9 @@ def main():
 
 def animate():
     sigma = 1
-    theta = 0.5
+    theta = 1
     # Load the CSV file
-    with open(f'src/cuda_test/simpleNbrGrowth/outputs/lattice2D/sigma_{sigma}_theta_{theta}.csv', 'r') as file:
+    with open(f'src/cuda_test/simpleNbrGrowth/outputs/lattice2DNbrDeath/sigma_{sigma}_theta_{theta}.csv', 'r') as file:
         file_gen = read_large_file(file)
         header = next(file_gen)  # Skip the header
         data = [np.fromstring(line, sep=',') for line in tqdm(file_gen)]
@@ -63,7 +63,7 @@ def animate():
         return update(i)
         
     ani = FuncAnimation(fig, update_with_progress, frames=len(lattices), blit=True)
-    ani.save(f'src/cuda_test/simpleNbrGrowth/plots/lattice2D/sigma_{sigma}_theta_{theta}.gif', writer='ffmpeg', fps=10, dpi=200)
+    ani.save(f'src/cuda_test/simpleNbrGrowth/plots/lattice2DNbrDeath/sigma_{sigma}_theta_{theta}.mp4', writer='ffmpeg', fps=30, dpi=200)
 
     pbar.close()
     plt.show()
