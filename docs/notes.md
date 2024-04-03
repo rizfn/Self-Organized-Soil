@@ -464,6 +464,15 @@ Check if coexistance is correlated to powerlaw (check powerlaw for various regio
 Try to see if mutation can remove a parameter (relative birthrates)
 
 
-## Meeting 34: 
+## Meeting 34: 3rd April 2024
+
+Check whether the critical points are different
+
+Calculate mass vs largest linear dimension of clusters
+
+Look at clusters for different
+
+Are we really the first to do this?
+
 
 
