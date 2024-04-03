@@ -165,21 +165,28 @@ def main_3D():
 def plot_one(filename):
     fig, ax = plt.subplots(figsize=(6, 4))
 
-    steps, cluster_sizes = load_csv(filename)
+    steps, filled_cluster_sizes, empty_cluster_sizes = load_csv(filename)
     # histogram and plot all the cluster sizes
     num_bins = 100
     min_size = 1  # smallest cluster size
-    max_size = max(max(sublist) for sublist in cluster_sizes)
+    max_size = max(max(max(sublist) for sublist in filled_cluster_sizes), max(max(sublist) for sublist in empty_cluster_sizes))
     bins = np.logspace(np.log10(min_size), np.log10(max_size), num=num_bins)
 
-    # Calculate histograms and plot
-    flat_cluster_sizes = [item for sublist in cluster_sizes for item in sublist]
-    hist, edges = np.histogram(flat_cluster_sizes, bins=bins, density=False)
+    # Calculate histograms and plot for filled clusters
+    flat_filled_cluster_sizes = [item for sublist in filled_cluster_sizes for item in sublist]
+    hist, edges = np.histogram(flat_filled_cluster_sizes, bins=bins, density=False)
     bin_widths = np.diff(edges)
     hist = hist / bin_widths  # Normalize by bin width
+    ax.plot(edges[:-1], hist, 'x', label='Filled Clusters')
+
+    # Calculate histograms and plot for empty clusters
+    flat_empty_cluster_sizes = [item for sublist in empty_cluster_sizes for item in sublist]
+    hist, edges = np.histogram(flat_empty_cluster_sizes, bins=bins, density=False)
+    hist = hist / bin_widths  # Normalize by bin width
+    ax.plot(edges[:-1], hist, 'x', label='Empty Clusters')
+
     ax.set_xscale('log')
     ax.set_yscale('log')
-    ax.plot(edges[:-1], hist, 'x', label='Simulation')
     ax.grid()
     ax.set_xlabel('Cluster size')
     ax.set_ylabel('Probability density')
@@ -200,13 +207,14 @@ def plot_one(filename):
     ax.set_title(f'$\sigma$: {sigma}, $\\theta$: {theta}')
 
     plt.tight_layout()
-    plt.savefig(filename.replace('outputs', 'plots').replace('.csv', '.png'), dpi=300)
+    plt.savefig(filename.replace('outputs', 'plots').replace('.tsv', '.png'), dpi=300)
     plt.show()
 
 
 if __name__ == "__main__":
     # main()
-    main_3D()
+    # main_3D()
     # plot_one('src/cuda_test/simpleNbrGrowth/outputs/csdNbrDeath/sigma_1_theta_1.csv')
     # plot_one('src/cuda_test/simpleNbrGrowth/outputs/csdNbrDeath/3D_sigma_1_theta_1.csv')
+    plot_one('src/cuda_test/simpleNbrGrowth/outputs/csdNbrDeath/6NN_sigma_1_theta_1.tsv')
 
