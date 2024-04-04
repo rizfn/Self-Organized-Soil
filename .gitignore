@@ -12,6 +12,7 @@ docs/presentations/images/feb29/hq_anim/
 src/coupled_map_lattice/outputs/
 src/coupled_map_lattice/snowflake/outputs/
 src/cuda_test/outputs/
+src/cuda_test/directedPercolation/outputs/
 src/cuda_test/simpleNbrGrowth/outputs/
 src/nutrient_mutations/outputs/
 src/two_species_same_nutrient/outputs/
