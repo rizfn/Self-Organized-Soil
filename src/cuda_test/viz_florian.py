@@ -13,23 +13,27 @@ def main():
 
     L_list = []
     bl_list = []
+    type_list = []  # New list to store the types
     occupied_data = []
 
     for i, file in enumerate(files):
         L = int(file.split("\\")[-1].split("_")[1])
         bl = int(file.split("\\")[-1].split("_")[3].split(".")[0])
+        type = file.split("\\")[-1].split("_")[4].split(".")[0]  # Extract the type from the filename
         L_list.append(L)
         bl_list.append(bl)
+        type_list.append(type)  # Append the type to the list
 
         occupied_fracs = np.genfromtxt(file, delimiter=',', skip_header=1, unpack=True)
 
         # append the occupied data to the list
         occupied_data.append(occupied_fracs)
 
-    # Get the indices that would sort L_list in ascending order
-    sort_indices = np.argsort(L_list)
+    # Get the indices that would sort type_list in ascending order
+    sort_indices = np.argsort(type_list)
 
-    # Use these indices to sort L_list and the occupied_data list
+    # Use these indices to sort type_list and the occupied_data list
+    type_list = np.array(type_list)[sort_indices]
     L_list = np.array(L_list)[sort_indices]
     bl_list = np.array(bl_list)[sort_indices]
     occupied_data = np.array(occupied_data)[sort_indices]
@@ -48,11 +52,13 @@ def main():
         # Get the occupied data and bl values for this L
         occupied_data_L = occupied_data[indices]
         bl_list_L = bl_list[indices]
+        type_list_L = type_list[indices]
 
         # Sort the occupied data and bl values by bl
         sort_indices = np.argsort(bl_list_L)
         occupied_data_L = occupied_data_L[sort_indices]
         bl_list_L = bl_list_L[sort_indices]
+        type_list_L = type_list_L[sort_indices]
 
         # Create a custom colormap for this L
         cmap_L = cm.get_cmap(colormaps[i % len(colormaps)])
@@ -61,16 +67,16 @@ def main():
         norm = Normalize(vmin=-1, vmax=0.8)
 
         # Plot the occupied timeseries for each bl, using a different shade of the color for this L
-        for j, bl in enumerate(bl_list_L):
+        for j, (bl, type) in enumerate(zip(bl_list_L, type_list_L)):
             sliced_data = occupied_data_L[j][2000:]
             mean, sd = np.mean(sliced_data), np.std(sliced_data)
-            axs.plot(occupied_data_L[j], label=f"L={L}, bl={bl}, $\mu$={mean:.4f}, $\sigma$={sd:.4f}", color=cmap_L(norm(j / len(bl_list_L))), linestyle=line_styles[j % len(line_styles)], alpha=0.8)
+            axs.plot(occupied_data_L[j], label=f"{type}, bl={bl}, $\mu$={mean:.4f}, $\sigma$={sd:.4f}", color=cmap_L(norm(j / len(bl_list_L))), linestyle=line_styles[j % len(line_styles)], alpha=0.8)
 
 
-    axs.set_title(f"Florian Algorithm")
+    axs.set_title(f"Florian Algorithm, {L=}")
     axs.set_xlabel("Time")
     axs.set_ylabel("Soil")
-    axs.legend(ncol=3)
+    axs.legend(ncol=2)
     axs.grid()
 
     # plt.savefig(f'src/cuda_test/2D_bl_sigma_{sigma}_theta_{theta}.png', dpi=300)
