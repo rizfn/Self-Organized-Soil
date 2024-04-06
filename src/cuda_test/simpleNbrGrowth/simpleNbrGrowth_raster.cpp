@@ -1,6 +1,9 @@
 #include <random>
 #include <vector>
+#include <thread>
+#include <array>
 #include <unordered_map>
+#include <mutex>
 #include <iomanip>
 #include <iostream>
 #include <fstream>
@@ -13,17 +16,23 @@
 static auto _ = []()
 {std::ios_base::sync_with_stdio(false);std::cin.tie(nullptr);std::cout.tie(nullptr);return 0; }();
 
+std::mutex mtx;  // for progress output
+int max_threads = std::thread::hardware_concurrency() - 2; // Keep 2 threads free
+int active_threads = 0;
+int completed_threads = 0;
+
+thread_local std::random_device rd;
+thread_local std::mt19937 gen(rd());
+
 // Define constants
 constexpr double SIGMA = 1;
-constexpr double THETA = 0.2;
+constexpr std::array<double, 6> theta_values = {0.26, 0.27, 0.28, 0.51, 0.52, 0.53};
 constexpr int L = 1024; // 2^10 = 1024
 constexpr long long STEPS_PER_LATTICEPOINT = 2000;
 constexpr long long N_STEPS = STEPS_PER_LATTICEPOINT * L * L;
 constexpr int RECORDING_INTERVAL = 20;
-constexpr long long RECORDING_STEP = 1000 * L *L;
+constexpr long long RECORDING_STEP = 1000 * L * L;
 
-std::random_device rd;
-std::mt19937 gen(rd());
 std::uniform_int_distribution<> dis(0, 1);
 std::uniform_int_distribution<> dis_site(0, L *L - 1);
 std::uniform_int_distribution<> dis_dir(0, 3);
@@ -40,35 +49,39 @@ std::vector<bool> initLattice(int L)
     return soil_lattice;
 }
 
-struct Coordinate {
+struct Coordinate
+{
     int x;
     int y;
 };
 
-Coordinate get_random_neighbour(Coordinate site, int L) {
+Coordinate get_random_neighbour(Coordinate site, int L)
+{
     int dir = dis_dir(gen);
-    switch (dir) {
-        case 0: // left
-            return {(site.x - 1 + L) % L, site.y};
-        case 1: // right
-            return {(site.x + 1) % L, site.y};
-        case 2: // above
-            return {site.x, (site.y - 1 + L) % L};
-        case 3: // below
-            return {site.x, (site.y + 1) % L};
+    switch (dir)
+    {
+    case 0: // left
+        return {(site.x - 1 + L) % L, site.y};
+    case 1: // right
+        return {(site.x + 1) % L, site.y};
+    case 2: // above
+        return {site.x, (site.y - 1 + L) % L};
+    case 3: // below
+        return {site.x, (site.y + 1) % L};
     }
     return site; // should never reach here
 }
 
-void updateLattice(std::vector<bool> &lattice) {
+void updateLattice(std::vector<bool> &lattice, double theta)
+{
     // Choose a random site
     int site_index = dis_site(gen);
     Coordinate site = {site_index % L, site_index / L};
 
     if (lattice[site_index]) // if the site is occupied
     {
-        // make it empty with rate THETA
-        if (dis_prob(gen) < THETA)
+        // make it empty with rate theta
+        if (dis_prob(gen) < theta)
         {
             lattice[site_index] = false;
         }
@@ -87,28 +100,33 @@ void updateLattice(std::vector<bool> &lattice) {
     }
 }
 
-
-class UnionFind {
+class UnionFind
+{
 public:
-    UnionFind(int n) : parent(n), rank(n, 0) {
+    UnionFind(int n) : parent(n), rank(n, 0)
+    {
         for (int i = 0; i < n; ++i)
             parent[i] = i;
     }
 
-    int find(int i) {
+    int find(int i)
+    {
         if (parent[i] != i)
             parent[i] = find(parent[i]);
         return parent[i];
     }
 
-    void union_set(int i, int j) {
+    void union_set(int i, int j)
+    {
         int ri = find(i), rj = find(j);
-        if (ri != rj) {
+        if (ri != rj)
+        {
             if (rank[ri] < rank[rj])
                 parent[ri] = rj;
             else if (rank[ri] > rank[rj])
                 parent[rj] = ri;
-            else {
+            else
+            {
                 parent[ri] = rj;
                 ++rank[rj];
             }
@@ -140,12 +158,17 @@ std::pair<std::vector<int>, std::vector<int>> get_cluster_sizes(const std::vecto
 
     std::unordered_map<int, int> cluster_sizes_filled;
     std::unordered_map<int, int> cluster_sizes_empty;
-    for (int i = 0; i < L; ++i) {
-        for (int j = 0; j < L; ++j) {
-            if (lattice[i * L + j]) {
+    for (int i = 0; i < L; ++i)
+    {
+        for (int j = 0; j < L; ++j)
+        {
+            if (lattice[i * L + j])
+            {
                 int root = uf_filled.find(i * L + j);
                 ++cluster_sizes_filled[root];
-            } else {
+            }
+            else
+            {
                 int root = uf_empty.find(i * L + j);
                 ++cluster_sizes_empty[root];
             }
@@ -153,23 +176,23 @@ std::pair<std::vector<int>, std::vector<int>> get_cluster_sizes(const std::vecto
     }
 
     std::vector<int> sizes_filled;
-    for (const auto& pair : cluster_sizes_filled)
+    for (const auto &pair : cluster_sizes_filled)
         sizes_filled.push_back(pair.second);
 
     std::vector<int> sizes_empty;
-    for (const auto& pair : cluster_sizes_empty)
+    for (const auto &pair : cluster_sizes_empty)
         sizes_empty.push_back(pair.second);
 
     return {sizes_filled, sizes_empty};
 }
 
-void run_csd(std::ofstream& file)
+void run_csd(std::ofstream &file, double theta)
 {
     std::vector<bool> lattice = initLattice(L);
 
     for (int step = 1; step <= N_STEPS; ++step)
     {
-        updateLattice(lattice);
+        updateLattice(lattice, theta);
         if (step % (RECORDING_INTERVAL * L * L) == 0)
         {
             if (step >= RECORDING_STEP)
@@ -197,28 +220,46 @@ void run_csd(std::ofstream& file)
                 }
                 file << "\n";
             }
-            std::cout << "Progress: " << std::fixed << std::setprecision(2) << static_cast<double>(step) / N_STEPS * 100 << "%\r" << std::flush;
         }
     }
 }
 
+
 int main(int argc, char *argv[])
 {
-    std::vector<bool> lattice = initLattice(L);
+    std::vector<std::thread> threads;
 
-    std::string exePath = argv[0];
-    std::string exeDir = std::filesystem::path(exePath).parent_path().string();
+    for (double theta : theta_values)
+    {
+        threads.push_back(std::thread([theta, &argv]() { // Capture theta by value
+            std::vector<bool> lattice = initLattice(L);
 
-    std::ostringstream filename;
-    filename << exeDir << "/outputs/csd/sigma_" << SIGMA << "_theta_" << THETA << ".tsv";
+            std::string exePath = argv[0];
+            std::string exeDir = std::filesystem::path(exePath).parent_path().string();
 
-    std::ofstream file(filename.str());
+            std::ostringstream filename;
+            filename << exeDir << "/outputs/csd_criticalpoints/sigma_" << SIGMA << "_theta_" << theta << ".tsv";
+            // filename << exeDir << "/outputs/csd_criticalpoints/small_system/sigma_" << SIGMA << "_theta_" << theta << ".tsv";
 
-    file << "step\tfilled_cluster_size\tempty_cluster_size\n";
+            std::ofstream file(filename.str());
 
-    run_csd(file);
+            file << "step\tfilled_cluster_size\tempty_cluster_size\n";
 
-    file.close();
+            run_csd(file, theta);
+
+            file.close();
+
+            // Lock the mutex before writing to the console
+            std::lock_guard<std::mutex> lock(mtx);
+            completed_threads++;
+            std::cout << "Thread finished. Completion: " << (completed_threads * 100.0 / theta_values.size()) << "%\n";
+        }));
+    }
+
+    for (std::thread &t : threads)
+    {
+        t.join();
+    }
 
     return 0;
 }
