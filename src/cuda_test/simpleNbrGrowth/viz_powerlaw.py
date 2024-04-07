@@ -84,8 +84,8 @@ def main(directory, outputfilename):
 
         tau1, tau2 = 2, 3
         x = np.array(edges[:-1])
-        ax.plot(x, 1e7*x**-tau1, label=r'$\tau=$' + f'{tau1} power law', linestyle='--', alpha=0.5)
-        ax.plot(x, 6e6*x**-tau2, label=r'$\tau=$' + f'{tau2} power law', linestyle='--', alpha=0.5)
+        ax.plot(x, 5e6*x**-tau1, label=r'$\tau=$' + f'{tau1} power law', linestyle='--', alpha=0.5)
+        ax.plot(x, 5e6*x**-tau2, label=r'$\tau=$' + f'{tau2} power law', linestyle='--', alpha=0.5)
         ax.legend()
         ax.set_ylim(ylim)
 
@@ -153,10 +153,11 @@ def plot_one(filename):
 
 if __name__ == "__main__":
     # main('src/cuda_test/simpleNbrGrowth/outputs/csd', 'csd_powerlaw')
-    # main('src/cuda_test/simpleNbrGrowth/outputs/csd_3D', 'csd_3D_powerlaw')
     # main('src/cuda_test/simpleNbrGrowth/outputs/csd_criticalpoints', 'critical_points')
-    main('src/cuda_test/simpleNbrGrowth/outputs/csd_3D_criticalpoints', '3D_critical_points')
     # main('src/cuda_test/simpleNbrGrowth/outputs/csd_criticalpoints/small_system', 'critical_points_small_system')
+    # main('src/cuda_test/simpleNbrGrowth/outputs/csd_criticalpoints/large_system', 'critical_points_large_system')
+    # main('src/cuda_test/simpleNbrGrowth/outputs/csd_3D', 'csd_3D_powerlaw')
+    main('src/cuda_test/simpleNbrGrowth/outputs/csd_3D_criticalpoints', '3D_critical_points')
     # main('src/cuda_test/simpleNbrGrowth/outputs/csd_3D_criticalpoints/small_system', '3D_critical_points_small_system')
     # plot_one('src/cuda_test/simpleNbrGrowth/outputs/csdNbrDeath/sigma_1_theta_1.csv')
     # plot_one('src/cuda_test/simpleNbrGrowth/outputs/csdNbrDeath/3D_sigma_1_theta_1.csv')
