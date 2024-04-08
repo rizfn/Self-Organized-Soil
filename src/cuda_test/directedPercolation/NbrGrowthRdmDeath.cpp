@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
     std::string exeDir = std::filesystem::path(exePath).parent_path().string();
 
     std::ostringstream filename;
-    filename << exeDir << "/outputs/sigma_" << SIGMA << "_theta_" << THETA << ".tsv";
+    filename << exeDir << "/outputs/timeseries1D/sigma_" << SIGMA << "_theta_" << THETA << ".tsv";
 
     std::ofstream file(filename.str());
 

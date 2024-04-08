@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
     std::string exeDir = std::filesystem::path(exePath).parent_path().string();
 
     std::ostringstream filename;
-    filename << exeDir << "/outputs/dirP_p_" << P << ".tsv";
+    filename << exeDir << "/outputs/timeseries1D/dirP_p_" << P << ".tsv";
 
     std::ofstream file(filename.str());
 

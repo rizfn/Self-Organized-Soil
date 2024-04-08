@@ -3,7 +3,7 @@ import glob
 import numpy as np
 
 # Get all file names
-files = glob.glob('src/cuda_test/directedPercolation/outputs/*.tsv')
+files = glob.glob('src/cuda_test/directedPercolation/outputs/timeseries1D/*.tsv')
 
 # Sort files into three categories
 directed_percolation_files = sorted([file for file in files if 'dirP' in file.rsplit('/', 1)[-1]])
