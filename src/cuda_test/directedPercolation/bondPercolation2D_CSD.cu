@@ -4,6 +4,7 @@
 #include <random>
 #include <vector>
 #include <array>
+#include <unordered_map>
 #include <cmath>
 #include <cstdint>
 #include <iostream>
@@ -12,11 +13,11 @@
 #include <filesystem>
 
 // Define constants
-constexpr double P = 0.6;
+constexpr double P = 0.46;
 constexpr int L = 1024;
-constexpr int N_STEPS = 2000;
+constexpr int N_STEPS = 1000;
 constexpr int RECORDING_STEP = N_STEPS / 2;
-constexpr int RECORDING_INTERVAL = 20;
+constexpr int RECORDING_INTERVAL = 10;
 
 std::vector<bool> initLattice(int L)
 {
@@ -90,84 +91,96 @@ __global__ void updateKernel(bool *d_lattice, bool *d_latticeUpdated, curandStat
     state[index] = localState;
 }
 
-// ToDo: Warning!! `d_histogram` might overflow, change to `long long`
-__global__ void cabaretKernel(bool *d_lattice, int *d_labelsFilled, int *d_labelsEmpty, int *d_histogramFilled, int *d_histogramEmpty, bool *d_changeOccurred)
+class UnionFind
 {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    int idy = blockIdx.y * blockDim.y + threadIdx.y;
-
-    // Calculate the unique index for the thread
-    int index = idx + idy * blockDim.x * gridDim.x;
-
-    // Initialize the label for this pixel
-    d_labelsFilled[index] = index;
-    d_labelsEmpty[index] = index;
-
-    // Perform the local labeling step for both filled and empty sites
-    bool changeOccurred;
-    do
+public:
+    UnionFind(int n) : parent(n), rank(n, 0)
     {
-        // Reset the global flag at the start of each iteration
-        if (threadIdx.x == 0 && threadIdx.y == 0)
+        for (int i = 0; i < n; ++i)
+            parent[i] = i;
+    }
+
+    int find(int i)
+    {
+        if (parent[i] != i)
+            parent[i] = find(parent[i]);
+        return parent[i];
+    }
+
+    void union_set(int i, int j)
+    {
+        int ri = find(i), rj = find(j);
+        if (ri != rj)
         {
-            *d_changeOccurred = false;
-        }
-
-        __syncthreads();
-
-        changeOccurred = false;
-        for (int i = 0; i < 4; ++i)
-        {
-            int x = idx + (i % 2) * 2 - 1;
-            int y = idy + (i / 2) * 2 - 1;
-
-            // Periodic boundary conditions
-            x = (x + L) % L;
-            y = (y + L) % L;
-
-            // Check if the site is occupied and has a lower label
-            if (d_lattice[x + y * L] && d_labelsFilled[x + y * L] < d_labelsFilled[index])
+            if (rank[ri] < rank[rj])
+                parent[ri] = rj;
+            else if (rank[ri] > rank[rj])
+                parent[rj] = ri;
+            else
             {
-                d_labelsFilled[index] = d_labelsFilled[x + y * L];
-                changeOccurred = true;
-            }
-
-            // Check if the site is empty and has a lower label
-            if (!d_lattice[x + y * L] && d_labelsEmpty[x + y * L] < d_labelsEmpty[index])
-            {
-                d_labelsEmpty[index] = d_labelsEmpty[x + y * L];
-                changeOccurred = true;
+                parent[ri] = rj;
+                ++rank[rj];
             }
         }
+    }
 
-        // Update the global flag if a change occurred
-        if (changeOccurred)
+private:
+    std::vector<int> parent, rank;
+};
+
+std::pair<std::vector<int>, std::vector<int>> get_cluster_sizes(const std::vector<bool> &lattice)
+{
+    UnionFind uf_filled(L * L);
+    UnionFind uf_empty(L * L);
+    for (int i = 0; i < L; ++i)
+    {
+        for (int j = 0; j < L; ++j)
         {
-            *d_changeOccurred = true;
+            if (lattice[i * L + j])
+            {
+                uf_filled.union_set(i * L + j, ((i - 1 + L) % L) * L + j);
+                uf_filled.union_set(i * L + j, i * L + ((j - 1 + L) % L));
+                uf_filled.union_set(i * L + j, ((i + 1) % L) * L + j);
+                uf_filled.union_set(i * L + j, i * L + ((j + 1) % L));
+            }
+            else
+            {
+                uf_empty.union_set(i * L + j, ((i - 1 + L) % L) * L + j);
+                uf_empty.union_set(i * L + j, i * L + ((j - 1 + L) % L));
+                uf_empty.union_set(i * L + j, ((i + 1) % L) * L + j);
+                uf_empty.union_set(i * L + j, i * L + ((j + 1) % L));
+            }
         }
+    }
 
-        // Wait for all threads to finish before checking the global flag
-        __syncthreads();
-
-    } while (*d_changeOccurred);
-
-    // Perform the global labeling step for both filled and empty sites
-    __syncthreads();
-    if (d_labelsFilled[index] != index)
+    std::unordered_map<int, int> cluster_sizes_filled;
+    std::unordered_map<int, int> cluster_sizes_empty;
+    for (int i = 0; i < L; ++i)
     {
-        d_labelsFilled[index] = d_labelsFilled[d_labelsFilled[index]];
-    }
-    if (d_labelsEmpty[index] != index)
-    {
-        d_labelsEmpty[index] = d_labelsEmpty[d_labelsEmpty[index]];
+        for (int j = 0; j < L; ++j)
+        {
+            if (lattice[i * L + j])
+            {
+                int root = uf_filled.find(i * L + j);
+                ++cluster_sizes_filled[root];
+            }
+            else
+            {
+                int root = uf_empty.find(i * L + j);
+                ++cluster_sizes_empty[root];
+            }
+        }
     }
 
-    // Calculate the cluster size for both filled and empty sites
-    if (d_lattice[index]) {
-        atomicAdd(&d_histogramFilled[d_labelsFilled[index]], 1);
-    } else {
-        atomicAdd(&d_histogramEmpty[d_labelsEmpty[index]], 1);
-    }
+    std::vector<int> sizes_filled;
+    for (const auto &pair : cluster_sizes_filled)
+        sizes_filled.push_back(pair.second);
+
+    std::vector<int> sizes_empty;
+    for (const auto &pair : cluster_sizes_empty)
+        sizes_empty.push_back(pair.second);
+
+    return {sizes_filled, sizes_empty};
 }
 
 void run(std::ofstream &file)
@@ -179,19 +192,9 @@ void run(std::ofstream &file)
     bool *d_lattice;
     bool *d_latticeUpdated;
     curandState *d_state;
-    int *d_labelsFilled;
-    int *d_labelsEmpty;
-    int *d_histogramFilled;
-    int *d_histogramEmpty;
-    bool *d_changeOccurred;
     cudaMalloc(&d_lattice, L * L * sizeof(bool));
     cudaMalloc(&d_latticeUpdated, L * L * sizeof(bool));
     cudaMalloc(&d_state, L * L * sizeof(curandState));
-    cudaMalloc(&d_labelsFilled, L * L * sizeof(int));
-    cudaMalloc(&d_labelsEmpty, L * L * sizeof(int));
-    cudaMalloc(&d_histogramFilled, L * L * sizeof(int));
-    cudaMalloc(&d_histogramEmpty, L * L * sizeof(int));
-    cudaMalloc(&d_changeOccurred, sizeof(bool));
 
     initCurand<<<L, L>>>(d_state, time(0));
 
@@ -210,39 +213,33 @@ void run(std::ofstream &file)
 
         cudaMemcpy(d_lattice, d_latticeUpdated, L * L * sizeof(bool), cudaMemcpyDeviceToDevice);
 
-        if (step >= RECORDING_STEP && step % RECORDING_INTERVAL == 0)
+        if (step < RECORDING_STEP || step % RECORDING_INTERVAL != 0)
         {
-            cudaMemset(d_labelsFilled, 0, L * L * sizeof(int));
-            cudaMemset(d_labelsEmpty, 0, L * L * sizeof(int));
-            cudaMemset(d_histogramFilled, 0, L * L * sizeof(int));
-            cudaMemset(d_histogramEmpty, 0, L * L * sizeof(int));
 
-            cabaretKernel<<<gridSize, blockSize>>>(d_lattice, d_labelsFilled, d_labelsEmpty, d_histogramFilled, d_histogramEmpty, d_changeOccurred);            cudaDeviceSynchronize();
+            // Copy lattice data from GPU to CPU
+            std::vector<char> lattice_cpu(L * L);
+            cudaMemcpy(lattice_cpu.data(), d_lattice, L * L * sizeof(char), cudaMemcpyDeviceToHost);
+            std::vector<bool> lattice_bool(lattice_cpu.begin(), lattice_cpu.end());
 
-            std::vector<int> histogramFilled(L * L);
-            std::vector<int> histogramEmpty(L * L);
-            cudaMemcpy(histogramFilled.data(), d_histogramFilled, L * L * sizeof(int), cudaMemcpyDeviceToHost);
-            cudaMemcpy(histogramEmpty.data(), d_histogramEmpty, L * L * sizeof(int), cudaMemcpyDeviceToHost);
+            // Calculate cluster sizes
+            auto [sizes_filled, sizes_empty] = get_cluster_sizes(lattice_bool);
 
-            std::stringstream ssFilled, ssEmpty;
-            for (int i = 0; i < L * L; ++i)
+            file << step << "\t";
+            // Write cluster sizes to a file
+            for (size_t i = 0; i < sizes_filled.size(); ++i)
             {
-                if (histogramFilled[i] > 0) // Only write non-zero entries
-                {
-                    ssFilled << histogramFilled[i] << ",";
-                }
-                if (histogramEmpty[i] > 0) // Only write non-zero entries
-                {
-                    ssEmpty << histogramEmpty[i] << ",";
-                }
+                file << sizes_filled[i];
+                if (i != sizes_filled.size() - 1)
+                    file << ",";
             }
-
-            std::string histogramStrFilled = ssFilled.str();
-            histogramStrFilled = histogramStrFilled.substr(0, histogramStrFilled.length() - 1); // remove the last comma
-            std::string histogramStrEmpty = ssEmpty.str();
-            histogramStrEmpty = histogramStrEmpty.substr(0, histogramStrEmpty.length() - 1); // remove the last comma
-
-            file << step << "\t" << histogramStrFilled << "\t" << histogramStrEmpty << "\n";
+            file << "\t";
+            for (size_t i = 0; i < sizes_empty.size(); ++i)
+            {
+                file << sizes_empty[i];
+                if (i != sizes_empty.size() - 1)
+                    file << ",";
+            }
+            file << "\n";
         }
 
         std::cout << "Progress: " << std::fixed << std::setprecision(2) << static_cast<double>(step) / (N_STEPS - 1) * 100 << "%\r" << std::flush;
@@ -251,11 +248,6 @@ void run(std::ofstream &file)
     cudaFree(d_lattice);
     cudaFree(d_latticeUpdated);
     cudaFree(d_state);
-    cudaFree(d_labelsFilled);
-    cudaFree(d_labelsEmpty);
-    cudaFree(d_histogramFilled);
-    cudaFree(d_histogramEmpty);
-    cudaFree(d_changeOccurred);
 }
 
 int main(int argc, char *argv[])
@@ -263,7 +255,7 @@ int main(int argc, char *argv[])
     std::string exePath = argv[0];
     std::string exeDir = std::filesystem::path(exePath).parent_path().string();
     std::ostringstream filePathStream;
-    filePathStream << exeDir << "/outputs/CSD2D/p_" << P << "_L_" << L << ".tsv";
+    filePathStream << exeDir << "/outputs/CSD2D/criticalPoints/p_" << P << "_L_" << L << ".tsv";
     std::string filePath = filePathStream.str();
 
     std::ofstream file;

@@ -25,7 +25,7 @@ std::random_device rd;
 std::mt19937 gen(rd());
 
 // Define constants
-constexpr std::array<double, 6> p_values = {0.1, 0.15, 0.2, 0.25, 0.3, 0.35};
+constexpr std::array<double, 6> p_values = {0.1, 0.15, 0.2, 0.4, 0.45, 0.5};
 constexpr int L = 128; // 2^10 = 1024
 constexpr long long STEPS_PER_LATTICEPOINT = 1000;
 constexpr int RECORDING_INTERVAL = 20;
