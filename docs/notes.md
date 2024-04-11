@@ -258,7 +258,7 @@ Do the 3D raster
 Try largest linear dimensions: both cumulative and in fractal dim
 
 
-# Meeting 19: 7th December 2023
+## Meeting 19: 7th December 2023
 
 Normalize by the amount of soil in the system: cluster as % of total soil
 
@@ -273,7 +273,7 @@ Calculate effective soil filling rate
 Show 3D over time (CSD)
 
 
-# Meeting 20: 14th December 2023
+## Meeting 20: 14th December 2023
 
 Make 2D oscillations
 
@@ -284,7 +284,7 @@ Max divided by min (or mean), to see the sensititity. Want to see how close it g
 Try the two species model
 
 
-# Meeting 21: 21st December 2023
+## Meeting 21: 21st December 2023
 
 Try to keep a limit at 10^-6 in the meanfield
 
@@ -474,5 +474,24 @@ Look at clusters for different
 
 Are we really the first to do this?
 
+
+## Meeting 35: 10th April 2024
+
+Start with one point and see if it grows, in our model
+
+Check for percolation cluster size dist exponents (are they 1.8?)
+
+Maybe, when looking each direction, you might have 2 directed percolation critical points. Unless one is site and one is directed, in which case you can have 2 different critical points
+
+Critical region may be smaller, but it may still exist in dirP
+
+Kim's Percolation: every site, if at least one neighbour, it'll be alive
+
+Check whether z exponent is just from left to right distance, and try to calculate that (it's probably the same as R^2)
+
+Check if powerlaw is valid for different values of sigma, and if grassbergers exponents are as well
+
+
+## Meeting 36: 17th April 2024
 
 
