@@ -25,8 +25,8 @@ thread_local std::random_device rd;
 thread_local std::mt19937 gen(rd());
 
 // Define constants
-constexpr double SIGMA = 1;
-constexpr std::array<double, 6> theta_values = {0.272, 0.274, 0.276, 0.516, 0.518, 0.52};
+constexpr double SIGMA = 0.5;
+constexpr std::array<double, 6> theta_values = {0.135, 0.136, 0.137, 0.258, 0.259, 0.26};
 constexpr int L = 2048; // 2^10 = 1024
 constexpr long long STEPS_PER_LATTICEPOINT = 2000;
 constexpr int RECORDING_INTERVAL = 20;
@@ -241,7 +241,8 @@ int main(int argc, char *argv[])
             std::ostringstream filename;
             // filename << exeDir << "/outputs/csd_criticalpoints/sigma_" << SIGMA << "_theta_" << theta << ".tsv";
             // filename << exeDir << "/outputs/csd_criticalpoints/small_system/sigma_" << SIGMA << "_theta_" << theta << ".tsv";
-            filename << exeDir << "/outputs/csd_criticalpoints/large_system/sigma_" << SIGMA << "_theta_" << theta << ".tsv";
+            // filename << exeDir << "/outputs/csd_criticalpoints/large_system/sigma_" << SIGMA << "_theta_" << theta << ".tsv";
+            filename << exeDir << "/outputs/csd_criticalPoints/small_sigma/sigma_" << SIGMA << "_theta_" << theta << ".tsv";
 
             std::ofstream file(filename.str());
 
