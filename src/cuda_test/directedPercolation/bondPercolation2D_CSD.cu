@@ -13,11 +13,11 @@
 #include <filesystem>
 
 // Define constants
-constexpr double P = 0.46;
+constexpr double P = 0.2978;
 constexpr int L = 1024;
-constexpr int N_STEPS = 1000;
+constexpr int N_STEPS = 2000;
 constexpr int RECORDING_STEP = N_STEPS / 2;
-constexpr int RECORDING_INTERVAL = 10;
+constexpr int RECORDING_INTERVAL = 20;
 
 std::vector<bool> initLattice(int L)
 {
@@ -57,11 +57,6 @@ __global__ void updateKernel(bool *d_lattice, bool *d_latticeUpdated, curandStat
     curandState localState = state[index]; // Copy the state to local memory for efficiency
 
     int nPercolationTrials = 0;
-
-    if (d_lattice[idx + idy * L])
-    {
-        nPercolationTrials++;
-    }
 
     for (int i = 0; i < 4; ++i)
     {
@@ -213,7 +208,7 @@ void run(std::ofstream &file)
 
         cudaMemcpy(d_lattice, d_latticeUpdated, L * L * sizeof(bool), cudaMemcpyDeviceToDevice);
 
-        if (step < RECORDING_STEP || step % RECORDING_INTERVAL != 0)
+        if (step >= RECORDING_STEP && step % RECORDING_INTERVAL != 0)
         {
 
             // Copy lattice data from GPU to CPU
@@ -256,6 +251,7 @@ int main(int argc, char *argv[])
     std::string exeDir = std::filesystem::path(exePath).parent_path().string();
     std::ostringstream filePathStream;
     filePathStream << exeDir << "/outputs/CSD2D/criticalPoints/p_" << P << "_L_" << L << ".tsv";
+    // filePathStream << exeDir << "/outputs/CSD2D/otherPoints/p_" << P << "_L_" << L << ".tsv";
     std::string filePath = filePathStream.str();
 
     std::ofstream file;

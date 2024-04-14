@@ -80,10 +80,10 @@ def main(directory, outputfilename):
         ax.set_ylabel('Probability density')
         ylim = ax.get_ylim()
 
-        tau1, tau2 = 2, 3
+        tau1, tau2 = 1.8, 1.9
         x = np.array(edges[:-1])
         ax.plot(x, 1e7*x**-tau1, label=r'$\tau=$' + f'{tau1} power law', linestyle='--', alpha=0.5)
-        # ax.plot(x, 5e6*x**-tau2, label=r'$\tau=$' + f'{tau2} power law', linestyle='--', alpha=0.5)
+        ax.plot(x, 5e6*x**-tau2, label=r'$\tau=$' + f'{tau2} power law', linestyle='--', alpha=0.5)
         ax.legend()
         ax.set_ylim(ylim)
 
