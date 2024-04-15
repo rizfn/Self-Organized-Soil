@@ -158,5 +158,5 @@ def plot_one(sigma, theta):
 
 if __name__ == '__main__':
     # main()
-    # plot_one(1, 0.605)
-    plot_one(0.5, 0.305)
+    plot_one(1, 0.6075)
+    # plot_one(0.5, 0.305)

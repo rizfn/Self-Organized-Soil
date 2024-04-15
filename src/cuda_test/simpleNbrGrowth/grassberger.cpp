@@ -30,8 +30,8 @@ thread_local std::random_device rd;
 thread_local std::mt19937 gen(rd());
 
 // Define constants
-constexpr double SIGMA = 0.5/2;
-constexpr double THETA = 0.305/2;
+constexpr double SIGMA = 1;
+constexpr double THETA = 0.6075;
 constexpr int L = 1024; // 2^10 = 1024
 constexpr int STEPS_PER_LATTICEPOINT = 1000;
 constexpr int N_SIMULATIONS = 10000;
