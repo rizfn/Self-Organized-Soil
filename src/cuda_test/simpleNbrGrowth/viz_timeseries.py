@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import re
+import glob
 
 def main():
     sigma = 1
@@ -21,5 +23,59 @@ def main():
 
     plt.show()
 
+
+def random_ICs():
+    # Get all .csv files in the directory
+    files = glob.glob('src/cuda_test/simpleNbrGrowth/outputs/timeseries/randomICs/*.csv')
+
+    for file in files:
+        # Use regex to get the sigma and theta values from the filename
+        match = re.search(r'sigma_(\d+\.?\d*)_theta_(\d+\.?\d*)\.csv', file)
+        if match:
+            sigma = match.group(1)
+            theta = match.group(2)
+            occupiedfracs = np.loadtxt(file)
+            latter_half = occupiedfracs[len(occupiedfracs)//2:]  # Select the latter half of the array
+            mean = np.mean(latter_half)
+            std = np.std(latter_half)
+            plt.plot(occupiedfracs, label=f'$\sigma$={sigma}, $\\theta$={theta}, $\mu$={mean:.4f} $\pm$ {std:.4f}')
+            
+    plt.xlabel('time')
+    plt.ylabel('occupied fraction')
+    plt.title('Our model, random ICs')
+    plt.legend(loc='upper right', bbox_to_anchor=(1, 0.7))
+    plt.ylim(0, 0.75)
+    plt.savefig('src/cuda_test/simpleNbrGrowth/plots/timeseries/criticalPointsRandomICs.png', dpi=300)
+    plt.show()
+
+
+def seedIC():
+    # Get all .csv files in the directory
+    files = glob.glob('src/cuda_test/simpleNbrGrowth/outputs/timeseries/seedIC/*.csv')
+
+    for file in files:
+        # Use regex to get the sigma and theta values from the filename
+        match = re.search(r'sigma_(\d+\.?\d*)_theta_(\d+\.?\d*)\.csv', file)
+        if match:
+            sigma = match.group(1)
+            theta = match.group(2)
+            occupiedfracs = np.loadtxt(file)
+            latter_half = occupiedfracs[len(occupiedfracs)//2:]  # Select the latter half of the array
+            mean = np.mean(latter_half)
+            std = np.std(latter_half)
+            plt.plot(occupiedfracs, label=f'$\sigma$={sigma}, $\\theta$={theta}, $\mu$={mean:.4f} $\pm$ {std:.4f}')
+
+    plt.xlabel('time')
+    plt.ylabel('occupied fraction')
+    plt.title('Our model, 1 seed IC')
+    plt.legend()
+    plt.legend(loc='upper right', bbox_to_anchor=(1, 0.7))
+    plt.ylim(0, 0.75)
+    plt.savefig('src/cuda_test/simpleNbrGrowth/plots/timeseries/criticalPointsSeedIC.png', dpi=300)
+    plt.show()
+
+
 if __name__ == "__main__":
-    main()
+    # main()
+    random_ICs()
+    # seedIC()
