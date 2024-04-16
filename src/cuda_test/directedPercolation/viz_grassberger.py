@@ -76,7 +76,7 @@ def main():
     axs[2].set_ylim(ylim)
 
     plt.tight_layout()
-    plt.savefig(f'src/cuda_test/directedPercolation/plots/grassberger/p_{p}_L_{L}.png', dpi=300)
+    # plt.savefig(f'src/cuda_test/directedPercolation/plots/grassberger/p_{p}_L_{L}.png', dpi=300)
     plt.show()
 
 if __name__ == '__main__':

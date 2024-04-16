@@ -12,18 +12,26 @@
 #include <filesystem>
 
 // Define constants
-constexpr double P = 0.3;
-constexpr int L = 100;
-constexpr int N_STEPS = 200;
+constexpr double P = 0.2873;
+constexpr int L = 1024;
+constexpr int N_STEPS = 500;
+constexpr float initialDensity = 2e-6;
 
-std::vector<bool> initLattice(int L)
+std::random_device rd;
+std::mt19937 gen(rd());
+std::uniform_real_distribution<> dis(0, 1);
+
+std::vector<bool> initLattice()
 {
-    std::vector<bool> lattice(L * L, false); // Initialize with all zeros
-    for (int i = 0; i < L * L; i += 20)
+    std::vector<bool> soil_lattice(L * L);
+    for (int i = 0; i < L * L; ++i)
     {
-        lattice[i] = true; // Set every 20th site to 1
+        if (dis(gen) < initialDensity)
+        {
+            soil_lattice[i] = true;
+        }
     }
-    return lattice;
+    return soil_lattice;
 }
 
 __global__ void initCurand(curandState *state, unsigned long long seed)
@@ -34,8 +42,14 @@ __global__ void initCurand(curandState *state, unsigned long long seed)
     // Calculate the unique index for the thread
     int index = idx + idy * blockDim.x * gridDim.x;
 
+    // Use a hash function to calculate the seed
+    unsigned long long hash = index;
+    hash = (hash ^ (hash >> 30)) * UINT64_C(0xbf58476d1ce4e5b9);
+    hash = (hash ^ (hash >> 27)) * UINT64_C(0x94d049bb133111eb);
+    hash = hash ^ (hash >> 31);
+
     // Initialize the RNG state for this thread
-    curand_init(seed, index, 0, &state[index]);
+    curand_init(seed + hash, index, 0, &state[index]);
 }
 
 __global__ void updateKernel(bool *d_lattice, bool *d_latticeUpdated, curandState *state)
@@ -49,34 +63,21 @@ __global__ void updateKernel(bool *d_lattice, bool *d_latticeUpdated, curandStat
     // Initialize the RNG
     curandState localState = state[index]; // Copy the state to local memory for efficiency
 
-    int nPercolationTrials = 0;
+    // Define the directions for the neighbors
+    int dx[4] = {-1, 1, 0, 0};
+    int dy[4] = {0, 0, -1, 1};
 
-    if (d_lattice[idx + idy * L])
+    if (d_lattice[idx + idy * L]) // if the site is active
     {
-        nPercolationTrials++;
-    }
-
-    for (int i = 0; i < 4; ++i)
-    {
-        int x = idx + (i % 2) * 2 - 1;
-        int y = idy + (i / 2) * 2 - 1;
-
-        // Periodic boundary conditions
-        x = (x + L) % L;
-        y = (y + L) % L;
-
-        // Check if the site is occupied
-        if (d_lattice[x + y * L])
+        for (int i = 0; i < 4; ++i)
         {
-            nPercolationTrials++;
-        }
-    }
+            int x = (idx + dx[i] + L) % L;
+            int y = (idy + dy[i] + L) % L;
 
-    if (nPercolationTrials > 0)
-    {
-        if (curand_uniform(&localState) < 1 - pow(1 - P, nPercolationTrials))
-        {
-            d_latticeUpdated[idx + idy * L] = true;
+            if (curand_uniform(&localState) < P)
+            {
+                d_latticeUpdated[x + y * L] = true;
+            }
         }
     }
 
@@ -87,7 +88,7 @@ __global__ void updateKernel(bool *d_lattice, bool *d_latticeUpdated, curandStat
 void run(std::ofstream &file)
 {
     // Initialize the lattice
-    std::vector<bool> soil_lattice = initLattice(L);
+    std::vector<bool> soil_lattice = initLattice();
 
     // Initialize CUDA
     cudaSetDevice(0);
@@ -155,7 +156,7 @@ int main(int argc, char *argv[])
     std::string exePath = argv[0];
     std::string exeDir = std::filesystem::path(exePath).parent_path().string();
     std::ostringstream filePathStream;
-    filePathStream << exeDir << "/outputs/lattice2D/CUDA_p_" << P << "_L_" << L << ".csv";
+    filePathStream << exeDir << "/outputs/lattice2D/CUDA_rho_" << initialDensity << "_p_" << P << "_L_" << L << ".csv";
     std::string filePath = filePathStream.str();
 
     std::ofstream file;

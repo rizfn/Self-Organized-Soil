@@ -18,19 +18,18 @@ constexpr int N_STEPS = 4000;
 
 std::random_device rd;
 std::mt19937 gen(rd());
-std::uniform_int_distribution<> dis(0, 1);
+std::uniform_real_distribution<> dis(0, 1);
 
-std::vector<bool> initLattice(int L)
+std::vector<bool> initLattice(float initialDensity)
 {
-//     std::vector<bool> soil_lattice(L * L);
-//     for (int i = 0; i < L * L; ++i)
-//     {
-//         soil_lattice[i] = dis(gen);
-//     }
-//     return soil_lattice;
-
-    std::vector<bool> soil_lattice(L * L, false); // All sites off
-    soil_lattice[L * L / 2 + L / 2] = true;       // Middle site on
+    std::vector<bool> soil_lattice(L * L);
+    for (int i = 0; i < L * L; ++i)
+    {
+        if (dis(gen) < initialDensity)
+        {
+            soil_lattice[i] = true;
+        }
+    }
     return soil_lattice;
 }
 
@@ -108,10 +107,10 @@ __global__ void normalizeCounts(int *d_countArray, float *d_normalizedArray)
     }
 }
 
-void run(std::ofstream &file)
+void run(std::ofstream &file, float initialDensity)
 {
     // Initialize the lattice
-    std::vector<bool> soil_lattice = initLattice(L);
+    std::vector<bool> soil_lattice = initLattice(initialDensity);
 
     // Initialize CUDA
     cudaSetDevice(0);
@@ -187,15 +186,21 @@ int main(int argc, char *argv[])
 {
     std::string exePath = argv[0];
     std::string exeDir = std::filesystem::path(exePath).parent_path().string();
-    std::ostringstream filePathStream;
-    // filePathStream << exeDir << "/outputs/timeseries2D/randomIC/p_" << P << ".csv";
-    filePathStream << exeDir << "/outputs/timeseries2D/seedIC/p_" << P << ".csv";
-    std::string filePath = filePathStream.str();
 
-    std::ofstream file;
-    file.open(filePath);
-    run(file);
-    file.close();
+    std::vector<float> densities = {0.0000001, 0.0000002, 0.0000003, 0.0000004, 0.0000005, 0.0000006, 0.0000007, 0.0000008, 0.0000009}; // Add your densities here
+
+    for (float density : densities)
+    {
+        std::cout << "Density: " << density << std::endl;
+        std::ostringstream filePathStream;
+        filePathStream << exeDir << "/outputs/timeseries2D/variableDensity/rho_" << density << "_p_" << P << "_" << time(0) << ".csv";
+        std::string filePath = filePathStream.str();
+
+        std::ofstream file;
+        file.open(filePath);
+        run(file, density);
+        file.close();
+    }
 
     return 0;
 }
