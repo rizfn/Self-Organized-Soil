@@ -194,6 +194,9 @@ void run(std::ofstream &file)
         // Initialize the lattice
         std::vector<bool> soil_lattice(L * L, false); // All sites off
         soil_lattice[L * L / 2 + L / 2] = true;       // Middle site on
+        soil_lattice[L * (L / 2 + 1) + L / 2] = true;
+        soil_lattice[L * L / 2 + (L / 2 + 1)] = true;
+        soil_lattice[L * (L / 2 + 1) + (L / 2 + 1)] = true;
 
         // Initialize the RNG states
         initCurand<<<L, L>>>(d_state, time(0) + simulationNumber);
@@ -277,7 +280,7 @@ int main(int argc, char *argv[])
     std::string exeDir = std::filesystem::path(exePath).parent_path().string();
 
     std::ostringstream filePathStream;
-    filePathStream << exeDir << "/outputs/grassberger/p_" << P << "_L_" << L << ".csv";
+    filePathStream << exeDir << "/outputs/grassberger/4IC_p_" << P << "_L_" << L << ".csv";
     std::string filePath = filePathStream.str();
 
     std::ofstream file;

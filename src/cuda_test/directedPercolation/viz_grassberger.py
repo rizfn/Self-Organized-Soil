@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 def main():
     p = 0.2873
     L = 1024
-    df = pd.read_csv(f'src/cuda_test/directedPercolation/outputs/grassberger/p_{p}_L_{L}.csv')
+    # df = pd.read_csv(f'src/cuda_test/directedPercolation/outputs/grassberger/p_{p}_L_{L}.csv')
+    df = pd.read_csv(f'src/cuda_test/directedPercolation/outputs/grassberger/4IC_p_{p}_L_{L}.csv')
 
     total_simulations = df['simulation'].nunique()
 
@@ -55,7 +56,7 @@ def main():
     ylim = axs[1].get_ylim()
     eta = 0.214
     x = np.array(n_t.index)
-    axs[1].plot(x, x**eta, label=r'$\eta=$' + f'{eta} power law', linestyle='--', alpha=0.5)
+    axs[1].plot(x, n_t[0]*x**eta, label=r'$\eta=$' + f'{eta} power law', linestyle='--', alpha=0.5)
     axs[1].legend()
     axs[1].set_ylim(ylim)
 
