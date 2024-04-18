@@ -14,8 +14,7 @@
 // Define constants
 constexpr double P = 0.2873;
 constexpr int L = 1024;
-constexpr int N_STEPS = 500;
-constexpr float initialDensity = 2e-6;
+constexpr int N_STEPS = 1000;
 
 std::random_device rd;
 std::mt19937 gen(rd());
@@ -23,14 +22,9 @@ std::uniform_real_distribution<> dis(0, 1);
 
 std::vector<bool> initLattice()
 {
-    std::vector<bool> soil_lattice(L * L);
-    for (int i = 0; i < L * L; ++i)
-    {
-        if (dis(gen) < initialDensity)
-        {
-            soil_lattice[i] = true;
-        }
-    }
+    std::vector<bool> soil_lattice(L * L, false); // Initialize all sites to false
+    int centralIndex = L * (L / 2) + L / 2;       // Calculate the index of the central site
+    soil_lattice[centralIndex] = true;            // Set the central site to true
     return soil_lattice;
 }
 
@@ -156,7 +150,7 @@ int main(int argc, char *argv[])
     std::string exePath = argv[0];
     std::string exeDir = std::filesystem::path(exePath).parent_path().string();
     std::ostringstream filePathStream;
-    filePathStream << exeDir << "/outputs/lattice2D/CUDA_rho_" << initialDensity << "_p_" << P << "_L_" << L << ".csv";
+    filePathStream << exeDir << "/outputs/lattice2D/CUDA_p_" << P << "_L_" << L << ".csv";
     std::string filePath = filePathStream.str();
 
     std::ofstream file;

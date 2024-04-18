@@ -72,12 +72,13 @@ def main():
     ylim = axs[2].get_ylim()
     z = 1.134
     x = np.array(R2_t.index)
-    axs[2].plot(x, x**z, label=r'$z=$' + f'{z} power law', linestyle='--', alpha=0.5)
+    axs[2].plot(x, R2_t[0]*x**z, label=r'$z=$' + f'{z} power law', linestyle='--', alpha=0.5)
     axs[2].legend()
     axs[2].set_ylim(ylim)
 
     plt.tight_layout()
     # plt.savefig(f'src/cuda_test/directedPercolation/plots/grassberger/p_{p}_L_{L}.png', dpi=300)
+    plt.savefig(f'src/cuda_test/directedPercolation/plots/grassberger/4IC_p_{p}_L_{L}.png', dpi=300)
     plt.show()
 
 if __name__ == '__main__':

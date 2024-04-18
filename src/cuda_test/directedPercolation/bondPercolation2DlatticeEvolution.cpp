@@ -8,8 +8,8 @@
 #include <filesystem>
 
 constexpr double P = 0.2873;
-constexpr int L = 100;
-constexpr int N_STEPS = 500;
+constexpr int L = 1024;
+constexpr int N_STEPS = 1000;
 
 std::random_device rd;
 std::mt19937 gen(rd());
@@ -19,9 +19,6 @@ std::vector<std::vector<bool>> initLattice()
 {
     std::vector<std::vector<bool>> soil_lattice(L, std::vector<bool>(L, false));
     soil_lattice[L / 2][L / 2] = true;
-    soil_lattice[L / 2][(L / 2) + 1] = true;
-    soil_lattice[(L / 2) + 1][L / 2] = true;
-    soil_lattice[(L / 2) + 1][(L / 2) + 1] = true;
     return soil_lattice;
 }
 

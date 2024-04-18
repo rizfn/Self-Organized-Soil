@@ -100,7 +100,14 @@ def plot_one(sigma, theta):
 
     # Calculate P(t), n(t), and R^2(t)
     P_t = df.groupby('time')['simulation'].nunique() / total_simulations
-    n_t = df.groupby('time')['activeCounts'].mean()
+
+    all_times = pd.DataFrame({
+        'time': np.repeat(df['time'].unique(), total_simulations),
+        'simulation': np.tile(np.arange(total_simulations), len(df['time'].unique())),
+    })
+    df_full = pd.merge(all_times, df, how='left').fillna(0)
+    n_t = df_full.groupby('time')['activeCounts'].mean()
+
     R2_t = df.groupby('time')['R2'].mean()
 
     fig, axs = plt.subplots(1, 3, figsize=(15, 5))
