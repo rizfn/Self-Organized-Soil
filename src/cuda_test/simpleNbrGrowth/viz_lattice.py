@@ -14,7 +14,7 @@ def read_large_file(file_object):
 def main():
 
     sigma = 1
-    theta = 0.3
+    theta = 0.38
     # Load the CSV file
     with open(f'src/cuda_test/simpleNbrGrowth/outputs/lattice2D/sigma_{sigma}_theta_{theta}.csv', 'r') as file:
         file_gen = read_large_file(file)
@@ -23,6 +23,8 @@ def main():
         for line in tqdm(file_gen):
             # Extract the lattice data
             lattice = np.fromstring(line, sep=',')[1:]
+
+    print(lattice.sum()/len(lattice))
 
     # Display the final lattice using imshow
     plt.imshow(lattice.reshape((int(np.sqrt(len(lattice))), int(np.sqrt(len(lattice))))), cmap='viridis', origin='lower')
@@ -68,6 +70,59 @@ def animate():
     pbar.close()
     plt.show()
 
+import cc3d
+import matplotlib.colors as mcolors
+import numpy as np
+
+
+
+def color_clusters(filename):
+    with open(filename, 'r') as file:
+        file_gen = read_large_file(file)
+        header = next(file_gen)  # Skip the header
+
+        for line in tqdm(file_gen):
+            # Extract the lattice data
+            lattice = np.fromstring(line, sep=',')[1:]
+
+    print(lattice.sum()/len(lattice))
+    lattice = lattice.reshape((int(np.sqrt(len(lattice))), int(np.sqrt(len(lattice)))))
+
+    labels_out = cc3d.connected_components(lattice, connectivity=4, periodic_boundary=True)
+
+    # # Count the occurrences of each label to get the cluster sizes
+    # cluster_sizes = np.bincount(labels_out.ravel())
+    # cluster_sizes = cluster_sizes[1:]
+    # counts, bin_edges = np.histogram(cluster_sizes, bins=np.logspace(np.log10(1),np.log10(max(cluster_sizes)), 50))
+    # bin_widths = np.diff(bin_edges)
+    # normalized_counts = counts / bin_widths
+    # plt.bar(bin_edges[:-1], normalized_counts, width=bin_widths, align='edge', log=True)
+    # plt.xscale('log')
+    # plt.yscale('log')
+    # plt.title('Cluster size distribution')
+    # plt.xlabel('Cluster size')
+    # plt.ylabel('Frequency')
+    # plt.show()
+
+    cmap = plt.get_cmap('gist_rainbow')
+    colors = cmap(np.linspace(0, 1, cmap.N))
+    colors[0, :] = [0, 0, 0, 1]
+    cmap = mcolors.LinearSegmentedColormap.from_list('Custom', colors, cmap.N)
+
+    labels_out_unique = np.unique(labels_out)
+    np.random.shuffle(labels_out_unique[1:])  # Shuffle in-place
+    labels_out = np.vectorize(lambda x: labels_out_unique[x])(labels_out)
+    
+    fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+    axs[0].imshow(lattice, origin='lower')
+    axs[1].imshow(labels_out, cmap=cmap, origin='lower')
+    # plt.savefig(f'src/cuda_test/simpleNbrGrowth/plots/lattice2D/colored_clusters_FSPL.png', dpi=300)
+    plt.show()
+
+
+
+
 if __name__ == '__main__':
     # main()
-    animate()
+    # animate()
+    color_clusters('src/cuda_test/simpleNbrGrowth/outputs/lattice2D/sigma_1_theta_0.38.csv')

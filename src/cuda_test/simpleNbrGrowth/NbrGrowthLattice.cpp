@@ -15,9 +15,9 @@ static auto _ = []()
 
 // Define constants
 constexpr double SIGMA = 1;
-constexpr double THETA = 0.5;
+constexpr double THETA = 0.38;
 constexpr int L = 100; // 2^10 = 1024
-constexpr long long STEPS_PER_LATTICEPOINT = 200;
+constexpr long long STEPS_PER_LATTICEPOINT = 2000;
 constexpr long long N_STEPS = STEPS_PER_LATTICEPOINT * L * L;
 constexpr int RECORDING_INTERVAL = 1;
 
@@ -100,16 +100,17 @@ void run(std::ofstream &file)
         updateLattice(lattice);
         if (step % (RECORDING_INTERVAL * L * L) == 0)
         {
-            // Write the lattice for this step
-            file << step;
-            for (const auto &cell : lattice)
-            {
-                file << "," << cell;
-            }
-            file << "\n";
+            // file << step;
             std::cout << "Progress: " << std::fixed << std::setprecision(2) << static_cast<double>(step) / N_STEPS * 100 << "%\r" << std::flush;
         }
     }
+    file << N_STEPS;
+    // Write the lattice for this step
+    for (const auto &cell : lattice)
+    {
+        file << "," << cell;
+    }
+    file << "\n";
 }
 
 int main(int argc, char *argv[])
