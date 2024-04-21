@@ -25,12 +25,12 @@ thread_local std::random_device rd;
 thread_local std::mt19937 gen(rd());
 
 // Define constants
-constexpr double SIGMA = 0.5;
-constexpr std::array<double, 6> theta_values = {0.135, 0.136, 0.137, 0.258, 0.259, 0.26};
-constexpr int L = 2048; // 2^10 = 1024
-constexpr long long STEPS_PER_LATTICEPOINT = 2000;
+constexpr double SIGMA = 1;
+constexpr std::array<double, 6> theta_values = {0.378, 0.38, 0.382, 0.454, 0.456, 0.458};
+constexpr int L = 4096; // 2^10 = 1024
+constexpr long long STEPS_PER_LATTICEPOINT = 3000;
 constexpr int RECORDING_INTERVAL = 20;
-constexpr long long RECORDING_STEP = 1000;
+constexpr long long RECORDING_STEP = 2000;
 
 std::uniform_int_distribution<> dis(0, 1);
 std::uniform_int_distribution<> dis_site(0, L *L - 1);
@@ -138,18 +138,47 @@ private:
 std::pair<std::vector<int>, std::vector<int>> get_cluster_sizes(const std::vector<bool>& lattice, int L) {
     UnionFind uf_filled(L * L);
     UnionFind uf_empty(L * L);
-    for (int i = 0; i < L; ++i) {
-        for (int j = 0; j < L; ++j) {
-            if (lattice[i * L + j]) {
-                uf_filled.union_set(i * L + j, ((i - 1 + L) % L) * L + j);
-                uf_filled.union_set(i * L + j, i * L + ((j - 1 + L) % L));
-                uf_filled.union_set(i * L + j, ((i + 1) % L) * L + j);
-                uf_filled.union_set(i * L + j, i * L + ((j + 1) % L));
-            } else {
-                uf_empty.union_set(i * L + j, ((i - 1 + L) % L) * L + j);
-                uf_empty.union_set(i * L + j, i * L + ((j - 1 + L) % L));
-                uf_empty.union_set(i * L + j, ((i + 1) % L) * L + j);
-                uf_empty.union_set(i * L + j, i * L + ((j + 1) % L));
+    for (int i = 0; i < L; ++i)
+    {
+        for (int j = 0; j < L; ++j)
+        {
+            if (lattice[i * L + j])
+            {
+                if (lattice[((i - 1 + L) % L) * L + j])
+                {
+                    uf_filled.union_set(i * L + j, ((i - 1 + L) % L) * L + j);
+                }
+                if (lattice[i * L + ((j - 1 + L) % L)])
+                {
+                    uf_filled.union_set(i * L + j, i * L + ((j - 1 + L) % L));
+                }
+                if (lattice[((i + 1) % L) * L + j])
+                {
+                    uf_filled.union_set(i * L + j, ((i + 1) % L) * L + j);
+                }
+                if (lattice[i * L + ((j + 1) % L)])
+                {
+                    uf_filled.union_set(i * L + j, i * L + ((j + 1) % L));
+                }
+            }
+            else
+            {
+                if (!lattice[((i - 1 + L) % L) * L + j])
+                {
+                    uf_empty.union_set(i * L + j, ((i - 1 + L) % L) * L + j);
+                }
+                if (!lattice[i * L + ((j - 1 + L) % L)])
+                {
+                    uf_empty.union_set(i * L + j, i * L + ((j - 1 + L) % L));
+                }
+                if (!lattice[((i + 1) % L) * L + j])
+                {
+                    uf_empty.union_set(i * L + j, ((i + 1) % L) * L + j);
+                }
+                if (!lattice[i * L + ((j + 1) % L)])
+                {
+                    uf_empty.union_set(i * L + j, i * L + ((j + 1) % L));
+                }
             }
         }
     }
@@ -239,10 +268,11 @@ int main(int argc, char *argv[])
             std::string exeDir = std::filesystem::path(exePath).parent_path().string();
 
             std::ostringstream filename;
+            // filename << exeDir << "/outputs/csd/sigma_" << SIGMA << "_theta_" << theta << ".tsv";
             // filename << exeDir << "/outputs/csd_criticalpoints/sigma_" << SIGMA << "_theta_" << theta << ".tsv";
             // filename << exeDir << "/outputs/csd_criticalpoints/small_system/sigma_" << SIGMA << "_theta_" << theta << ".tsv";
-            // filename << exeDir << "/outputs/csd_criticalpoints/large_system/sigma_" << SIGMA << "_theta_" << theta << ".tsv";
-            filename << exeDir << "/outputs/csd_criticalPoints/small_sigma/sigma_" << SIGMA << "_theta_" << theta << ".tsv";
+            filename << exeDir << "/outputs/csd_criticalpoints/large_system/sigma_" << SIGMA << "_theta_" << theta << ".tsv";
+            // filename << exeDir << "/outputs/csd_criticalPoints/small_sigma/sigma_" << SIGMA << "_theta_" << theta << ".tsv";
 
             std::ofstream file(filename.str());
 
