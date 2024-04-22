@@ -494,4 +494,8 @@ Check if powerlaw is valid for different values of sigma, and if grassbergers ex
 
 ## Meeting 36: 17th April 2024
 
+Dimension 1: drawing boxes, plot N(boxes) vs box size
+Dimension 2: plot mass of each cluster vs largest linear dimension of that cluster
+Dimension 3: Reduce every cluster to a point (within the cluster), and do box counting on the points
 
+Also check if after fixing bug, correlation between survival and power law
