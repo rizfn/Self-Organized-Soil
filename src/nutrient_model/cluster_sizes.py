@@ -1,6 +1,6 @@
 import numpy as np
 from tqdm import tqdm
-from scipy import ndimage
+import cc3d
 import matplotlib.pyplot as plt
 from nutrient_utils import run_stochastic
 
@@ -23,8 +23,8 @@ def calculate_cluster_sizes(soil_lattice_data, target_site=1):
     cluster_sizes = []
     for i in range(len(soil_lattice_data)):
         m = soil_lattice_data[i] == target_site
-        lw, num = ndimage.label(m)
-        sizes = ndimage.sum(m, lw, index=np.arange(num + 1))
+        labels_out = cc3d.connected_components(m, connectivity=4, periodic_boundary=True)
+        sizes = np.bincount(labels_out.flat)[1:]  # Skip the background (label 0)
         cluster_sizes.append(sizes)
     return cluster_sizes
 
@@ -33,11 +33,11 @@ def main():
 
     # initialize the parameters
     steps_per_latticepoint = 1_000  # number of time steps for each lattice point
-    L = 200  # side length of the square lattice
+    L = 500  # side length of the square lattice
     n_steps = steps_per_latticepoint * L**2  # number of bacteria moves
     rho = 1  # reproduction rate
-    theta = 0.14  # death rate
-    sigma = 0.2  # soil filling rate
+    theta = 0.006  # death rate
+    sigma = 1.0  # soil filling rate
     delta = 0 # nutrient decay rate
 
     steps_to_record = np.arange(n_steps//2, n_steps, 20 * L**2, dtype=np.int32)
@@ -74,8 +74,8 @@ def main():
     plt.xscale('log')
     plt.yscale('log')
     plt.legend()
-    # plt.savefig(f'src/nutrient_model/plots/cluster_sizes_{theta=}_{sigma=}.png', dpi=300)
-    plt.savefig(f'src/nutrient_model/plots/cluster_sizes_{L=}_{theta=}_{sigma=}.png', dpi=300)
+    plt.savefig(f'src/nutrient_model/plots/csd/cluster_sizes_{theta=}_{sigma=}.png', dpi=300)
+    # plt.savefig(f'src/nutrient_model/plots/csd/cluster_sizes_{L=}_{theta=}_{sigma=}.png', dpi=300)
     plt.show()
 
 if __name__ == "__main__":

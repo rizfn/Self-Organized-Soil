@@ -14,6 +14,7 @@ src/coupled_map_lattice/snowflake/outputs/
 src/cuda_test/outputs/
 src/cuda_test/directedPercolation/outputs/
 src/cuda_test/simpleNbrGrowth/outputs/
+src/nutrient_model/outputs/
 src/nutrient_mutations/outputs/
 src/two_species_same_nutrient/outputs/
 src/IUPAB_abstract/outputs/
