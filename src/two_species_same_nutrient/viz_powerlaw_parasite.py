@@ -15,20 +15,20 @@ def load_csv(filename):
 
 
 def main():
-    # steps, cluster_sizes = load_csv('src/nutrient_mutations/outputs/parasite_CSD.csv')
-    # steps, cluster_sizes = load_csv('src/nutrient_mutations/outputs/parasite_CSD/sigma_1_theta_0.038.csv')
-    # steps, cluster_sizes = load_csv('src/nutrient_mutations/outputs/parasite_CSD/sigma_0.6_theta_0.04.csv')
-    steps, cluster_sizes = load_csv('src/nutrient_mutations/outputs/parasite_CSD_3D/sigma_1_theta_0.01.csv')
-    # steps, cluster_sizes = load_csv('src/nutrient_mutations/outputs/parasite_CSD_3D/sigma_0.6_theta_0.03.csv')
+    # steps, cluster_sizes = load_csv('src/nutrient_mutations/outputs/parasite_CSD/sigma_0.5_theta_0.04.csv')
+    steps, cluster_sizes = load_csv('src/nutrient_mutations/outputs/parasite_CSD/sigma_0.5_theta_0.03.csv')
+    # steps, cluster_sizes = load_csv('src/nutrient_mutations/outputs/parasite_CSD/sigma_0.5_theta_0.02.csv')
+    
+    n_datapoints = len(cluster_sizes)
     # histogram and plot all the cluster sizes
     plt.figure(figsize=(6, 4))
     num_bins = 100
     min_size = 1  # smallest cluster size
-    max_size = max(max(sublist) for sublist in cluster_sizes[500:])
+    max_size = max(max(sublist) for sublist in cluster_sizes[n_datapoints//2:])
     bins = np.logspace(np.log10(min_size), np.log10(max_size), num=num_bins)
 
     # Calculate histograms and plot
-    flat_cluster_sizes = [item for sublist in cluster_sizes[500:] for item in sublist]
+    flat_cluster_sizes = [item for sublist in cluster_sizes[n_datapoints//2:] for item in sublist]
     hist, edges = np.histogram(flat_cluster_sizes, bins=bins, density=False)
     bin_widths = np.diff(edges)
     hist = hist / bin_widths  # Normalize by bin width

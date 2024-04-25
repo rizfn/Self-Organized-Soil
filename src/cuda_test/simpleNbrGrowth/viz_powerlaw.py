@@ -31,7 +31,8 @@ def load_csv(filename):
             steps.append(int(row[0]))  # Convert to int and add to steps
             # Check if the row is empty before splitting and converting to int
             filled_cluster_sizes.append([int(x) for x in row[1].split(',')] if row[1] else [0])
-            empty_cluster_sizes.append([int(x) for x in row[2].split(',')] if row[2] else [0])
+            empty_cluster_sizes.append([int(x) for x in row[2].split(',') if x] if row[2] else [0])
+            # empty_cluster_sizes.append([int(x) for x in row[2].split(',')] if row[2] else [0])
     return steps, filled_cluster_sizes, empty_cluster_sizes
 
 
@@ -82,7 +83,8 @@ def main(directory, outputfilename):
         ax.set_ylabel('Probability density')
         ylim = ax.get_ylim()
 
-        tau1, tau2 = 2, 3
+        # tau1, tau2 = 2, 3
+        tau1, tau2 = 1.8, 1.9
         x = np.array(edges[:-1])
         ax.plot(x, 5e6*x**-tau1, label=r'$\tau=$' + f'{tau1} power law', linestyle='--', alpha=0.5)
         ax.plot(x, 5e6*x**-tau2, label=r'$\tau=$' + f'{tau2} power law', linestyle='--', alpha=0.5)

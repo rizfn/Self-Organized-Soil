@@ -21,12 +21,13 @@ struct Coordinate
 // Define constants
 constexpr int STEPS_PER_LATTICEPOINT = 1000;
 constexpr double SIGMA = 0.5;
-constexpr double THETA = 0.025;
-constexpr double RHO1 = 0.5;
-constexpr double MU1 = 0.5;
+constexpr double THETA = 0.05;
+constexpr double RHO1 = 0.25;
+constexpr double MU1 = 1;
 constexpr double RHO2 = 1;
 constexpr double MU2 = 0;
 constexpr int L = 1000; // side length of the square lattice
+constexpr int RECORDING_INTERVAL = 10;
 
 constexpr int EMPTY = 0;
 constexpr int NUTRIENT = 1;
@@ -171,27 +172,33 @@ void update(std::vector<std::vector<int>> &soil_lattice, int L, double sigma, do
     }
 }
 
-class UnionFind {
+class UnionFind
+{
 public:
-    UnionFind(int n) : parent(n), rank(n, 0) {
+    UnionFind(int n) : parent(n), rank(n, 0)
+    {
         for (int i = 0; i < n; ++i)
             parent[i] = i;
     }
 
-    int find(int i) {
+    int find(int i)
+    {
         if (parent[i] != i)
             parent[i] = find(parent[i]);
         return parent[i];
     }
 
-    void union_set(int i, int j) {
+    void union_set(int i, int j)
+    {
         int ri = find(i), rj = find(j);
-        if (ri != rj) {
+        if (ri != rj)
+        {
             if (rank[ri] < rank[rj])
                 parent[ri] = rj;
             else if (rank[ri] > rank[rj])
                 parent[rj] = ri;
-            else {
+            else
+            {
                 parent[ri] = rj;
                 ++rank[rj];
             }
@@ -202,23 +209,34 @@ private:
     std::vector<int> parent, rank;
 };
 
-std::vector<int> get_cluster_sizes(const std::vector<std::vector<int>>& soil_lattice, int L) {
+std::vector<int> get_cluster_sizes(const std::vector<std::vector<int>> &soil_lattice, int L)
+{
     UnionFind uf(L * L);
-    for (int i = 0; i < L; ++i) {
-        for (int j = 0; j < L; ++j) {
-            if (soil_lattice[i][j] == 2) {
-                if (i > 0 && soil_lattice[i - 1][j] == 2)
-                    uf.union_set(i * L + j, (i - 1) * L + j);
-                if (j > 0 && soil_lattice[i][j - 1] == 2)
-                    uf.union_set(i * L + j, i * L + j - 1);
+    for (int i = 0; i < L; ++i)
+    {
+        for (int j = 0; j < L; ++j)
+        {
+            if (soil_lattice[i][j] == 2)
+            {
+                if (soil_lattice[(i - 1 + L) % L][j] == 2)
+                    uf.union_set(i * L + j, ((i - 1 + L) % L) * L + j);
+                if (soil_lattice[i][(j - 1 + L) % L] == 2)
+                    uf.union_set(i * L + j, i * L + ((j - 1 + L) % L));
+                if (soil_lattice[(i + 1) % L][j] == 2)
+                    uf.union_set(i * L + j, ((i + 1) % L) * L + j);
+                if (soil_lattice[i][(j + 1) % L] == 2)
+                    uf.union_set(i * L + j, i * L + ((j + 1) % L));
             }
         }
     }
 
     std::unordered_map<int, int> cluster_sizes;
-    for (int i = 0; i < L; ++i) {
-        for (int j = 0; j < L; ++j) {
-            if (soil_lattice[i][j] == 2) {
+    for (int i = 0; i < L; ++i)
+    {
+        for (int j = 0; j < L; ++j)
+        {
+            if (soil_lattice[i][j] == 2)
+            {
                 int root = uf.find(i * L + j);
                 ++cluster_sizes[root];
             }
@@ -226,26 +244,30 @@ std::vector<int> get_cluster_sizes(const std::vector<std::vector<int>>& soil_lat
     }
 
     std::vector<int> sizes;
-    for (const auto& pair : cluster_sizes)
+    for (const auto &pair : cluster_sizes)
         sizes.push_back(pair.second);
     return sizes;
 }
 
-void run_csd(int n_steps, int L, double sigma, double theta, double rho1, double rho2, double mu1, double mu2, std::ofstream& file)
+void run_csd(double sigma, double theta, double rho1, double rho2, double mu1, double mu2, std::ofstream &file)
 {
     std::vector<std::vector<int>> soil_lattice = init_lattice(L);
 
-    for (int step = 0; step <= n_steps; ++step)
+    for (int step = 0; step <= STEPS_PER_LATTICEPOINT; ++step)
     {
-        update(soil_lattice, L, sigma, theta, rho1, rho2, mu1, mu2);
-        if (step % (L * L) == 0)
+        for (int i = 0; i < L * L; ++i)
         {
-            std::cout << "Progress: " << std::fixed << std::setprecision(2) << static_cast<double>(step) / n_steps * 100 << "%\r" << std::flush;
+            update(soil_lattice, L, sigma, theta, rho1, rho2, mu1, mu2);
+        }
+        std::cout << "Progress: " << std::fixed << std::setprecision(2) << static_cast<double>(step) / STEPS_PER_LATTICEPOINT * 100 << "%\r" << std::flush;
+
+        if (step % RECORDING_INTERVAL != 0)
+        {
             std::vector<int> cluster_sizes = get_cluster_sizes(soil_lattice, L);
 
             // Write the data for this step
-            file << step * L * L;
-            for (const auto& size : cluster_sizes)
+            file << step;
+            for (const auto &size : cluster_sizes)
             {
                 file << "," << size;
             }
@@ -254,16 +276,15 @@ void run_csd(int n_steps, int L, double sigma, double theta, double rho1, double
     }
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
-    // initialize the parameters
-    int n_steps = STEPS_PER_LATTICEPOINT * L * L; // 2D
-
     // Check if command line arguments are provided
     double sigma = SIGMA;
     double theta = THETA;
-    if(argc > 1) sigma = std::stod(argv[1]);
-    if(argc > 2) theta = std::stod(argv[2]);
+    if (argc > 1)
+        sigma = std::stod(argv[1]);
+    if (argc > 2)
+        theta = std::stod(argv[2]);
 
     wchar_t exePath[MAX_PATH];
     GetModuleFileNameW(NULL, exePath, MAX_PATH);
@@ -279,7 +300,7 @@ int main(int argc, char* argv[])
     file << "step,cluster_sizes\n";
 
     // Run the time series
-    run_csd(n_steps, L, sigma, theta, RHO1, RHO2, MU1, MU2, file);
+    run_csd(sigma, theta, RHO1, RHO2, MU1, MU2, file);
 
     file.close();
 
