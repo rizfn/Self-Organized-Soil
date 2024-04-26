@@ -16,13 +16,13 @@ static auto _ = []()
 
 // Define constants
 constexpr double SIGMA = 1;
-constexpr double THETA = 0.38;
-constexpr int L = 1024;             // 2^10 = 1024
+constexpr double THETA = 0.377;
+constexpr int L = 4096;             // 2^10 = 1024
 constexpr bool TARGET_SITE = true;  // true = filled sites, false = empty sites
 constexpr int MAX_BOX_SIZE = L / 4; // maximum box size for box counting method
-constexpr int STEPS_PER_LATTICEPOINT = 2000;
+constexpr int STEPS_PER_LATTICEPOINT = 3000;
 constexpr int RECORDING_INTERVAL = 20;
-constexpr int RECORDING_STEP = STEPS_PER_LATTICEPOINT / 2;
+constexpr int RECORDING_STEP = 2000;
 
 std::random_device rd;
 std::mt19937 gen(rd());

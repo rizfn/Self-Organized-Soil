@@ -4,8 +4,8 @@ import pandas as pd
 
 def main():
     sigma = 1
-    theta = 0.4
-    target = 0
+    theta = 0.377
+    target = 1
     df = pd.read_csv(f'src/cuda_test/simpleNbrGrowth/outputs/huber/sigma_{sigma}_theta_{theta}_target_{target}.tsv', sep='\t')
 
     print(df.iloc[0])
@@ -31,40 +31,66 @@ def main():
     counts, bin_edges = np.histogram(cluster_sizes, bins=np.logspace(np.log10(1),np.log10(max(cluster_sizes)), 50))
     bin_widths = np.diff(bin_edges)
     normalized_counts = counts / bin_widths
-    axs[0, 0].bar(bin_edges[:-1], normalized_counts, width=bin_widths, align='edge', log=True)
+    axs[0, 0].plot(bin_edges[:-1], normalized_counts, 'x', linestyle='None')
     axs[0, 0].set_xscale('log')
     axs[0, 0].set_yscale('log')
+    axs[0, 0].grid()
     axs[0, 0].set_title('Cluster size distribution')
     axs[0, 0].set_xlabel('Cluster size')
     axs[0, 0].set_ylabel('Frequency')
-    
+    tau1, tau2 = 1.8, 1.9
+    ylim = axs[0, 0].set_ylim()
+    axs[0, 0].plot(bin_edges[:-1], normalized_counts[0]*np.power(bin_edges[:-1].astype(float), -tau1), label=f"$\\tau$={tau1} power law", linestyle='--')
+    axs[0, 0].plot(bin_edges[:-1], normalized_counts[0]*np.power(bin_edges[:-1].astype(float), -tau2), label=f"$\\tau$={tau2} power law", linestyle='--')
+    axs[0, 0].set_ylim(ylim)
+    axs[0, 0].legend()
+
     # Plot 2: Fractal dimension of each cluster
     axs[0, 1].plot(cluster_lineardim, cluster_sizes, '.', linestyle='None', alpha=0.1)
     axs[0, 1].set_xscale('log')
     axs[0, 1].set_yscale('log')
+    axs[0, 1].grid()
     axs[0, 1].set_title('Fractal dimension of each cluster')
     axs[0, 1].set_xlabel('Linear dimension')
     axs[0, 1].set_ylabel('Cluster size')
+    D = 1.8
+    ylim = axs[0, 1].set_ylim()
+    axs[0, 1].plot(cluster_lineardim, 5e-1*np.power(cluster_lineardim.astype(float), D), label=f"$D$={D} power law", linestyle='--')
+    axs[0, 1].set_ylim(ylim)
+    axs[0, 1].legend()
+
 
     # Plot 3: Sum of fractal dimensions vs box sizes
     axs[1, 0].plot(box_sizes, fractal_dim, 'x', linestyle='None')
     axs[1, 0].set_xscale('log')
     axs[1, 0].set_yscale('log')
+    axs[1, 0].grid()
     axs[1, 0].set_title('Fractal dimension $d_{tot}$')
     axs[1, 0].set_xlabel('Box size')
     axs[1, 0].set_ylabel('Number of intersecting boxes')
+    D_tot = 2
+    ylim = axs[1, 0].set_ylim()
+    axs[1, 0].plot(box_sizes, 1.5e7*np.power(box_sizes.astype(float), -D_tot), label=f"$D_{{tot}}$={D_tot} power law", linestyle='--')
+    axs[1, 0].set_ylim(ylim)
+    axs[1, 0].legend()
 
     # Plot 4: Sum of point fractal dimensions vs box sizes
     axs[1, 1].plot(box_sizes, point_fractal_dim, 'x', linestyle='None')
     axs[1, 1].set_xscale('log')
     axs[1, 1].set_yscale('log')
+    axs[1, 1].grid()
     axs[1, 1].set_title('Point fractal dimension (each cluster is a point)')
     axs[1, 1].set_xlabel('Box size')
     axs[1, 1].set_ylabel('Number of intersecting boxes')
+    D_num = 2
+    ylim = axs[1, 1].set_ylim()
+    axs[1, 1].plot(box_sizes, 1.6e7*np.power(box_sizes.astype(float), -D_num), label=f"$D_{{num}}$={D_num} power law", linestyle='--')
+    axs[1, 1].set_ylim(ylim)
+    axs[1, 1].legend()
 
     # Adjust layout
     plt.tight_layout()
-    plt.savefig(f'src/cuda_test/simpleNbrGrowth/outputs/huber/sigma_{sigma}_theta_{theta}_target_{target}.png')
+    plt.savefig(f'src/cuda_test/simpleNbrGrowth/plots/huber/sigma_{sigma}_theta_{theta}_target_{target}.png')
     plt.show()
 
 
@@ -79,7 +105,7 @@ def plot_single_timestep(filename):
     df['point_fractal_dim'] = df['point_fractal_dim'].apply(lambda x: np.array([float(i) for i in x.split(',') if i]))
 
     # Use data for the final timestep
-    final_row = df.iloc[-11]
+    final_row = df.iloc[-1]
     cluster_sizes = final_row['cluster_sizes']
     cluster_lineardim = final_row['cluster_lineardim']
     box_sizes = final_row['box_sizes']
@@ -151,5 +177,5 @@ def plot_single_timestep(filename):
 
 
 if __name__ == '__main__':
-    # main()
-    plot_single_timestep('src/cuda_test/simpleNbrGrowth/outputs/huber/sigma_1_theta_0.38_target_1.tsv')
+    main()
+    # plot_single_timestep('src/cuda_test/simpleNbrGrowth/outputs/huber/sigma_1_theta_0.377_target_1.tsv')
