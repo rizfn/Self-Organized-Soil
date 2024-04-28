@@ -62,7 +62,7 @@ def main():
     p = 0.2873
     L = 512
 
-    filename = f'src/cuda_test/directedPercolation/outputs/latticeEvolution2D/nbrDist_p_{p}_L_{L}.csv'
+    filename = f'src/directedPercolation/outputs/latticeEvolution2D/nbrDist_p_{p}_L_{L}.csv'
 
     distances_list = []
 
@@ -115,7 +115,7 @@ def main():
     plt.plot(bin_edges, 0.3e1*normalized_counts[0]*bin_edges**-tau2, label=f'$\\tau$={tau2} power law', linestyle='--', zorder=-1, alpha=0.8)
     plt.ylim(ylim)
     plt.legend()
-    plt.savefig(f'src/cuda_test/directedPercolation/plots/nbrDist/{p=}_{L=}.png', dpi=300)
+    plt.savefig(f'src/directedPercolation/plots/nbrDist/{p=}_{L=}.png', dpi=300)
     plt.show()
 
 def plot_voronoi(filename):
@@ -138,5 +138,5 @@ def plot_voronoi(filename):
 
 if __name__ == '__main__':
     main()
-    # plot_voronoi('src/cuda_test/directedPercolation/outputs/lattice2D/survival_p_0.2873_L_2048_steps_2000.csv')
+    # plot_voronoi('src/directedPercolation/outputs/lattice2D/survival_p_0.2873_L_2048_steps_2000.csv')
     

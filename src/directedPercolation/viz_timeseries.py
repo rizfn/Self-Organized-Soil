@@ -6,7 +6,7 @@ import re
 
 def main():
     # Get all .csv files in the directory
-    files = glob.glob('src/cuda_test/directedPercolation/outputs/timeseries2D/randomIC/*.csv')
+    files = glob.glob('src/directedPercolation/outputs/timeseries2D/randomIC/*.csv')
 
     for file in files:
         # Use regex to get the p value from the filename
@@ -25,12 +25,12 @@ def main():
     plt.title('Directed Percolation, random ICs')
     plt.legend(loc='upper right', bbox_to_anchor=(1, 0.7))
     plt.ylim(0, 0.75)
-    plt.savefig('src/cuda_test/directedPercolation/plots/timeseries/criticalPointsRandomICs.png', dpi=300)
+    plt.savefig('src/directedPercolation/plots/timeseries/criticalPointsRandomICs.png', dpi=300)
     plt.show()
 
 def seedIC():
     # Get all .csv files in the directory
-    files = glob.glob('src/cuda_test/directedPercolation/outputs/timeseries2D/seedIC/*.csv')
+    files = glob.glob('src/directedPercolation/outputs/timeseries2D/seedIC/*.csv')
 
     for file in files:
         # Use regex to get the p value from the filename
@@ -50,12 +50,12 @@ def seedIC():
     plt.legend()
     plt.legend(loc='upper right', bbox_to_anchor=(1, 0.7))
     plt.ylim(0, 0.75)
-    plt.savefig('src/cuda_test/directedPercolation/plots/timeseries/criticalPointsSeedIC.png', dpi=300)
+    plt.savefig('src/directedPercolation/plots/timeseries/criticalPointsSeedIC.png', dpi=300)
     plt.show()
 
 def variable_density():
     # Get all .csv files in the directory
-    files = glob.glob('src/cuda_test/directedPercolation/outputs/timeseries2D/variableDensity/*.csv')
+    files = glob.glob('src/directedPercolation/outputs/timeseries2D/variableDensity/*.csv')
 
     means = []
 

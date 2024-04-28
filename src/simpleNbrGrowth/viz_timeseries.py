@@ -6,7 +6,7 @@ import glob
 def main():
     sigma = 1
     theta = 1
-    filename = f"src/cuda_test/simpleNbrGrowth/outputs/timeseriesNbrDeath/sigma_{sigma}_theta_{theta}.csv"
+    filename = f"src/simpleNbrGrowth/outputs/timeseriesNbrDeath/sigma_{sigma}_theta_{theta}.csv"
     fig, ax = plt.subplots(figsize=(12, 8))
 
     step, occupied_fracs = np.genfromtxt(filename, delimiter=',', skip_header=1, unpack=True)
@@ -19,14 +19,14 @@ def main():
     ax.set_ylabel("Occupied fraction")
     ax.legend()
     ax.grid()
-    plt.savefig(f"src/cuda_test/simpleNbrGrowth/plots/timeseriesNbrDeath/sigma_{sigma}_theta_{theta}.png", dpi=300)
+    plt.savefig(f"src/simpleNbrGrowth/plots/timeseriesNbrDeath/sigma_{sigma}_theta_{theta}.png", dpi=300)
 
     plt.show()
 
 
 def random_ICs():
     # Get all .csv files in the directory
-    files = glob.glob('src/cuda_test/simpleNbrGrowth/outputs/timeseries/randomICs/*.csv')
+    files = glob.glob('src/simpleNbrGrowth/outputs/timeseries/randomICs/*.csv')
 
     for file in files:
         # Use regex to get the sigma and theta values from the filename
@@ -45,13 +45,13 @@ def random_ICs():
     plt.title('Our model, random ICs')
     plt.legend(loc='upper right', bbox_to_anchor=(1, 0.7))
     plt.ylim(0, 0.75)
-    plt.savefig('src/cuda_test/simpleNbrGrowth/plots/timeseries/criticalPointsRandomICs.png', dpi=300)
+    plt.savefig('src/simpleNbrGrowth/plots/timeseries/criticalPointsRandomICs.png', dpi=300)
     plt.show()
 
 
 def seedIC():
     # Get all .csv files in the directory
-    files = glob.glob('src/cuda_test/simpleNbrGrowth/outputs/timeseries/seedIC/*.csv')
+    files = glob.glob('src/simpleNbrGrowth/outputs/timeseries/seedIC/*.csv')
 
     for file in files:
         # Use regex to get the sigma and theta values from the filename
@@ -71,7 +71,7 @@ def seedIC():
     plt.legend()
     plt.legend(loc='upper right', bbox_to_anchor=(1, 0.7))
     plt.ylim(0, 0.75)
-    plt.savefig('src/cuda_test/simpleNbrGrowth/plots/timeseries/criticalPointsSeedIC.png', dpi=300)
+    plt.savefig('src/simpleNbrGrowth/plots/timeseries/criticalPointsSeedIC.png', dpi=300)
     plt.show()
 
 

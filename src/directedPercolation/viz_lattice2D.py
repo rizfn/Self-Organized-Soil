@@ -7,7 +7,7 @@ def main():
     L = 100
     CUDA = 1
 
-    filename = f'src/cuda_test/directedPercolation/outputs/lattice2D/{"CUDA_" if CUDA else ""}p_{p}_L_{L}.csv'
+    filename = f'src/directedPercolation/outputs/lattice2D/{"CUDA_" if CUDA else ""}p_{p}_L_{L}.csv'
     print(f'Loading {filename}')
     # Load the CSV file
     lattice = np.loadtxt(filename, delimiter=',')
@@ -22,7 +22,7 @@ def density(rho):
     L = 1024
     CUDA = 1
 
-    filename = f'src/cuda_test/directedPercolation/outputs/lattice2D/{"CUDA_" if CUDA else ""}rho_{rho}_p_{p}_L_{L}.csv'
+    filename = f'src/directedPercolation/outputs/lattice2D/{"CUDA_" if CUDA else ""}rho_{rho}_p_{p}_L_{L}.csv'
     print(f'Loading {filename}')
     # Load the CSV file
     lattice = np.loadtxt(filename, delimiter=',')

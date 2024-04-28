@@ -100,7 +100,7 @@ def main(directory, outputfilename):
         ax.set_title(f'$\sigma$: {sigma}, $\\theta$: {theta}')
 
     plt.tight_layout()
-    plt.savefig('src/cuda_test/simpleNbrGrowth/plots/csd/' + outputfilename + '.png', dpi=300)
+    plt.savefig('src/simpleNbrGrowth/plots/csd/' + outputfilename + '.png', dpi=300)
     plt.show()
 
 
@@ -154,15 +154,15 @@ def plot_one(filename):
 
 
 if __name__ == "__main__":
-    # main('src/cuda_test/simpleNbrGrowth/outputs/csd', 'csd_powerlaw')
-    # main('src/cuda_test/simpleNbrGrowth/outputs/csd_criticalpoints', 'critical_points')
-    # main('src/cuda_test/simpleNbrGrowth/outputs/csd_criticalpoints/small_system', 'critical_points_small_system')
-    main('src/cuda_test/simpleNbrGrowth/outputs/csd_criticalpoints/large_system', 'critical_points_large_system')
-    # main('src/cuda_test/simpleNbrGrowth/outputs/csd_3D', 'csd_3D_powerlaw')
-    # main('src/cuda_test/simpleNbrGrowth/outputs/csd_3D_criticalpoints', '3D_critical_points')
-    # main('src/cuda_test/simpleNbrGrowth/outputs/csd_3D_criticalpoints/small_system', '3D_critical_points_small_system')
-    # main('src/cuda_test/simpleNbrGrowth/outputs/csd_criticalpoints/small_sigma', 'critical_points_small_sigma')
-    # plot_one('src/cuda_test/simpleNbrGrowth/outputs/csdNbrDeath/sigma_1_theta_1.csv')
-    # plot_one('src/cuda_test/simpleNbrGrowth/outputs/csdNbrDeath/3D_sigma_1_theta_1.csv')
-    # plot_one('src/cuda_test/simpleNbrGrowth/outputs/csdNbrDeath/6NN_sigma_1_theta_1.tsv')
+    # main('src/simpleNbrGrowth/outputs/csd', 'csd_powerlaw')
+    # main('src/simpleNbrGrowth/outputs/csd_criticalpoints', 'critical_points')
+    # main('src/simpleNbrGrowth/outputs/csd_criticalpoints/small_system', 'critical_points_small_system')
+    main('src/simpleNbrGrowth/outputs/csd_criticalpoints/large_system', 'critical_points_large_system')
+    # main('src/simpleNbrGrowth/outputs/csd_3D', 'csd_3D_powerlaw')
+    # main('src/simpleNbrGrowth/outputs/csd_3D_criticalpoints', '3D_critical_points')
+    # main('src/simpleNbrGrowth/outputs/csd_3D_criticalpoints/small_system', '3D_critical_points_small_system')
+    # main('src/simpleNbrGrowth/outputs/csd_criticalpoints/small_sigma', 'critical_points_small_sigma')
+    # plot_one('src/simpleNbrGrowth/outputs/csdNbrDeath/sigma_1_theta_1.csv')
+    # plot_one('src/simpleNbrGrowth/outputs/csdNbrDeath/3D_sigma_1_theta_1.csv')
+    # plot_one('src/simpleNbrGrowth/outputs/csdNbrDeath/6NN_sigma_1_theta_1.tsv')
 

@@ -6,7 +6,7 @@ import glob
 
 def main():
 
-    filepath = 'src/cuda_test/simpleNbrGrowth/outputs/grassberger/'
+    filepath = 'src/simpleNbrGrowth/outputs/grassberger/'
 
     fig, axs = plt.subplots(1, 3, figsize=(15, 5))
 
@@ -78,13 +78,13 @@ def main():
     axs[2].set_ylim(ylim)
 
     plt.tight_layout()
-    plt.savefig(f'src/cuda_test/simpleNbrGrowth/plots/grassberger/sigma_{sigma}.png', dpi=300)
+    plt.savefig(f'src/simpleNbrGrowth/plots/grassberger/sigma_{sigma}.png', dpi=300)
     plt.show()
 
 
 def plot_one(sigma, theta):
 
-    filepath = 'src/cuda_test/simpleNbrGrowth/outputs/grassberger/critical_point/'
+    filepath = 'src/simpleNbrGrowth/outputs/grassberger/critical_point/'
     df_list = []
 
     for file in glob.glob(filepath + f'sigma_{sigma}_theta_{theta}_*.csv'):
@@ -160,7 +160,7 @@ def plot_one(sigma, theta):
     axs[2].set_ylim(ylim)
 
     plt.tight_layout()
-    plt.savefig(f'src/cuda_test/simpleNbrGrowth/plots/grassberger/sigma_{sigma}_theta_{theta}.png', dpi=300)
+    plt.savefig(f'src/simpleNbrGrowth/plots/grassberger/sigma_{sigma}_theta_{theta}.png', dpi=300)
     plt.show()
 
 if __name__ == '__main__':

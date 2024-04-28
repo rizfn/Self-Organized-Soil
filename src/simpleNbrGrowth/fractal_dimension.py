@@ -26,7 +26,7 @@ def main():
     L = 2048
     steps = 2000
 
-    lattice = np.loadtxt(f'src/cuda_test/simpleNbrGrowth/outputs/lattice2D/survival_sigma_{sigma}_theta_{theta}_L_{L}_steps_{steps}.csv')
+    lattice = np.loadtxt(f'src/simpleNbrGrowth/outputs/lattice2D/survival_sigma_{sigma}_theta_{theta}_L_{L}_steps_{steps}.csv')
 
     # lattice = np.zeros((L, L))
     # lattice[:, L//2] = 1

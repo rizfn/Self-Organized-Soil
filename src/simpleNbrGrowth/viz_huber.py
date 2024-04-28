@@ -6,7 +6,7 @@ def main():
     sigma = 1
     theta = 0.377
     target = 1
-    df = pd.read_csv(f'src/cuda_test/simpleNbrGrowth/outputs/huber/sigma_{sigma}_theta_{theta}_target_{target}.tsv', sep='\t')
+    df = pd.read_csv(f'src/simpleNbrGrowth/outputs/huber/sigma_{sigma}_theta_{theta}_target_{target}.tsv', sep='\t')
 
     print(df.iloc[0])
 
@@ -90,7 +90,7 @@ def main():
 
     # Adjust layout
     plt.tight_layout()
-    plt.savefig(f'src/cuda_test/simpleNbrGrowth/plots/huber/sigma_{sigma}_theta_{theta}_target_{target}.png')
+    plt.savefig(f'src/simpleNbrGrowth/plots/huber/sigma_{sigma}_theta_{theta}_target_{target}.png')
     plt.show()
 
 
@@ -178,4 +178,4 @@ def plot_single_timestep(filename):
 
 if __name__ == '__main__':
     main()
-    # plot_single_timestep('src/cuda_test/simpleNbrGrowth/outputs/huber/sigma_1_theta_0.377_target_1.tsv')
+    # plot_single_timestep('src/simpleNbrGrowth/outputs/huber/sigma_1_theta_0.377_target_1.tsv')

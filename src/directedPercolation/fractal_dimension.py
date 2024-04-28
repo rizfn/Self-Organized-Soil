@@ -25,7 +25,7 @@ def main():
     L = 2048
     steps = 2000
 
-    lattice = np.loadtxt(f'src/cuda_test/directedPercolation/outputs/lattice2D/survival_p_{p}_L_{L}_steps_{steps}.csv')
+    lattice = np.loadtxt(f'src/directedPercolation/outputs/lattice2D/survival_p_{p}_L_{L}_steps_{steps}.csv')
 
     plt.imshow(lattice, cmap='binary')
     plt.show()

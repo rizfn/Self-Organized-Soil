@@ -3,7 +3,7 @@ import glob
 import numpy as np
 
 # Get all file names
-files = glob.glob('src/cuda_test/directedPercolation/outputs/timeseries1D/*.tsv')
+files = glob.glob('src/directedPercolation/outputs/timeseries1D/*.tsv')
 
 # Sort files into three categories
 directed_percolation_files = sorted([file for file in files if 'dirP' in file.rsplit('/', 1)[-1]])
@@ -32,5 +32,5 @@ for i, file in enumerate(model_files[:4]):
     axs[i, 2].set_title(file.rsplit('/', 1)[-1].rsplit('\\', 1)[-1])
 
 plt.tight_layout()
-plt.savefig('src/cuda_test/directedPercolation/plots/directed_percolation.png')
+plt.savefig('src/directedPercolation/plots/directed_percolation.png')
 plt.show()

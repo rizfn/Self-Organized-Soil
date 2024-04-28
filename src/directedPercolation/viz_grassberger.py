@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 def main():
     p = 0.2873
     L = 1024
-    # df = pd.read_csv(f'src/cuda_test/directedPercolation/outputs/grassberger/p_{p}_L_{L}.csv')
-    df = pd.read_csv(f'src/cuda_test/directedPercolation/outputs/grassberger/4IC_p_{p}_L_{L}.csv')
+    # df = pd.read_csv(f'src/directedPercolation/outputs/grassberger/p_{p}_L_{L}.csv')
+    df = pd.read_csv(f'src/directedPercolation/outputs/grassberger/4IC_p_{p}_L_{L}.csv')
 
     total_simulations = df['simulation'].nunique()
 
@@ -77,8 +77,8 @@ def main():
     axs[2].set_ylim(ylim)
 
     plt.tight_layout()
-    # plt.savefig(f'src/cuda_test/directedPercolation/plots/grassberger/p_{p}_L_{L}.png', dpi=300)
-    plt.savefig(f'src/cuda_test/directedPercolation/plots/grassberger/4IC_p_{p}_L_{L}.png', dpi=300)
+    # plt.savefig(f'src/directedPercolation/plots/grassberger/p_{p}_L_{L}.png', dpi=300)
+    plt.savefig(f'src/directedPercolation/plots/grassberger/4IC_p_{p}_L_{L}.png', dpi=300)
     plt.show()
 
 if __name__ == '__main__':

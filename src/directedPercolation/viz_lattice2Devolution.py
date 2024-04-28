@@ -26,12 +26,12 @@ def main():
     p = 0.2873
     L = 100
 
-    filename = f'src/cuda_test/directedPercolation/outputs/latticeEvolution2D/p_{p}_L_{L}.csv'
+    filename = f'src/directedPercolation/outputs/latticeEvolution2D/p_{p}_L_{L}.csv'
     lattices = load_lattices(filename)
 
     sigma = 1
     theta = 0.605
-    filename = f'src/cuda_test/simpleNbrGrowth/outputs/latticeEvolution2D/sigma_{sigma}_theta_{theta}_L_{L}.csv'
+    filename = f'src/simpleNbrGrowth/outputs/latticeEvolution2D/sigma_{sigma}_theta_{theta}_L_{L}.csv'
     lattices_2 = load_lattices(filename)
 
     fig, axs = plt.subplots(1, 2, figsize=(14,8))
@@ -57,7 +57,7 @@ def main():
 
     ani = animation.FuncAnimation(fig, update_with_progress, frames=len(lattices))
 
-    ani.save('src/cuda_test/directedPercolation/plots/timeseries/fourActiveInit.mp4', writer='ffmpeg', dpi=300, fps=30)
+    ani.save('src/directedPercolation/plots/timeseries/fourActiveInit.mp4', writer='ffmpeg', dpi=300, fps=30)
 
     pbar.close()
 

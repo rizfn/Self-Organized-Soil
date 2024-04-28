@@ -95,7 +95,7 @@ def main(directory, outputfilename):
         ax.set_title(f'p: {p},  L: {L}')
 
     plt.tight_layout()
-    plt.savefig('src/cuda_test/directedPercolation/plots/csd/' + outputfilename + '.png', dpi=300)
+    plt.savefig('src/directedPercolation/plots/csd/' + outputfilename + '.png', dpi=300)
     plt.show()
 
 
@@ -150,6 +150,6 @@ def plot_one(filename):
 
 
 if __name__ == '__main__':
-    main('src/cuda_test/directedPercolation/outputs/CSD2D/criticalPoints/', 'criticalPoints2D')
-    # main('src/cuda_test/directedPercolation/outputs/CSD2D/otherPoints/', 'standardCriticalPoint2D')
-    # plot_one('src/cuda_test/directedPercolation/outputs/CSD2D/p_0.46_L_1024.tsv')
+    main('src/directedPercolation/outputs/CSD2D/criticalPoints/', 'criticalPoints2D')
+    # main('src/directedPercolation/outputs/CSD2D/otherPoints/', 'standardCriticalPoint2D')
+    # plot_one('src/directedPercolation/outputs/CSD2D/p_0.46_L_1024.tsv')
