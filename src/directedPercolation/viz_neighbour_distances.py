@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.spatial import Voronoi, voronoi_plot_2d, Delaunay
+from scipy.spatial import Voronoi, voronoi_plot_2d, Delaunay, cKDTree
 from tqdm import tqdm
+from itertools import product
 
 
 def blocks(file):
@@ -25,9 +26,6 @@ def periodic_distance(x, y, L):
     dx = np.abs(x - y)
     dx = np.where(dx > 0.5 * L, L - dx, dx)
     return np.sqrt(np.sum(dx**2, axis=-1))
-
-from itertools import product
-from scipy.spatial import cKDTree
 
 def periodic_delaunay(points, L):
     # Create the supercell
@@ -60,7 +58,7 @@ def periodic_delaunay(points, L):
 
 def main():
     p = 0.2873
-    L = 512
+    L = 1024
 
     filename = f'src/directedPercolation/outputs/latticeEvolution2D/nbrDist_p_{p}_L_{L}.csv'
 
