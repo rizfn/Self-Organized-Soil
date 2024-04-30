@@ -25,21 +25,27 @@ std::random_device rd;
 std::mt19937 gen(rd());
 
 // Define constants
-constexpr std::array<double, 6> p_values = {0.1, 0.15, 0.2, 0.4, 0.45, 0.5};
-constexpr int L = 128; // 2^10 = 1024
-constexpr long long STEPS_PER_LATTICEPOINT = 1000;
-constexpr int RECORDING_INTERVAL = 20;
-constexpr long long RECORDING_STEP = STEPS_PER_LATTICEPOINT / 2;
+constexpr std::array<double, 6> p_values = {0.318, 0.3185, 0.319, 0.343, 0.3435, 0.344};
+constexpr int L = 1024; // 2^10 = 1024
+constexpr int STEPS_PER_LATTICEPOINT = 2000;
+constexpr int RECORDING_INTERVAL = 10;
+constexpr int RECORDING_STEP = STEPS_PER_LATTICEPOINT / 2;
 
 thread_local std::uniform_int_distribution<> dis(0, 1);
 thread_local std::uniform_real_distribution<> dis_prob(0, 1);
 
 std::vector<bool> initLattice()
 {
-    std::vector<bool> soil_lattice(L * L);
-    for (int i = 0; i < L * L; ++i)
+    std::vector<bool> soil_lattice(L * L, false); // Initialize all cells to false
+    for (int i = 0; i < L; ++i)
     {
-        soil_lattice[i] = dis(gen);
+        for (int j = 0; j < L; ++j)
+        {
+            if ((i + j) % 2 == 1) // Set odd cells to true
+            {
+                soil_lattice[i * L + j] = dis(gen);
+            }
+        }
     }
     return soil_lattice;
 }
@@ -60,10 +66,6 @@ void updateLattice(std::vector<bool> &lattice, double p)
         {
             int index = i * L + j;
             int nPercolationTrials = 0;
-            if (lattice[index]) // if the site is active
-            {
-                nPercolationTrials++;
-            }
 
             for (int k = 0; k < 4; ++k)
             {
@@ -130,21 +132,45 @@ private:
     std::vector<int> parent, rank;
 };
 
-std::pair<std::vector<int>, std::vector<int>> get_cluster_sizes(const std::vector<bool>& lattice) {
-    UnionFind uf_filled(L * L);
-    UnionFind uf_empty(L * L);
-    for (int i = 0; i < L; ++i) {
-        for (int j = 0; j < L; ++j) {
-            if (lattice[i * L + j]) {
-                uf_filled.union_set(i * L + j, ((i - 1 + L) % L) * L + j);
-                uf_filled.union_set(i * L + j, i * L + ((j - 1 + L) % L));
-                uf_filled.union_set(i * L + j, ((i + 1) % L) * L + j);
-                uf_filled.union_set(i * L + j, i * L + ((j + 1) % L));
-            } else {
-                uf_empty.union_set(i * L + j, ((i - 1 + L) % L) * L + j);
-                uf_empty.union_set(i * L + j, i * L + ((j - 1 + L) % L));
-                uf_empty.union_set(i * L + j, ((i + 1) % L) * L + j);
-                uf_empty.union_set(i * L + j, i * L + ((j + 1) % L));
+std::pair<std::vector<int>, std::vector<int>> get_cluster_sizes(const std::vector<bool> &lattice)
+{
+    int newL = L / 2;
+    std::vector<bool> condensed_lattice(L * newL, false);
+    for (int i = 0; i < L; ++i)
+    {
+        for (int j = 0; j < newL; ++j)
+        {
+            condensed_lattice[i * newL + j] = lattice[i * L + j * 2] || lattice[i * L + j * 2 + 1];
+        }
+    }
+
+    UnionFind uf_filled(L * newL);
+    UnionFind uf_empty(L * newL);
+    for (int i = 0; i < L; ++i)
+    {
+        for (int j = 0; j < newL; ++j)
+        {
+            if (condensed_lattice[i * newL + j])
+            {
+                if (condensed_lattice[((i - 1 + L) % L) * newL + j])
+                    uf_filled.union_set(i * newL + j, ((i - 1 + L) % L) * newL + j);
+                if (condensed_lattice[i * newL + ((j - 1 + newL) % newL)])
+                    uf_filled.union_set(i * newL + j, i * newL + ((j - 1 + newL) % newL));
+                if (condensed_lattice[((i + 1) % L) * newL + j])
+                    uf_filled.union_set(i * newL + j, ((i + 1) % L) * newL + j);
+                if (condensed_lattice[i * newL + ((j + 1) % newL)])
+                    uf_filled.union_set(i * newL + j, i * newL + ((j + 1) % newL));
+            }
+            else
+            {
+                if (!condensed_lattice[((i - 1 + L) % L) * newL + j])
+                    uf_empty.union_set(i * newL + j, ((i - 1 + L) % L) * newL + j);
+                if (!condensed_lattice[i * newL + ((j - 1 + newL) % newL)])
+                    uf_empty.union_set(i * newL + j, i * newL + ((j - 1 + newL) % newL));
+                if (!condensed_lattice[((i + 1) % L) * newL + j])
+                    uf_empty.union_set(i * newL + j, ((i + 1) % L) * newL + j);
+                if (!condensed_lattice[i * newL + ((j + 1) % newL)])
+                    uf_empty.union_set(i * newL + j, i * newL + ((j + 1) % newL));
             }
         }
     }
@@ -153,16 +179,16 @@ std::pair<std::vector<int>, std::vector<int>> get_cluster_sizes(const std::vecto
     std::unordered_map<int, int> cluster_sizes_empty;
     for (int i = 0; i < L; ++i)
     {
-        for (int j = 0; j < L; ++j)
+        for (int j = 0; j < newL; ++j)
         {
-            if (lattice[i * L + j])
+            if (condensed_lattice[i * newL + j])
             {
-                int root = uf_filled.find(i * L + j);
+                int root = uf_filled.find(i * newL + j);
                 ++cluster_sizes_filled[root];
             }
             else
             {
-                int root = uf_empty.find(i * L + j);
+                int root = uf_empty.find(i * newL + j);
                 ++cluster_sizes_empty[root];
             }
         }
@@ -185,10 +211,8 @@ void run_csd(std::ofstream &file, double p)
 
     for (int step = 1; step <= STEPS_PER_LATTICEPOINT; ++step)
     {
-        for (int i = 0; i < L * L; ++i)
-        {
-            updateLattice(lattice, p);
-        }
+        updateLattice(lattice, p);
+
         if (step % (RECORDING_INTERVAL) == 0)
         {
             if (step >= RECORDING_STEP)
@@ -234,7 +258,7 @@ int main(int argc, char *argv[])
             std::string exeDir = std::filesystem::path(exePath).parent_path().string();
 
             std::ostringstream filename;
-            filename << exeDir << "/outputs/CSD2D/criticalPoints/p_" << p << ".tsv";
+            filename << exeDir << "/outputs/CSD2D/criticalPointsCPU/p_" << p  << "_L_" << L << ".tsv";
 
             std::ofstream file(filename.str());
 

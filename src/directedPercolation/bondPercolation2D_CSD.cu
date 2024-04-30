@@ -13,11 +13,11 @@
 #include <filesystem>
 
 // Define constants
-constexpr double P = 0.2978;
-constexpr int L = 1024;
+constexpr double P = 0.2873;
+constexpr int L = 4096;
 constexpr int N_STEPS = 2000;
 constexpr int RECORDING_STEP = N_STEPS / 2;
-constexpr int RECORDING_INTERVAL = 20;
+constexpr int RECORDING_INTERVAL = 5;
 
 std::vector<bool> initLattice(int L)
 {
@@ -25,10 +25,17 @@ std::vector<bool> initLattice(int L)
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(0, 1);
 
-    std::vector<bool> soil_lattice(L * L);
-    for (int i = 0; i < L * L; ++i)
+    std::vector<bool> soil_lattice(L * L, false); // Initialize all cells to false
+    for (int i = 0; i < L; ++i)
     {
-        soil_lattice[i] = dis(gen);
+        for (int j = 0; j < L; ++j)
+        {
+            // Only initialize "odd" cells
+            if ((i + j) % 2 == 1)
+            {
+                soil_lattice[i * L + j] = dis(gen);
+            }
+        }
     }
     return soil_lattice;
 }
@@ -45,7 +52,7 @@ __global__ void initCurand(curandState *state, unsigned long long seed)
     curand_init(seed, index, 0, &state[index]);
 }
 
-__global__ void updateKernel(bool *d_lattice, bool *d_latticeUpdated, curandState *state)
+__global__ void updateKernel(bool *d_lattice, bool *d_latticeUpdated, double p, curandState *state)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int idy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -76,7 +83,7 @@ __global__ void updateKernel(bool *d_lattice, bool *d_latticeUpdated, curandStat
 
     if (nPercolationTrials > 0)
     {
-        if (curand_uniform(&localState) < 1 - pow(1 - P, nPercolationTrials))
+        if (curand_uniform(&localState) < 1 - pow(1 - p, nPercolationTrials))
         {
             d_latticeUpdated[idx + idy * L] = true;
         }
@@ -125,25 +132,43 @@ private:
 
 std::pair<std::vector<int>, std::vector<int>> get_cluster_sizes(const std::vector<bool> &lattice)
 {
-    UnionFind uf_filled(L * L);
-    UnionFind uf_empty(L * L);
+    int newL = L / 2;
+    std::vector<bool> condensed_lattice(L * newL, false);
     for (int i = 0; i < L; ++i)
     {
-        for (int j = 0; j < L; ++j)
+        for (int j = 0; j < newL; ++j)
         {
-            if (lattice[i * L + j])
+            condensed_lattice[i * newL + j] = lattice[i * L + j * 2] || lattice[i * L + j * 2 + 1];
+        }
+    }
+
+    UnionFind uf_filled(L * newL);
+    UnionFind uf_empty(L * newL);
+    for (int i = 0; i < L; ++i)
+    {
+        for (int j = 0; j < newL; ++j)
+        {
+            if (condensed_lattice[i * newL + j])
             {
-                uf_filled.union_set(i * L + j, ((i - 1 + L) % L) * L + j);
-                uf_filled.union_set(i * L + j, i * L + ((j - 1 + L) % L));
-                uf_filled.union_set(i * L + j, ((i + 1) % L) * L + j);
-                uf_filled.union_set(i * L + j, i * L + ((j + 1) % L));
+                if (condensed_lattice[((i - 1 + L) % L) * newL + j])
+                    uf_filled.union_set(i * newL + j, ((i - 1 + L) % L) * newL + j);
+                if (condensed_lattice[i * newL + ((j - 1 + newL) % newL)])
+                    uf_filled.union_set(i * newL + j, i * newL + ((j - 1 + newL) % newL));
+                if (condensed_lattice[((i + 1) % L) * newL + j])
+                    uf_filled.union_set(i * newL + j, ((i + 1) % L) * newL + j);
+                if (condensed_lattice[i * newL + ((j + 1) % newL)])
+                    uf_filled.union_set(i * newL + j, i * newL + ((j + 1) % newL));
             }
             else
             {
-                uf_empty.union_set(i * L + j, ((i - 1 + L) % L) * L + j);
-                uf_empty.union_set(i * L + j, i * L + ((j - 1 + L) % L));
-                uf_empty.union_set(i * L + j, ((i + 1) % L) * L + j);
-                uf_empty.union_set(i * L + j, i * L + ((j + 1) % L));
+                if (!condensed_lattice[((i - 1 + L) % L) * newL + j])
+                    uf_empty.union_set(i * newL + j, ((i - 1 + L) % L) * newL + j);
+                if (!condensed_lattice[i * newL + ((j - 1 + newL) % newL)])
+                    uf_empty.union_set(i * newL + j, i * newL + ((j - 1 + newL) % newL));
+                if (!condensed_lattice[((i + 1) % L) * newL + j])
+                    uf_empty.union_set(i * newL + j, ((i + 1) % L) * newL + j);
+                if (!condensed_lattice[i * newL + ((j + 1) % newL)])
+                    uf_empty.union_set(i * newL + j, i * newL + ((j + 1) % newL));
             }
         }
     }
@@ -152,16 +177,16 @@ std::pair<std::vector<int>, std::vector<int>> get_cluster_sizes(const std::vecto
     std::unordered_map<int, int> cluster_sizes_empty;
     for (int i = 0; i < L; ++i)
     {
-        for (int j = 0; j < L; ++j)
+        for (int j = 0; j < newL; ++j)
         {
-            if (lattice[i * L + j])
+            if (condensed_lattice[i * newL + j])
             {
-                int root = uf_filled.find(i * L + j);
+                int root = uf_filled.find(i * newL + j);
                 ++cluster_sizes_filled[root];
             }
             else
             {
-                int root = uf_empty.find(i * L + j);
+                int root = uf_empty.find(i * newL + j);
                 ++cluster_sizes_empty[root];
             }
         }
@@ -178,7 +203,7 @@ std::pair<std::vector<int>, std::vector<int>> get_cluster_sizes(const std::vecto
     return {sizes_filled, sizes_empty};
 }
 
-void run(std::ofstream &file)
+void run(std::ofstream &file, double p)
 {
     std::vector<bool> soil_lattice = initLattice(L);
 
@@ -191,24 +216,36 @@ void run(std::ofstream &file)
     cudaMalloc(&d_latticeUpdated, L * L * sizeof(bool));
     cudaMalloc(&d_state, L * L * sizeof(curandState));
 
-    initCurand<<<L, L>>>(d_state, time(0));
+    dim3 blockSize(1, 1);
+    dim3 gridSize(L, L);
+
+    initCurand<<<gridSize, blockSize>>>(d_state, time(0));
+
+    cudaError_t curandError = cudaGetLastError();
+    if (curandError != cudaSuccess)
+    {
+        std::cerr << "CUDA error in initCurand: " << cudaGetErrorString(curandError) << std::endl;
+    }
 
     std::vector<char> temp_lattice(soil_lattice.begin(), soil_lattice.end());
     cudaMemcpy(d_lattice, temp_lattice.data(), L * L * sizeof(char), cudaMemcpyHostToDevice);
 
-    dim3 blockSize(1, 1);
-    dim3 gridSize(L, L);
-
     for (int step = 0; step < N_STEPS; ++step)
     {
+        cudaError_t updateError = cudaGetLastError();
+        if (updateError != cudaSuccess)
+        {
+            std::cerr << "CUDA error in updateKernel: " << cudaGetErrorString(updateError) << std::endl;
+        }
+
         cudaMemset(d_latticeUpdated, 0, L * L * sizeof(bool));
 
-        updateKernel<<<gridSize, blockSize>>>(d_lattice, d_latticeUpdated, d_state);
+        updateKernel<<<gridSize, blockSize>>>(d_lattice, d_latticeUpdated, p, d_state);
         cudaDeviceSynchronize();
 
         cudaMemcpy(d_lattice, d_latticeUpdated, L * L * sizeof(bool), cudaMemcpyDeviceToDevice);
 
-        if (step >= RECORDING_STEP && step % RECORDING_INTERVAL != 0)
+        if (step >= RECORDING_STEP && step % RECORDING_INTERVAL == 0)
         {
 
             // Copy lattice data from GPU to CPU
@@ -247,17 +284,23 @@ void run(std::ofstream &file)
 
 int main(int argc, char *argv[])
 {
+    double p = P; // Use the default value P
+    if (argc > 1) // If a command-line argument is provided
+    {
+        p = std::stod(argv[1]); // Convert the first argument to double and use it as p
+    }
+
     std::string exePath = argv[0];
     std::string exeDir = std::filesystem::path(exePath).parent_path().string();
     std::ostringstream filePathStream;
-    filePathStream << exeDir << "/outputs/CSD2D/criticalPoints/p_" << P << "_L_" << L << ".tsv";
-    // filePathStream << exeDir << "/outputs/CSD2D/otherPoints/p_" << P << "_L_" << L << ".tsv";
+    filePathStream << exeDir << "/outputs/CSD2D/criticalPoints/p_" << p << "_L_" << L << ".tsv";
+    // filePathStream << exeDir << "/outputs/CSD2D/otherPoints/p_" << p << "_L_" << L << ".tsv";
     std::string filePath = filePathStream.str();
 
     std::ofstream file;
     file.open(filePath);
     file << "Step\tfilledClusterSizes\temptyClusterSizes\n";
-    run(file);
+    run(file, p); // Pass p to the run function
     file.close();
 
     return 0;
