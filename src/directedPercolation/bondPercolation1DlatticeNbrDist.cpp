@@ -7,8 +7,8 @@
 #include <iomanip>
 #include <filesystem>
 
-constexpr double P = 0.2873;
-constexpr int L = 1024;
+constexpr double P = 0.6447;
+constexpr int L = 16384;
 constexpr int RECORDING_STEP = (L * L) / 4; // spreading from center, in t^2 steps will spread distance 't'
 constexpr int RECORDING_SKIP = 10;
 constexpr int N_STEPS = RECORDING_STEP + RECORDING_SKIP*1000;
@@ -17,51 +17,35 @@ std::random_device rd;
 std::mt19937 gen(rd());
 std::uniform_real_distribution<> dis_prob(0, 1);
 
-std::vector<std::vector<bool>> initLattice()
+std::vector<bool> initLattice()
 {
-    std::vector<std::vector<bool>> soil_lattice(L, std::vector<bool>(L, false));
+    std::vector<bool> soil_lattice(L, false);
     for (int i = 0; i < L; ++i)
     {
-        for (int j = 0; j < L; ++j)
+        if (i % 2 != 0)
         {
-            if ((i + j) % 2 != 0)
-            {
-                soil_lattice[i][j] = true;
-            }
+            soil_lattice[i] = true;
         }
     }
     return soil_lattice;
 }
 
-void updateLattice(std::vector<std::vector<bool>> &lattice)
+void updateLattice(std::vector<bool> &lattice)
 {
-    std::vector<std::vector<bool>> newLattice(L, std::vector<bool>(L, false));
+    std::vector<bool> newLattice(L, false);
     for (int i = 0; i < L; ++i)
     {
-        for (int j = 0; j < L; ++j)
+        if (lattice[i]) // if the site is active
         {
-            if (lattice[i][j]) // if the site is active
+            int left = (i - 1 + L) % L;
+            int right = (i + 1) % L;
+            if (dis_prob(gen) < P)
             {
-                int left = (j - 1 + L) % L;
-                int right = (j + 1) % L;
-                int up = (i - 1 + L) % L;
-                int down = (i + 1) % L;
-                if (dis_prob(gen) < P)
-                {
-                    newLattice[i][left] = true;
-                }
-                if (dis_prob(gen) < P)
-                {
-                    newLattice[i][right] = true;
-                }
-                if (dis_prob(gen) < P)
-                {
-                    newLattice[up][j] = true;
-                }
-                if (dis_prob(gen) < P)
-                {
-                    newLattice[down][j] = true;
-                }
+                newLattice[left] = true;
+            }
+            if (dis_prob(gen) < P)
+            {
+                newLattice[right] = true;
             }
         }
     }
@@ -70,7 +54,7 @@ void updateLattice(std::vector<std::vector<bool>> &lattice)
 
 void run_with_resetting(std::ofstream &file)
 {
-    std::vector<std::vector<bool>> lattice = initLattice();
+    std::vector<bool> lattice = initLattice();
     int n_resets = 0;
     int step = 0;
     while (step <= N_STEPS)
@@ -80,11 +64,7 @@ void run_with_resetting(std::ofstream &file)
         if (step % RECORDING_SKIP == 0)
         {
             // Count the number of true sites
-            int count = 0;
-            for (const auto &row : lattice)
-            {
-                count += std::count(row.begin(), row.end(), true);
-            }
+            int count = std::count(lattice.begin(), lattice.end(), true);
 
             // If count is 0, reset the simulation and continue
             if (count == 0)
@@ -102,17 +82,13 @@ void run_with_resetting(std::ofstream &file)
                 // Write the state of the lattice to the file
                 for (int i = 0; i < L; ++i)
                 {
-                    for (int j = 0; j < L; ++j)
+                    file << lattice[i];
+                    if (i != L - 1)
                     {
-                        file << lattice[i][j];
-                        if (j != L - 1)
-                        {
-                            file << ",";
-                        }
+                        file << ",";
                     }
-                    file << "\n";
                 }
-                file << "\n"; // Add an extra newline to separate timesteps
+                file << "\n";
             }
 
             std::cout << "Progress: " << std::setw(5) << std::fixed << std::setprecision(2) << (100.0 * step) / N_STEPS << "%\r";
@@ -127,7 +103,7 @@ int main(int argc, char *argv[])
     std::string exeDir = std::filesystem::path(exePath).parent_path().string();
 
     std::ostringstream filename;
-    filename << exeDir << "/outputs/latticeEvolution2D/nbrDist_p_" << P << "_L_" << L << ".csv";
+    filename << exeDir << "/outputs/latticeEvolution1D/nbrDist_p_" << P << "_L_" << L << ".csv";
 
     std::ofstream file(filename.str());
 

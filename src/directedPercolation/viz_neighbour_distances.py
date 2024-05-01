@@ -57,7 +57,7 @@ def periodic_delaunay(points, L):
 
 
 def main():
-    p = 0.2873
+    p = 0.318
     L = 1024
 
     filename = f'src/directedPercolation/outputs/latticeEvolution2D/nbrDist_p_{p}_L_{L}.csv'
@@ -133,8 +133,48 @@ def plot_voronoi(filename):
     plt.show()
 
 
+def main_1D():
+    p = 0.6447
+    L = 4096
+
+    filename = f'src/directedPercolation/outputs/latticeEvolution1D/nbrDist_p_{p}_L_{L}.csv'
+
+    distances_list = []
+
+    with open(filename, 'r') as file:
+        for line in file:
+            lattice = np.array([int(x) for x in line.strip().split(',')])
+            active_sites = np.argwhere(lattice)
+            sorted_sites = np.sort(active_sites.flatten())
+            distances = np.diff(sorted_sites)
+            # Add the distance between the first and last point for periodic boundary conditions
+            distances = np.append(distances, sorted_sites[0] + len(lattice) - sorted_sites[-1])
+            distances_list.append(distances)
+
+    distances = np.concatenate(distances_list)
+    bins = np.logspace(np.log10(np.min(distances)), np.log10(np.max(distances)), num=50)
+    counts, bin_edges = np.histogram(distances, bins=bins)
+    widths = np.diff(bin_edges)
+    normalized_counts = counts / widths
+
+    plt.plot(bin_edges[1:], normalized_counts, 'x', label='Data')
+    plt.title(f'Distances between active sites, L={L}')
+    plt.xlabel('Distance')
+    plt.ylabel('Probability density')
+    plt.grid()
+    plt.xscale('log')
+    plt.yscale('log')
+    ylim = plt.ylim()
+    tau1, tau2 = 2,2.5
+    plt.plot(bin_edges, normalized_counts[0]*bin_edges**-tau1, label=f'$\\tau$={tau1} power law', linestyle='--', zorder=-1, alpha=0.8)
+    plt.plot(bin_edges, 0.3e1*normalized_counts[0]*bin_edges**-tau2, label=f'$\\tau$={tau2} power law', linestyle='--', zorder=-1, alpha=0.8)
+    plt.ylim(ylim)
+    plt.legend()
+    plt.show()
+
 
 if __name__ == '__main__':
     main()
     # plot_voronoi('src/directedPercolation/outputs/lattice2D/survival_p_0.2873_L_2048_steps_2000.csv')
+    # main_1D()
     
