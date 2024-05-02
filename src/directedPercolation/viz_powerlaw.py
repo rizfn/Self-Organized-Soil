@@ -151,7 +151,8 @@ def plot_one(filename):
 
 if __name__ == '__main__':
     # main('src/directedPercolation/outputs/CSD2D/criticalPoints/', 'criticalPoints2D')
-    main('src/directedPercolation/outputs/CSD2D/criticalPointsLarge/', 'criticalPoints2DLarge')
+    # main('src/directedPercolation/outputs/CSD2D/criticalPointsLarge/', 'criticalPoints2DLarge')
     # main('src/directedPercolation/outputs/CSD2D/otherPoints/', 'standardCriticalPoint2D')
     # main('src/directedPercolation/outputs/CSD2D/criticalPointsCPU/', 'criticalPoints2DCPU')
+    main('src/directedPercolation/outputs/CSD3D/criticalPointsCPU/', 'criticalPoints3DCPU')
     # plot_one('src/directedPercolation/outputs/CSD2D/p_0.46_L_1024.tsv')
