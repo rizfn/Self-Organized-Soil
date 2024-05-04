@@ -499,3 +499,18 @@ Dimension 2: plot mass of each cluster vs largest linear dimension of that clust
 Dimension 3: Reduce every cluster to a point (within the cluster), and do box counting on the points
 
 Also check if after fixing bug, correlation between survival and power law
+
+
+## Meeting 37: 3rd May 2024
+
+Check information dimension, which doesn't agree with box. $P^2$
+
+Check also correlation dimension. Also Grassberger dimension $P^1$
+
+Check for DP for empty sites
+
+Look at parasite reproduction rate correlation with power law
+
+Bethe lattice exact renormalization can be done, so this can be seen.
+
+Try bethe lattice! Ignore ESPL, and look for FSPL correlation with DP point
