@@ -15,7 +15,7 @@ static auto _ = []()
 // Define constants
 constexpr double SIGMA = 1;
 constexpr double THETA = 0.5;
-constexpr int L = 2048; // 2^10 = 1024
+constexpr int L = 4096; // 2^10 = 1024
 constexpr long long STEPS_PER_LATTICEPOINT = 5000;
 constexpr long long N_STEPS = STEPS_PER_LATTICEPOINT * L * L;
 

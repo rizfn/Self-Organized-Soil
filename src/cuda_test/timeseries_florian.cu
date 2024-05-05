@@ -209,7 +209,8 @@ int main(int argc, char *argv[])
     std::string exeDir = std::filesystem::path(exePath).parent_path().string();
     std::ostringstream filePathStream;
     // filePathStream << exeDir << "/outputs/sigma_" << SIGMA << "_theta_" << THETA << "/L_" << L << "_bl_" << BLOCK_LENGTH << ".csv";
-    filePathStream << exeDir << "/outputs/florian/L_" << L << "_bl_" << BLOCK_LENGTH << "_florian.csv";
+    // filePathStream << exeDir << "/outputs/florian/L_" << L << "_bl_" << BLOCK_LENGTH << "_florian.csv";
+    filePathStream << exeDir << "/outputs/density_vs_bl/L_" << L << "_bl_" << BLOCK_LENGTH << ".csv";
     std::string filePath = filePathStream.str();
 
     std::ofstream file;
