@@ -1,5 +1,11 @@
-#include <bits/stdc++.h>
-#include <windows.h>
+#include <random>
+#include <vector>
+#include <unordered_map>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <sstream>
+#include <filesystem>
 
 // #pragma GCC optimize("Ofast","inline","fast-math","unroll-loops","no-stack-protector")
 #pragma GCC optimize("inline", "unroll-loops", "no-stack-protector")
@@ -23,7 +29,7 @@ constexpr int L = 1024; // side length of the square lattice
 constexpr double RHO = 1;
 constexpr double MU = 1;
 constexpr double SIGMA = 0.53;
-constexpr double THETA = 0.16;
+constexpr double THETA = 0.133;
 constexpr int STEPS_PER_LATTICEPOINT = 2000;
 constexpr int RECORDING_STEP = STEPS_PER_LATTICEPOINT / 2;
 constexpr int RECORDING_INTERVAL = 20;
@@ -240,11 +246,10 @@ int main(int argc, char *argv[])
     if (argc > 2)
         theta = std::stod(argv[2]);
 
-    wchar_t exePath[MAX_PATH];
-    GetModuleFileNameW(NULL, exePath, MAX_PATH);
+    std::string exePath = argv[0];
     std::string exeDir = std::filesystem::path(exePath).parent_path().string();
     std::ostringstream filePathStream;
-    filePathStream << exeDir << "\\outputs\\csd2D\\sigma_" << sigma << "_theta_" << theta << ".tsv";
+    filePathStream << exeDir << "\\outputs\\csd2D_thesis\\sigma_" << sigma << "_theta_" << theta << ".tsv";
     std::string filePath = filePathStream.str();
 
     std::ofstream file;

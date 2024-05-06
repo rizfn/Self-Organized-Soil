@@ -93,55 +93,58 @@ def main(directory, outputfilename):
     plt.show()
 
 
-# def plot_one(filename):
-#     fig, ax = plt.subplots(figsize=(6, 4))
+def plot_thesis(directory, outputfilename):
+    csv_files = glob.glob(f'{directory}/*.tsv')
+    num_files = len(csv_files)
+    
+    fig, axs = plt.subplots(1, num_files, figsize=(6*num_files, 5))
 
-#     steps, filled_cluster_sizes, empty_cluster_sizes = load_csv(filename)
-#     # histogram and plot all the cluster sizes
-#     num_bins = 100
-#     min_size = 1  # smallest cluster size
-#     max_size = max(max(max(sublist) for sublist in filled_cluster_sizes), max(max(sublist) for sublist in empty_cluster_sizes))
-#     bins = np.logspace(np.log10(min_size), np.log10(max_size), num=num_bins)
+    for ax, filename in zip(axs, csv_files):
+        match = re.search(r'sigma_\d+(\.\d+)?_theta_\d+(\.\d+)?', filename)
+        if match:
+            sigma_theta_part = match.group()
+            sigma, theta = sigma_theta_part.split('_')[1], sigma_theta_part.split('_')[3]
 
-#     # Calculate histograms and plot for filled clusters
-#     flat_filled_cluster_sizes = [item for sublist in filled_cluster_sizes for item in sublist]
-#     hist, edges = np.histogram(flat_filled_cluster_sizes, bins=bins, density=False)
-#     bin_widths = np.diff(edges)
-#     hist = hist / bin_widths  # Normalize by bin width
-#     ax.plot(edges[:-1], hist, 'x', label='Filled Clusters')
+        steps, filled_cluster_sizes = load_csv(filename)
+        # histogram and plot all the cluster sizes
+        num_bins = 100
+        min_size = 1  # smallest cluster size
+        max_size = max(max(sublist) for sublist in filled_cluster_sizes)
+        bins = np.logspace(np.log10(min_size), np.log10(max_size), num=num_bins)
 
-#     # Calculate histograms and plot for empty clusters
-#     flat_empty_cluster_sizes = [item for sublist in empty_cluster_sizes for item in sublist]
-#     hist, edges = np.histogram(flat_empty_cluster_sizes, bins=bins, density=False)
-#     hist = hist / bin_widths  # Normalize by bin width
-#     ax.plot(edges[:-1], hist, 'x', label='Empty Clusters')
+        # Calculate histograms and plot for filled clusters
+        flat_filled_cluster_sizes = [item for sublist in filled_cluster_sizes for item in sublist]
+        hist, edges = np.histogram(flat_filled_cluster_sizes, bins=bins, density=False)
+        bin_widths = np.diff(edges)
+        hist = hist / bin_widths  # Normalize by bin width
+        ax.plot(edges[:-1], hist, 'x', label='Filled Clusters')
 
-#     ax.set_xscale('log')
-#     ax.set_yscale('log')
-#     ax.grid()
-#     ax.set_xlabel('Cluster size')
-#     ax.set_ylabel('Probability density')
-#     ylim = ax.get_ylim()
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+        ax.grid()
+        ax.set_xlabel('Cluster size')
+        ax.set_ylabel('Probability density')
+        ylim = ax.get_ylim()
 
-#     tau1, tau2 = 2, 3
-#     x = np.array(edges[:-1])
-#     ax.plot(x, 1e7*x**-tau1, label=r'$\tau=$' + f'{tau1} power law', linestyle='--', alpha=0.5)
-#     ax.plot(x, 6e6*x**-tau2, label=r'$\tau=$' + f'{tau2} power law', linestyle='--', alpha=0.5)
-#     ax.legend()
-#     ax.set_ylim(ylim)
+        if float(theta) > 0.14:
+            tau1, tau2 = 2.2, 2.3
+        else: 
+            tau1, tau2 = 1.8, 1.9
+        x = np.array(edges[:-1])
+        ax.plot(x, 1e6*x**-tau1, label=r'$\tau=$' + f'{tau1} power law', linestyle='--', alpha=0.5)
+        ax.plot(x, 1e6*x**-tau2, label=r'$\tau=$' + f'{tau2} power law', linestyle='--', alpha=0.5)
+        ax.legend()
+        ax.set_ylim(ylim)
 
-#     # Extract sigma and theta from filename and set as title
-#     match = re.search(r'sigma_\d+(\.\d+)?_theta_\d+(\.\d+)?', filename)
-#     if match:
-#         sigma_theta_part = match.group()
-#         sigma, theta = sigma_theta_part.split('_')[1], sigma_theta_part.split('_')[3]
-#     ax.set_title(f'$\sigma$: {sigma}, $\\theta$: {theta}')
+        ax.set_title(f'$\sigma$: {sigma}, $\\theta$: {theta}')
 
-#     plt.tight_layout()
-#     plt.savefig(filename.replace('outputs', 'plots').replace('.tsv', '.png'), dpi=300)
-#     plt.show()
+    plt.tight_layout()
+    plt.savefig('src/nutrient_model/plots/csd/' + outputfilename + '.png', dpi=300)
+    plt.show()
+
 
 
 if __name__ == "__main__":
-    main('src/nutrient_model/outputs/csd2D', 'soil_clusters')
+    # main('src/nutrient_model/outputs/csd2D', 'soil_clusters')
+    plot_thesis('src/nutrient_model/outputs/csd2D_thesis', 'soil_clusters_thesis')
 
