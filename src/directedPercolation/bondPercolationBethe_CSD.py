@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+from multiprocessing import Pool
 
 def get_distance_to_origin(node, adjacency_list):
     distance = 0
@@ -132,5 +133,136 @@ def main():
     plt.show()
 
 
+def only_CSD(p = 0.272, N_steps = 2000, N_simulations = 1000, threshold_n_active_nodes = 1000):
+    coordination_number = 3
+    cluster_sizes = []
+    threshold_n_active_nodes = 1000
+    
+    for sim in tqdm(range(N_simulations)):
+        node_values = [1] + [0] * coordination_number
+        
+        adjacency_list = {0: list(range(0, coordination_number + 1))}
+        for i in range(1, coordination_number + 1):
+            adjacency_list[i] = [0, i]  # Each node is a neighbour of itself
+            
+        last_node = coordination_number
+
+        for i in range(1, N_steps):
+            new_node_values = [0] * len(node_values)  # Initialize new_node_values as 0s
+            adjacency_list_copy = adjacency_list.copy()
+            previous_last_node = last_node  # Save the value of last_node at the start of the iteration
+            for node, neighbours in adjacency_list.items():
+                if node_values[node]:
+                    for neighbour in neighbours:
+                        neighbourInfected = np.random.rand() < p
+                        if neighbourInfected:
+                            new_node_values[neighbour] = True  # Set new_node_values[neighbour] to True
+                            if len(adjacency_list[neighbour]) == 2:  # Check if the node only has one neighbour (excluding itself)
+                                for _ in range(coordination_number - 1):  # Add coordination_number - 1 neighbours
+                                    adjacency_list_copy[neighbour].append(last_node+1)
+                                    adjacency_list_copy[last_node+1] = [neighbour, last_node+1]  # New node is a neighbour of itself
+                                    last_node += 1
+        
+            # Append 0s to new_node_values for the new nodes added
+            new_node_values.extend([0] * (last_node - previous_last_node))
+        
+            adjacency_list = adjacency_list_copy
+            node_values = new_node_values
+
+            n_active_nodes = sum(node_values)
+            if n_active_nodes == 0:
+                break
+            if n_active_nodes > threshold_n_active_nodes:
+                cluster_sizes.extend(get_cluster_size_distribution(node_values, adjacency_list))
+
+
+    # Plot cluster size distribution
+    cluster_sizes = np.array(cluster_sizes)
+    hist, bins = np.histogram(cluster_sizes, bins=np.geomspace(1, cluster_sizes.max(), 50), density=True)
+    hist /= np.diff(bins)
+    plt.loglog(bins[:-1], hist, marker='x', linestyle='', label='Cluster Size Distribution')
+    plt.xlabel('Cluster Size')
+    plt.ylabel('Normalized Frequency')
+    plt.title(f'p = {p}, threshold = {threshold_n_active_nodes}')
+    plt.grid()
+    plt.legend()
+
+    plt.tight_layout()
+    plt.savefig(f'src/directedPercolation/plots/bethe_CSD/p_{p}_steps_{N_steps}_sims_{N_simulations}_test.png', dpi=300)
+    plt.show()
+
+
+# def simulation(_):
+#     coordination_number = 3
+#     cluster_sizes = []
+#     threshold_n_active_nodes = 1000
+#     N_steps = 2000
+#     p = 0.272
+
+#     node_values = [1] + [0] * coordination_number
+
+#     adjacency_list = {0: list(range(0, coordination_number + 1))}
+#     for i in range(1, coordination_number + 1):
+#         adjacency_list[i] = [0, i]  # Each node is a neighbour of itself
+
+#     last_node = coordination_number
+
+#     for i in range(1, N_steps):
+#         new_node_values = [0] * len(node_values)  # Initialize new_node_values as 0s
+#         adjacency_list_copy = adjacency_list.copy()
+#         previous_last_node = last_node  # Save the value of last_node at the start of the iteration
+#         for node, neighbours in adjacency_list.items():
+#             if node_values[node]:
+#                 for neighbour in neighbours:
+#                     neighbourInfected = np.random.rand() < p
+#                     if neighbourInfected:
+#                         new_node_values[neighbour] = True  # Set new_node_values[neighbour] to True
+#                         if len(adjacency_list[neighbour]) == 2:  # Check if the node only has one neighbour (excluding itself)
+#                             for _ in range(coordination_number - 1):  # Add coordination_number - 1 neighbours
+#                                 adjacency_list_copy[neighbour].append(last_node+1)
+#                                 adjacency_list_copy[last_node+1] = [neighbour, last_node+1]  # New node is a neighbour of itself
+#                                 last_node += 1
+
+#         # Append 0s to new_node_values for the new nodes added
+#         new_node_values.extend([0] * (last_node - previous_last_node))
+
+#         adjacency_list = adjacency_list_copy
+#         node_values = new_node_values
+
+#         n_active_nodes = sum(node_values)
+#         if n_active_nodes == 0:
+#             break
+#         if n_active_nodes > threshold_n_active_nodes:
+#             cluster_sizes.extend(get_cluster_size_distribution(node_values, adjacency_list))
+
+#     return cluster_sizes
+
+# import multiprocessing
+
+# def only_CSD(p = 0.272, N_steps = 2000, N_simulations = 1000, threshold_n_active_nodes = 1000):
+#     num_cores = multiprocessing.cpu_count() - 3
+#     with Pool(num_cores) as pool:
+#         results = pool.map(simulation, range(N_simulations))
+
+#     # Combine results from all simulations
+#     cluster_sizes = [size for result in results for size in result]
+
+#     # Plot cluster size distribution
+#     cluster_sizes = np.array(cluster_sizes)
+#     hist, bins = np.histogram(cluster_sizes, bins=np.geomspace(1, cluster_sizes.max(), 50), density=True)
+#     hist /= np.diff(bins)
+#     plt.loglog(bins[:-1], hist, marker='x', linestyle='', label='Cluster Size Distribution')
+#     plt.xlabel('Cluster Size')
+#     plt.ylabel('Normalized Frequency')
+#     plt.title(f'p = {p}, threshold = {threshold_n_active_nodes}')
+#     plt.grid()
+#     plt.legend()
+
+#     plt.tight_layout()
+#     # plt.savefig(f'src/directedPercolation/plots/bethe_CSD/p_{p}_steps_{N_steps}_sims_{N_simulations}_test.png', dpi=300)
+#     plt.show()
+
+
 if __name__ == "__main__":
-    main()
+    # main()
+    only_CSD(p = 0.272, N_steps = 2000, N_simulations = 1000, threshold_n_active_nodes=2000)
