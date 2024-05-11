@@ -2,6 +2,7 @@ let { default: data_meanfield } = await import("../data/single_species/soil_neig
 let { default: data_stochastic } = await import("../data/single_species/soil_neighbours_meanfield_d_r=1.json", { assert: { type: "json" } });
 let { default: data_wellmixed } = await import("../data/single_species/wellmixed_soil_neighbours_r=1.json", { assert: { type: "json" } });
 let { default: data_predatorprey } = await import("../data/single_species/predatorprey_meanfield_r=1.json", { assert: { type: "json" } });
+let { default: data_predatorprey_stochastic} = await import("../data/single_species/predatorprey_stochastic_mfcomparison_r=1.json", { assert: { type: "json" } });
 
 // add 4 radio buttons to switch between meanfield, stochastic, parallel, 3d, wellmixed data
 var form = d3.select("div#select-data")
@@ -63,6 +64,20 @@ form_label = form.append("label")
 		change_data(this.value)
 	});
 
+form_label.append("span")
+	.attr("class", "checkmark");
+
+form_label = form.append("label")
+	.attr("class", "radio-label")
+	.text("Predator-prey stochastic (5)")
+	.append("input")
+	.attr("type", "radio")
+	.attr("name", "radio")
+	.attr("value", "predatorprey_stochastic")
+	.on("change", function() {
+		change_data(this.value)
+	});
+
 
 
 // on 1,2,3,4 set radio buttons
@@ -87,6 +102,11 @@ document.addEventListener('keydown', function(event) {
 		document.getElementById("radio-buttons").elements[3].checked = true;
 		change_data('predatorprey')
 	}
+	else if (event.code === 'Digit5') {
+		// set radio button to predatorprey-stochastic
+		document.getElementById("radio-buttons").elements[4].checked = true;
+		change_data('predatorprey_stochastic')
+	}
 });
 
 
@@ -104,6 +124,7 @@ data_meanfield = filter_max_step(data_meanfield);
 data_stochastic = filter_max_step(data_stochastic);
 data_wellmixed = filter_max_step(data_wellmixed);
 data_predatorprey = filter_max_step(data_predatorprey);
+data_predatorprey_stochastic = filter_max_step(data_predatorprey_stochastic);
 
 console.log(data_meanfield);
 console.log(data_stochastic);
@@ -124,6 +145,18 @@ data_stochastic.forEach((d) => {
 });
 
 data_wellmixed.forEach((d) => {
+	const lattice = d.soil_lattice;
+	const L = lattice.length
+	// calculate the fraction of 1s, 2s and 0s in the matrix
+	const ones = lattice.reduce((a, b) => a + b.filter((x) => x === 1).length, 0);
+	const twos = lattice.reduce((a, b) => a + b.filter((x) => x === 2).length, 0);
+	const zeros = lattice.reduce((a, b) => a + b.filter((x) => x === 0).length, 0);
+	d.vacancy = zeros / L**2;
+	d.soil = ones / L**2;
+	d.bacteria = twos / L**2;
+});
+
+data_predatorprey_stochastic.forEach((d) => {
 	const lattice = d.soil_lattice;
 	const L = lattice.length
 	// calculate the fraction of 1s, 2s and 0s in the matrix
@@ -201,7 +234,7 @@ var Tooltip = d3.select("div#raster")
 	}
 
 svg_soil.append("g")
-	.attr("class", "axis")
+	.attr("class", "x axis")
 	.attr("transform", "translate(0," + height + ")")
 	.call(d3.axisBottom(x).tickFormat(d3.format(".2f")))
 	.selectAll("text")
@@ -216,7 +249,7 @@ svg_soil.append("text")
 	.text("Death rate (θ)");
 
 svg_soil.append("g")
-	.attr("class", "axis")
+	.attr("class", "y axis")
 	.call(d3.axisLeft(y).tickFormat(d3.format(".2f")));
 
 // label y axis
@@ -263,6 +296,9 @@ function change_data(state) {
 	else if (state == 'predatorprey') {
 		data = data_predatorprey;
 	}
+	else if (state == 'predatorprey_stochastic') {
+		data = data_predatorprey_stochastic;
+	}
 
 	// update the rgb heatmap
 	svg_soil.selectAll(".cell")
@@ -270,5 +306,17 @@ function change_data(state) {
 		.transition(t)
 		.style("fill", function(d) { return "rgb(" + d.soil*255 + "," + d.vacancy*255 + "," + d.bacteria*255 + ")" } );
 
+
+	// update the x axis
+	var rows = d3.map(data, function(d){return d.d;})
+	x.domain(rows);
+	svg_soil.select(".x.axis")
+    .attr("transform", "translate(0," + height + ")")
+    .transition(t)
+    .call(d3.axisBottom(x).tickFormat(d3.format(".2f")))
+    .selectAll("text")
+        .attr("transform", "translate(-10,0)rotate(-45)")
+        .style("text-anchor", "end");
+		
 }
 	

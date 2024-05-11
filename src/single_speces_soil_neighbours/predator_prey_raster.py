@@ -42,17 +42,19 @@ def main():
 
     # initialize the parameters
     n_steps = 10_000_000  # number of bacteria moves (more for stochastic)
-    L = 50  # side length of the square lattice
+    L = 100  # side length of the square lattice
     r = 1  # reproduction rate
-    d = np.linspace(0, 0.3, 20)  # death rate
+    # d = np.linspace(0, 0.3, 20)  # death rate
+    d = np.linspace(0, 1, 20)  # death rate
     s = np.linspace(0, 1, 20)  # soil filling rate
 
-    soil_lattice_data = run_raster_predatorprey(n_steps, L, r, d, s, np.geomspace(100, n_steps, int(np.log10(n_steps/100))+1, dtype=np.int32))
+    soil_lattice_data = run_raster_predatorprey(n_steps, L, r, d, s, np.linspace(n_steps//2, n_steps, 5, dtype=np.int32))
 
     soil_lattice_data = pd.DataFrame(soil_lattice_data)
 
     # save the data
-    soil_lattice_data.to_json(f"docs/data/single_species/predatorprey_stochastic_{r=}.json", orient="records")
+    # soil_lattice_data.to_json(f"docs/data/single_species/predatorprey_stochastic_{r=}.json", orient="records")
+    soil_lattice_data.to_json(f"docs/data/single_species/predatorprey_stochastic_mfcomparison_{r=}.json", orient="records")
     
 
 if __name__ == "__main__":

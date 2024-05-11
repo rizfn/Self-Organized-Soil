@@ -345,7 +345,7 @@ def run_predatorprey(n_steps, L, r, d, s, steps_to_record=np.array([100, 1000, 1
     soil_lattice_data = np.zeros((len(steps_to_record), L, L), dtype=np.int8)
 
     for step in range(1, n_steps+1):
-        update_stochastic(soil_lattice, L, r, d, s)
+        update_predatorprey(soil_lattice, L, r, d, s)
         if step in steps_to_record:
             soil_lattice_data[steps_to_record == step] = soil_lattice
 
