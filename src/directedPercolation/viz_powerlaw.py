@@ -29,11 +29,12 @@ def load_csv(filename):
         for row in reader:
             steps.append(int(row[0]))  # Convert to int and add to steps
             # Check if the row is empty before splitting and converting to int
-            filled_cluster_sizes.append([int(x) for x in row[1].split(',')] if row[1] else [0])
-            empty_cluster_sizes.append([int(x) for x in row[2].split(',')] if row[2] else [0])
+            filled_cluster_sizes.append([int(x) for x in row[1].split(',') if x] if row[1] else [0])
+            empty_cluster_sizes.append([int(x) for x in row[2].split(',') if x] if row[2] else [0])
+
     return steps, filled_cluster_sizes, empty_cluster_sizes
 
-def main(directory, outputfilename):
+def main(directory, outputfilename, tau1=1.8, tau2=1.9):
     csv_files = glob.glob(f'{directory}/*.tsv')
     num_files = len(csv_files)
     
@@ -80,7 +81,6 @@ def main(directory, outputfilename):
         ax.set_ylabel('Probability density')
         ylim = ax.get_ylim()
 
-        tau1, tau2 = 1.8, 1.9
         x = np.array(edges[:-1])
         ax.plot(x, 1e7*x**-tau1, label=r'$\tau=$' + f'{tau1} power law', linestyle='--', alpha=0.5)
         ax.plot(x, 5e6*x**-tau2, label=r'$\tau=$' + f'{tau2} power law', linestyle='--', alpha=0.5)
@@ -154,5 +154,10 @@ if __name__ == '__main__':
     # main('src/directedPercolation/outputs/CSD2D/criticalPointsLarge/', 'criticalPoints2DLarge')
     # main('src/directedPercolation/outputs/CSD2D/otherPoints/', 'standardCriticalPoint2D')
     # main('src/directedPercolation/outputs/CSD2D/criticalPointsCPU/', 'criticalPoints2DCPU')
-    main('src/directedPercolation/outputs/CSD3D/criticalPointsCPU/', 'criticalPoints3DCPU')
+    # main('src/directedPercolation/outputs/CSD3D/criticalPointsCPU/', 'criticalPoints3DCPU')
+    # main('src/directedPercolation/outputs/CSD3D/criticalPointsCPUBCC/', 'criticalPoints3DCPUBCC', 2.2, 2.3)
+    # main('src/directedPercolation/outputs/CSD4D/criticalPointsCPUBCC/', 'criticalPoints4DCPUBCC', 2.5, 3)
+    main('src/directedPercolation/outputs/CSD5D/criticalPointsCPUBCC/', 'criticalPoints5DCPUBCC', 2.5, 3)
     # plot_one('src/directedPercolation/outputs/CSD2D/p_0.46_L_1024.tsv')
+    # plot_one('src/directedPercolation/outputs/CSD2D/criticalPointsTest/p_0.318_L_1024.tsv')
+    # plot_one('src/directedPercolation/outputs/CSD2D/criticalPointsTest/p_0.344_L_1024.tsv')
