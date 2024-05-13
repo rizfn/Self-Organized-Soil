@@ -53,7 +53,7 @@ def ode_derivatives(S, E, N, W, sigma, theta, rho, delta):
 
 
 @njit
-def ode_integrate_rk4(sigma, theta, rho, delta, stoptime=100_000, nsteps=100_000):
+def ode_integrate_rk4(sigma, theta, rho, delta, stoptime=100_000, nsteps=100_000, S_0=0.3, E_0=0.3, N_0=0.3, W_0=0.1):
     """Integrate the ODEs for the nutrient model using Runge-Kutta 4th order method.
     
     Parameters
@@ -72,11 +72,6 @@ def ode_integrate_rk4(sigma, theta, rho, delta, stoptime=100_000, nsteps=100_000
     nsteps : int, optional
         Number of steps to take. The default is 100_000.
     """
-
-    W_0 = 0.1  # initial fraction of worms
-    E_0 = (1 - W_0) / 3  # initial number of empty sites
-    S_0 = (1 - W_0) / 3 # initial number of soil sites
-    N_0 = 1 - W_0 - E_0 - S_0  # initial number of nutrient sites
 
     dt = stoptime / nsteps
 
@@ -174,9 +169,10 @@ def run_raster(n_steps, rho, theta_list, sigma_list, delta, tolerance=1e-6):
     grid = np.meshgrid(theta_list, sigma_list)
     ts_pairs = np.reshape(grid, (2, -1)).T  # all possible pairs of d and s
     state_data = []
+    S0, E0, N0, W0 = 0.25, 0.25, 0.25, 0.25
     for i in tqdm(range(len(ts_pairs))):  # todo: parallelize
         theta, sigma = ts_pairs[i]
-        T, S, E, N, W = ode_integrate_rk4(sigma, theta, rho, delta, stoptime=n_steps, nsteps=n_steps)
+        T, S, E, N, W = ode_integrate_rk4(sigma, theta, rho, delta, stoptime=n_steps, nsteps=n_steps, S_0=S0, E_0=E0, N_0=N0, W_0=W0)
         if W[-1] <= tolerance:
             if S[-1] <= tolerance:
                 state = "Empty"
