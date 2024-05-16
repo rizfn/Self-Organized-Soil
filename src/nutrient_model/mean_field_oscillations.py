@@ -1,9 +1,13 @@
 import numpy as np
-from tqdm import tqdm
 import pandas as pd
 from nutrient_utils import ode_integrate_rk4
 from scipy.signal import find_peaks
 import matplotlib.pyplot as plt
+from matplotlib import colors
+import multiprocessing as mp
+from functools import partial
+import concurrent.futures
+from tqdm import tqdm
 
 
 def calculate_oscillation_metrics(array, time_series):
@@ -51,38 +55,20 @@ def calculate_oscillation_metrics(array, time_series):
     # return the oscillation period, amplitude, and sensitivity
     return oscillation_period, amplitude, sensitivity
 
+def calculate_oscillations(ts_pair, rho, delta, n_steps):
+    theta, sigma = ts_pair
+    T, S, E, N, W = ode_integrate_rk4(sigma, theta, rho, delta, stoptime=n_steps, nsteps=n_steps)
+    time_period, amplitude, sensitivity =  calculate_oscillation_metrics(W[n_steps//2:], T[n_steps//2:])
+    return {"theta": theta, "sigma": sigma, "time_period": time_period, "amplitude": amplitude, "sensitivity": sensitivity}
 
 def run_raster(n_steps, rho, theta_list, sigma_list, delta):
-    """Scans the ODE integrator over s and d for n_steps timesteps.
-    
-    Parameters
-    ----------
-    n_steps : int
-        Number of timesteps to run the simulation for.
-    L : int
-        Side length of the square lattice.
-    r : float
-        Reproduction rate.
-    d_list : ndarray
-        List of death rates.
-    s_list : ndarray
-        List of soil filling rates.
-    steps_to_record : ndarray, optional
-        Array of timesteps to record the lattice data for, by default [100, 1000, 10000, 100000].
-    
-    Returns
-    -------
-    soil_lattice_list : list
-        List of soil_lattice data for specific timesteps and parameters.
-    """
     grid = np.meshgrid(theta_list, sigma_list)
     ts_pairs = np.reshape(grid, (2, -1)).T  # all possible pairs of d and s
-    oscillation_list = []
-    for i in tqdm(range(len(ts_pairs))):  # todo: parallelize
-        theta, sigma = ts_pairs[i]
-        T, S, E, N, W = ode_integrate_rk4(sigma, theta, rho, delta, stoptime=n_steps, nsteps=n_steps)
-        time_period, amplitude, sensitivity =  calculate_oscillation_metrics(W[n_steps//2:], T[n_steps//2:])
-        oscillation_list.append({"theta": theta, "sigma": sigma, "time_period": time_period, "amplitude": amplitude, "sensitivity": sensitivity})
+
+    num_processes = max(1, mp.cpu_count() - 4)  # Leave 4 cores free
+    with concurrent.futures.ProcessPoolExecutor(num_processes) as executor:
+        oscillation_list = list(tqdm(executor.map(partial(calculate_oscillations, rho=rho, delta=delta, n_steps=n_steps), ts_pairs), total=len(ts_pairs)))
+
     return oscillation_list
 
 
@@ -91,8 +77,8 @@ def main():
     n_steps = 10_000  # number of worm moves
     rho = 1  # reproduction rate
     delta = 0  # nutrient decay rate
-    theta_list = np.linspace(0, 0.3, 100)  # death rate
-    sigma_list = np.linspace(0, 1, 100)  # soil filling rate
+    theta_list = np.linspace(0, 0.3, 400)  # death rate
+    sigma_list = np.linspace(0, 1, 400)  # soil filling rate
 
     oscillation_data = run_raster(n_steps, rho, theta_list, sigma_list, delta)
 
@@ -107,23 +93,27 @@ def main():
 
     plt.suptitle("Worm Oscillations: Period and Amplitude")
 
+    cmap1 = colors.ListedColormap(plt.get_cmap('hot')(np.arange(0.8*256).astype(int)))
+    cmap2 = colors.ListedColormap(plt.get_cmap('gist_heat')(np.arange(0.9*256).astype(int)))
+    cmap3 = colors.ListedColormap(plt.get_cmap('afmhot')(np.arange(0.9*256).astype(int)))
+
     # Period heatmap
-    cax0 = axs[0].imshow(np.log10(period_pivot), aspect='auto', origin='lower', extent=[period_pivot.columns.min(), period_pivot.columns.max(), period_pivot.index.min(), period_pivot.index.max()])
-    cbar0 = fig.colorbar(cax0, ax=axs[0], orientation='horizontal', pad=0.2)
+    cax0 = axs[0].imshow(np.log10(period_pivot), aspect='auto', origin='lower', extent=[period_pivot.columns.min(), period_pivot.columns.max(), period_pivot.index.min(), period_pivot.index.max()], cmap=cmap1)
+    cbar0 = fig.colorbar(cax0, ax=axs[0], orientation='horizontal', pad=0.1)
     axs[0].set_xlabel(r"$\theta$ (Death rate)")
     axs[0].set_ylabel(r"$\sigma$ (Soil filling rate)")
     axs[0].set_title(r"$\log_{10}(T)$")
 
     # Amplitude heatmap
-    cax1 = axs[1].imshow(amplitude_pivot, aspect='auto', origin='lower', extent=[amplitude_pivot.columns.min(), amplitude_pivot.columns.max(), amplitude_pivot.index.min(), amplitude_pivot.index.max()])
-    cbar1 = fig.colorbar(cax1, ax=axs[1], orientation='horizontal', pad=0.2)
+    cax1 = axs[1].imshow(amplitude_pivot, aspect='auto', origin='lower', extent=[amplitude_pivot.columns.min(), amplitude_pivot.columns.max(), amplitude_pivot.index.min(), amplitude_pivot.index.max()], cmap=cmap1)
+    cbar1 = fig.colorbar(cax1, ax=axs[1], orientation='horizontal', pad=0.1)
     axs[1].set_xlabel(r"$\theta$ (Death rate)")
     axs[1].set_ylabel(r"$\sigma$ (Soil filling rate)")
     axs[1].set_title(r"$A$")
 
     # Sensitivity heatmap
-    cax2 = axs[2].imshow(np.log10(sensitivity_pivot), aspect='auto', origin='lower', extent=[sensitivity_pivot.columns.min(), sensitivity_pivot.columns.max(), sensitivity_pivot.index.min(), sensitivity_pivot.index.max()])
-    cbar2 = fig.colorbar(cax2, ax=axs[2], orientation='horizontal', pad=0.2)
+    cax2 = axs[2].imshow(np.log10(sensitivity_pivot), aspect='auto', origin='lower', extent=[sensitivity_pivot.columns.min(), sensitivity_pivot.columns.max(), sensitivity_pivot.index.min(), sensitivity_pivot.index.max()], cmap=cmap1)
+    cbar2 = fig.colorbar(cax2, ax=axs[2], orientation='horizontal', pad=0.1)
     axs[2].set_xlabel(r"$\theta$ (Death rate)")
     axs[2].set_ylabel(r"$\sigma$ (Soil filling rate)")
     axs[2].set_title(r"$\log_{10}$((Max - Min) / Min)")
