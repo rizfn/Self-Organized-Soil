@@ -150,80 +150,80 @@ def main():
     # plt.savefig("src/IUPAB_abstract/plots/raster_column.png", dpi=300)
     # plt.show()
 
-    # Create a gridspec instance with 2 rows and 2 columns
-    gs = gridspec.GridSpec(2, 2, width_ratios=[1, 0.05])
-
-    # Create a single figure
-    fig = plt.figure(figsize=(7, 11))  # Adjust the figure size to accommodate the new plot
-    plt.rcParams['font.family'] = 'monospace'
-
-    # Plot 3D data first
-    ax0 = plt.subplot(gs[0, 0])
-    im_3D = ax0.imshow(pivot_3D, cmap=cmap, vmin=-0.5, vmax=3.5, extent=[0, 0.3, 1, 0], aspect=1/3)
-    ax0.set_xlabel(r"Death rate ($\theta$)")
-    ax0.set_ylabel(r"Soil filling rate ($\sigma$)")
-    ax0.set_title("3D: L=75", fontweight='bold')
-    ax0.invert_yaxis()
-
-    # Plot meanfield data second
-    ax1 = plt.subplot(gs[1, 0])
-    im_meanfield = ax1.imshow(pivot_meanfield, cmap=cmap, vmin=-0.5, vmax=3.5, extent=[0, 0.3, 1, 0], aspect=1/3)  # todo: remove hardcode extent
-    ax1.set_xlabel(r"Death rate ($\theta$)")
-    ax1.set_ylabel(r"Soil filling rate ($\sigma$)")
-    ax1.set_title("Meanfield", fontweight='bold')
-    ax1.invert_yaxis()
-    
-    # Create a single vertical colorbar for all plots
-    cbar_ax = fig.add_subplot(gs[:, 1])
-    cbar = fig.colorbar(im_3D, cax=cbar_ax, orientation='vertical', ticks=[0, 1, 2, 3])
-    cbar.ax.set_yticklabels(['Soil', 'Empty', 'Oscillating', 'Stable'])  # set the state names
-
-    plt.tight_layout()
-
-    plt.savefig("src/IUPAB_abstract/plots/raster_column_2plots.png", dpi=300)
-    plt.show()
-
-
-    # # Create a gridspec instance with 2 rows and 3 columns
-    # gs = gridspec.GridSpec(2, 3, height_ratios=[1, 0.05])
+    # # Create a gridspec instance with 2 rows and 2 columns
+    # gs = gridspec.GridSpec(2, 2, width_ratios=[1, 0.05])
 
     # # Create a single figure
-    # fig = plt.figure(figsize=(16, 7))  # Adjust the figure size to accommodate the new plot
+    # fig = plt.figure(figsize=(7, 11))  # Adjust the figure size to accommodate the new plot
     # plt.rcParams['font.family'] = 'monospace'
 
-    # # Plot meanfield data
+    # # Plot 3D data first
     # ax0 = plt.subplot(gs[0, 0])
-    # im_meanfield = ax0.imshow(pivot_meanfield, cmap=cmap, vmin=-0.5, vmax=3.5, extent=[0, 0.3, 1, 0], aspect=1/3)  # todo: remove hardcode extent
+    # im_3D = ax0.imshow(pivot_3D, cmap=cmap, vmin=-0.5, vmax=3.5, extent=[0, 0.3, 1, 0], aspect=1/3)
     # ax0.set_xlabel(r"Death rate ($\theta$)")
     # ax0.set_ylabel(r"Soil filling rate ($\sigma$)")
-    # ax0.set_title("Meanfield", fontweight='bold')
+    # ax0.set_title("3D: L=75", fontweight='bold')
     # ax0.invert_yaxis()
 
-    # # Plot 2D data
-    # ax1 = plt.subplot(gs[0, 1])
-    # im_2D = ax1.imshow(pivot_2D, cmap=cmap, vmin=-0.5, vmax=3.5, extent=[0, 0.3, 1, 0], aspect=1/3)
+    # # Plot meanfield data second
+    # ax1 = plt.subplot(gs[1, 0])
+    # im_meanfield = ax1.imshow(pivot_meanfield, cmap=cmap, vmin=-0.5, vmax=3.5, extent=[0, 0.3, 1, 0], aspect=1/3)  # todo: remove hardcode extent
     # ax1.set_xlabel(r"Death rate ($\theta$)")
     # ax1.set_ylabel(r"Soil filling rate ($\sigma$)")
-    # ax1.set_title("2D: L=500", fontweight='bold')
+    # ax1.set_title("Meanfield", fontweight='bold')
     # ax1.invert_yaxis()
-
-    # # Plot 3D data
-    # ax2 = plt.subplot(gs[0, 2])
-    # im_3D = ax2.imshow(pivot_3D, cmap=cmap, vmin=-0.5, vmax=3.5, extent=[0, 0.3, 1, 0], aspect=1/3)
-    # ax2.set_xlabel(r"Death rate ($\theta$)")
-    # ax2.set_ylabel(r"Soil filling rate ($\sigma$)")
-    # ax2.set_title("3D: L=75", fontweight='bold')
-    # ax2.invert_yaxis()
-
-    # # Create a single horizontal colorbar for all plots
-    # cbar_ax = fig.add_subplot(gs[1, :])
-    # cbar = fig.colorbar(im_2D, cax=cbar_ax, orientation='horizontal', ticks=[0, 1, 2, 3])
-    # cbar.ax.set_xticklabels(['Soil', 'Empty', 'Oscillating', 'Stable'])  # set the state names
+    
+    # # Create a single vertical colorbar for all plots
+    # cbar_ax = fig.add_subplot(gs[:, 1])
+    # cbar = fig.colorbar(im_3D, cax=cbar_ax, orientation='vertical', ticks=[0, 1, 2, 3])
+    # cbar.ax.set_yticklabels(['Soil', 'Empty', 'Oscillating', 'Stable'])  # set the state names
 
     # plt.tight_layout()
 
-    # plt.savefig("src/IUPAB_abstract/plots/raster_row.png", dpi=300)
+    # plt.savefig("src/IUPAB_abstract/plots/raster_column_2plots.png", dpi=300)
     # plt.show()
+
+
+    # Create a gridspec instance with 2 rows and 3 columns
+    gs = gridspec.GridSpec(2, 3, height_ratios=[1, 0.05])
+
+    # Create a single figure
+    fig = plt.figure(figsize=(16, 7))  # Adjust the figure size to accommodate the new plot
+    plt.rcParams['font.family'] = 'monospace'
+
+    # Plot meanfield data
+    ax0 = plt.subplot(gs[0, 0])
+    im_meanfield = ax0.imshow(pivot_meanfield, cmap=cmap, vmin=-0.5, vmax=3.5, extent=[0, 0.3, 1, 0], aspect=1/3)  # todo: remove hardcode extent
+    ax0.set_xlabel(r"Death rate ($\theta$)")
+    ax0.set_ylabel(r"Soil filling rate ($\sigma$)")
+    ax0.set_title("Meanfield", fontweight='bold')
+    ax0.invert_yaxis()
+
+    # Plot 3D data
+    ax1 = plt.subplot(gs[0, 1])
+    im_2D = ax1.imshow(pivot_3D, cmap=cmap, vmin=-0.5, vmax=3.5, extent=[0, 0.3, 1, 0], aspect=1/3)
+    ax1.set_xlabel(r"Death rate ($\theta$)")
+    ax1.set_ylabel(r"Soil filling rate ($\sigma$)")
+    ax1.set_title("3D: L=75", fontweight='bold')
+    ax1.invert_yaxis()
+
+    # Plot 2D data
+    ax2 = plt.subplot(gs[0, 2])
+    im_3D = ax2.imshow(pivot_2D, cmap=cmap, vmin=-0.5, vmax=3.5, extent=[0, 0.3, 1, 0], aspect=1/3)
+    ax2.set_xlabel(r"Death rate ($\theta$)")
+    ax2.set_ylabel(r"Soil filling rate ($\sigma$)")
+    ax2.set_title("2D: L=500", fontweight='bold')
+    ax2.invert_yaxis()
+
+    # Create a single horizontal colorbar for all plots
+    cbar_ax = fig.add_subplot(gs[1, :])
+    cbar = fig.colorbar(im_2D, cax=cbar_ax, orientation='horizontal', ticks=[0, 1, 2, 3])
+    cbar.ax.set_xticklabels(['Soil', 'Empty', 'Oscillating', 'Stable'])  # set the state names
+
+    plt.tight_layout()
+
+    plt.savefig("src/IUPAB_abstract/plots/raster_row.png", dpi=300)
+    plt.show()
 
     
 if __name__ == "__main__":

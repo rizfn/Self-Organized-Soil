@@ -277,6 +277,10 @@ svg_soil.selectAll(".cell")
 		.on("mousemove", mousemove_rgb)
 		.on("mouseleave", mouseleave_rgb);
 
+// var colorScale = d3.scaleSequential()
+//     .domain([0, 1])  // input domain of bacteria fraction
+//     .interpolator(d3.interpolateYlOrRd);
+
 
 function change_data(state) {
 	
@@ -305,7 +309,7 @@ function change_data(state) {
 		.data(data)
 		.transition(t)
 		.style("fill", function(d) { return "rgb(" + d.soil*255 + "," + d.vacancy*255 + "," + d.bacteria*255 + ")" } );
-
+		// .style("fill", function(d) { return colorScale(d.bacteria**0.5); });
 
 	// update the x axis
 	var rows = d3.map(data, function(d){return d.d;})
