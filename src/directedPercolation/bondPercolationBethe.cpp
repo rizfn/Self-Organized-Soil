@@ -7,11 +7,67 @@
 #include <fstream>
 #include <iostream>
 #include <filesystem>
+#include <array>
+
 
 constexpr int COORDINATION_NUMBER = 3;
 constexpr double P = 0.271;
 constexpr int N_STEPS = 1000;
 constexpr int N_SIMULATIONS = 1000;
+constexpr int GENERATIONS = 3;  // Number of generations
+constexpr int calculate_N_NODES(int coordination_number, int generations)
+{
+    int result = 1;
+    for (int i = 0; i < generations - 1; ++i)
+    {
+        result *= coordination_number - 1;
+    }
+    return 1 + coordination_number * result;
+}
+constexpr int N_NODES = calculate_N_NODES(COORDINATION_NUMBER, GENERATIONS);
+
+std::pair<std::array<std::vector<int>, N_NODES>, std::array<int, N_NODES>> generate_bethe_lattice(int generations)
+{
+    std::array<std::vector<int>, N_NODES> adjacency_list;
+    std::array<int, N_NODES> distanceSquared;
+    int next_node = COORDINATION_NUMBER;
+
+    // Create the root node
+    for (int i = 1; i < COORDINATION_NUMBER + 1; ++i)
+    {
+        adjacency_list[0].push_back(i);
+        adjacency_list[i].push_back(0);
+        adjacency_list[i].push_back(i); // Node can infect itself
+        distanceSquared[i] = 1;
+    }
+
+    // Create the nodes of each generation
+    for (int gen = 2; gen < generations; ++gen)
+    {
+        int start_node = std::pow(COORDINATION_NUMBER, gen - 2) + 1;
+        int end_node = std::pow(COORDINATION_NUMBER, gen - 1) + 1;
+
+        for (int node = start_node; node < end_node; ++node)
+        {
+            for (int i = 0; i < COORDINATION_NUMBER - 1; ++i)
+            {
+                adjacency_list[node].push_back(next_node);
+                adjacency_list[next_node].push_back(node);
+                adjacency_list[next_node].push_back(next_node); // Node can infect itself
+                distanceSquared[next_node] = gen * gen;
+                next_node++;
+            }
+        }
+    }
+
+    // For the boundary nodes
+    for (int node = std::pow(COORDINATION_NUMBER, generations - 2) + 1; node < N_NODES; ++node)
+    {
+        adjacency_list[node].push_back(node); // Node can infect itself
+    }
+
+    return {adjacency_list, distanceSquared};
+}
 
 std::vector<double> linspace(double start, double end, int num)
 {
@@ -25,19 +81,11 @@ std::vector<double> linspace(double start, double end, int num)
     return linspaced;
 }
 
-int get_distance_to_origin(int node, std::map<int, std::vector<int>> &adjacency_list)
-{
-    int distance = 0;
-    while (node != 0)
-    {
-        node = *std::min_element(adjacency_list[node].begin(), adjacency_list[node].end());
-        distance += 1;
-    }
-    return distance;
-}
 
 void run(std::ofstream &file)
 {
+    int total_nodes = N_NODES;
+    auto [adjacency_list, distanceSquared] = generate_bethe_lattice(GENERATIONS);
     std::vector<std::vector<double>> meanSquaredDistance(N_STEPS, std::vector<double>(N_SIMULATIONS, 0));
     std::vector<std::vector<double>> nFilled(N_STEPS, std::vector<double>(N_SIMULATIONS, 0));
     std::fill(nFilled[0].begin(), nFilled[0].end(), 1);
@@ -47,30 +95,18 @@ void run(std::ofstream &file)
 
     for (int sim = 0; sim < N_SIMULATIONS; ++sim)
     {
-        std::vector<int> nodeValues = {1};
-        nodeValues.resize(COORDINATION_NUMBER + 1, 0);
-
-        std::map<int, std::vector<int>> adjacencyList;
-        for (int i = 0; i <= COORDINATION_NUMBER; ++i)
-        {
-            adjacencyList[i].push_back(i);
-            if (i != 0)
-            {
-                adjacencyList[0].push_back(i);
-                adjacencyList[i].push_back(0);
-            }
-        }
-
-        int lastNode = COORDINATION_NUMBER;
+        std::array<int, N_NODES> nodeValues;
+        std::fill(nodeValues.begin(), nodeValues.end(), 0);
+        nodeValues[0] = 1;  // Infection starts at the root node
 
         for (int i = 1; i < N_STEPS; ++i)
         {
-            std::vector<int> newNodeValues(nodeValues.size(), 0);
-            std::map<int, std::vector<int>> adjacencyListCopy = adjacencyList;
-            int previousLastNode = lastNode;
+            std::array<int, N_NODES> newNodeValues;
+            std::fill(newNodeValues.begin(), newNodeValues.end(), 0);
 
-            for (auto &[node, neighbours] : adjacencyList)
+            for (int node = 0; node < N_NODES; ++node)
             {
+                std::vector<int>& neighbours = adjacency_list[node];
                 if (nodeValues[node])
                 {
                     for (auto &neighbour : neighbours)
@@ -79,23 +115,11 @@ void run(std::ofstream &file)
                         if (neighbourInfected)
                         {
                             newNodeValues[neighbour] = 1;
-                            if (adjacencyList[neighbour].size() == 2)
-                            {
-                                for (int j = 0; j < COORDINATION_NUMBER - 1; ++j)
-                                {
-                                    adjacencyListCopy[neighbour].push_back(++lastNode);
-                                    adjacencyListCopy[lastNode] = {neighbour, lastNode};
-                                }
-                            }
                         }
                     }
                 }
             }
-
-            newNodeValues.resize(lastNode + 1, 0);
-            adjacencyList = adjacencyListCopy;
             nodeValues = newNodeValues;
-
             int nActiveNodes = std::accumulate(nodeValues.begin(), nodeValues.end(), 0);
             nFilled[i][sim] = nActiveNodes;
             if (nActiveNodes == 0)
@@ -115,7 +139,7 @@ void run(std::ofstream &file)
             double total_squared_distance = 0;
             for (auto &node : activeNodes)
             {
-                total_squared_distance += std::pow(get_distance_to_origin(node, adjacencyList), 2);
+                total_squared_distance += distanceSquared[node];
             }
 
             meanSquaredDistance[i][sim] = total_squared_distance / activeNodes.size();
@@ -155,7 +179,7 @@ int main(int argc, char *argv[])
     std::string exeDir = std::filesystem::path(exePath).parent_path().string();
 
     std::ostringstream filename;
-    filename << exeDir << "/outputs/bethe/p_" << P << "_steps_" << N_STEPS << ".csv";
+    filename << exeDir << "/outputs/bethe/p_" << P << "_steps_" << N_STEPS << "gens" << GENERATIONS << ".csv";
 
     std::ofstream file(filename.str());
 
