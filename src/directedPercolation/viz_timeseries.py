@@ -95,8 +95,33 @@ def variable_density():
     plt.yscale('log')
     plt.show()
 
+def plot_wellMixed():
+    # Get all .csv files in the directory
+    files = glob.glob('src/directedPercolation/outputs/timeseriesWellMixed/*.tsv')
+
+    for file in files:
+        # Use regex to get the p and N values from the filename
+        match = re.search(r'p_(\d+\.?\d*)_N_(\d+)\.tsv', file)
+        if match:
+            p = float(match.group(1))
+            N = int(match.group(2))
+
+            step, occupiedfracs = np.loadtxt(file, skiprows=1, delimiter='\t', unpack=True)
+            latter_half = occupiedfracs[len(occupiedfracs)//2:]  # Select the latter half of the array
+            mean = np.mean(latter_half)
+            std = np.std(latter_half)
+            plt.plot(occupiedfracs, label=f'p={p}, $\mu$={mean:.4f} $\pm$ {std:.4f}')
+
+    plt.xlabel('time')
+    plt.ylabel('occupied fraction')
+    plt.title(f'Well-mixed DP')
+    plt.legend()
+    # plt.ylim(-0.1, 1.1)
+    plt.show()
+
 
 if __name__ == '__main__':
     # main()
     # seedIC()
-    variable_density()
+    # variable_density().
+    plot_wellMixed()

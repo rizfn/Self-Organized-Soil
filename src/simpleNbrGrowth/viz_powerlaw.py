@@ -97,7 +97,7 @@ def main(directory, outputfilename):
             sigma_theta_part = match.group()
             sigma, theta = sigma_theta_part.split('_')[1], sigma_theta_part.split('_')[3]
 
-        ax.set_title(f'$\sigma$: {sigma}, $\\theta$: {theta}')
+        ax.set_title(f'$\sigma$: {sigma}, $\\varphi$: {theta}')
 
     plt.tight_layout()
     plt.savefig('src/simpleNbrGrowth/plots/csd/' + outputfilename + '.png', dpi=300)

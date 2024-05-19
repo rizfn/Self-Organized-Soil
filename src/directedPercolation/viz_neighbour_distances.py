@@ -107,11 +107,11 @@ def main():
     plt.grid()
     plt.xscale('log')
     plt.yscale('log')
-    ylim = plt.ylim()
-    tau1, tau2 = 2,2.5
-    plt.plot(bin_edges, normalized_counts[0]*bin_edges**-tau1, label=f'$\\tau$={tau1} power law', linestyle='--', zorder=-1, alpha=0.8)
-    plt.plot(bin_edges, 0.3e1*normalized_counts[0]*bin_edges**-tau2, label=f'$\\tau$={tau2} power law', linestyle='--', zorder=-1, alpha=0.8)
-    plt.ylim(ylim)
+    # ylim = plt.ylim()
+    # tau1, tau2 = 2,2.5
+    # plt.plot(bin_edges, normalized_counts[0]*bin_edges**-tau1, label=f'$\\tau$={tau1} power law', linestyle='--', zorder=-1, alpha=0.8)
+    # plt.plot(bin_edges, 0.3e1*normalized_counts[0]*bin_edges**-tau2, label=f'$\\tau$={tau2} power law', linestyle='--', zorder=-1, alpha=0.8)
+    # plt.ylim(ylim)
     plt.legend()
     plt.savefig(f'src/directedPercolation/plots/nbrDist/{p=}_{L=}.png', dpi=300)
     plt.show()

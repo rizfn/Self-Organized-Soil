@@ -9,3 +9,20 @@ $$
 \frac{\mathrm{d}W_B}{\mathrm{d}t} &= \rho_2 W_B N - \theta W_B
 \end{align}
 $$
+
+
+
+Fixed points:
+
+$$
+\begin{align*}
+    S &= 0, & \text{Em} &= 1-N, & G &= 0, & B &= 0 \\
+    S &= \frac{-\sqrt{(\theta  \sigma -\text{$\mu $1} \text{$\rho $1})^2-4 \theta  \text{$\mu $1} \text{$\rho $1}}-\theta  \sigma +\text{$\mu $1} \text{$\rho $1}}{2 \text{$\mu $1} \text{$\rho $1}}, & \text{Em} &= \frac{\frac{\sqrt{(\theta  \sigma -\text{$\mu $1} \text{$\rho $1})^2-4 \theta  \text{$\mu $1} \text{$\rho $1}}}{\text{$\mu $1}}+\frac{\theta  \sigma }{\text{$\mu $1}}-2 \theta  \sigma -2 \theta +\text{$\rho $1}}{2 (\text{$\rho $1} \sigma +\text{$\rho $1})}, & N &= \frac{\theta }{\text{$\rho $1}}, & G &= \frac{\frac{\theta  \sigma ^2}{\text{$\mu $1} \text{$\rho $1}}+\frac{\sigma  \sqrt{(\theta  \sigma -\text{$\mu $1} \text{$\rho $1})^2-4 \theta  \text{$\mu $1} \text{$\rho $1}}}{\text{$\mu $1} \text{$\rho $1}}+\sigma }{2 (\sigma +1)}, & B &= 0 \\
+    S &= \frac{\sqrt{(\theta  \sigma -\text{$\mu $1} \text{$\rho $1})^2-4 \theta  \text{$\mu $1} \text{$\rho $1}}-\theta  \sigma +\text{$\mu $1} \text{$\rho $1}}{2 \text{$\mu $1} \text{$\rho $1}}, & \text{Em} &= \frac{-\frac{\sqrt{(\theta  \sigma -\text{$\mu $1} \text{$\rho $1})^2-4 \theta  \text{$\mu $1} \text{$\rho $1}}}{\text{$\mu $1}}+\frac{\theta  \sigma }{\text{$\mu $1}}-2 \theta  \sigma -2 \theta +\text{$\rho $1}}{2 (\text{$\rho $1} \sigma +\text{$\rho $1})}, & N &= \frac{\theta }{\text{$\rho $1}}, & G &= \frac{\frac{\theta  \sigma ^2}{\text{$\mu $1} \text{$\rho $1}}-\frac{\sigma  \sqrt{(\theta  \sigma -\text{$\mu $1} \text{$\rho $1})^2-4 \theta  \text{$\mu $1} \text{$\rho $1}}}{\text{$\mu $1} \text{$\rho $1}}+\sigma }{2 (\sigma +1)}, & B &= 0 \\
+    S &= \frac{-\sqrt{(\theta  \sigma -\text{$\mu $2} \text{$\rho $2})^2-4 \theta  \text{$\mu $2} \text{$\rho $2}}-\theta  \sigma +\text{$\mu $2} \text{$\rho $2}}{2 \text{$\mu $2} \text{$\rho $2}}, & \text{Em} &= \frac{\frac{\sqrt{(\theta  \sigma -\text{$\mu $2} \text{$\rho $2})^2-4 \theta  \text{$\mu $2} \text{$\rho $2}}}{\text{$\mu $2}}+\frac{\theta  \sigma }{\text{$\mu $2}}-2 \theta  \sigma -2 \theta +\text{$\rho $2}}{2 (\text{$\rho $2} \sigma +\text{$\rho $2})}, & N &= \frac{\theta }{\text{$\rho $2}}, & G &= 0, & B &= \frac{\frac{\theta  \sigma ^2}{\text{$\mu $2} \text{$\rho $2}}+\frac{\sigma  \sqrt{(\theta  \sigma -\text{$\mu $2} \text{$\rho $2})^2-4 \theta  \text{$\mu $2} \text{$\rho $2}}}{\text{$\mu $2} \text{$\rho $2}}+\sigma }{2 (\sigma +1)} \\
+    S &= \frac{\sqrt{(\theta  \sigma -\text{$\mu $2} \text{$\rho $2})^2-4 \theta  \text{$\mu $2} \text{$\rho $2}}-\theta  \sigma +\text{$\mu $2} \text{$\rho $2}}{2 \text{$\mu $2} \text{$\rho $2}}, & \text{Em} &= \frac{-\frac{\sqrt{(\theta  \sigma -\text{$\mu $2} \text{$\rho $2})^2-4 \theta  \text{$\mu $2} \text{$\rho $2}}}{\text{$\mu $2}}+\frac{\theta  \sigma }{\text{$\mu $2}}-2 \theta  \sigma -2 \theta +\text{$\rho $2}}{2 (\text{$\rho $2} \sigma +\text{$\rho $2})}, & N &= \frac{\theta }{\text{$\rho $2}}, & G &= 0, & B &= \frac{\frac{\theta  \sigma ^2}{\text{$\mu $2} \text{$\rho $2}}-\frac{\sigma  \sqrt{(\theta  \sigma -\text{$\mu $2} \text{$\rho $2})^2-4 \theta  \text{$\mu $2} \text{$\rho $2}}}{\text{$\mu $2} \text{$\rho $2}}+\sigma }{2 (\sigma +1)} \\
+    S &= 0, & \text{Em} &= \frac{\text{$\rho $1}-\theta }{\text{$\rho $1}}, & N &= \frac{\theta }{\text{$\rho $1}}, & G &= 0, & B &= 0 \\
+    S &= 0, & \text{Em} &= \frac{\text{$\rho $2}-\theta }{\text{$\rho $2}}, & N &= \frac{\theta }{\text{$\rho $2}}, & G &= 0, & B &= 0 \\
+    S &= 1, & \text{Em} &= 0, & N &= 0, & G &= 0, & B &= 0
+\end{align*}
+$$

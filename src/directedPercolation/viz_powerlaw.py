@@ -59,7 +59,7 @@ def main(directory, outputfilename, tau1=1.8, tau2=1.9):
         num_bins = 100
         min_size = 1  # smallest cluster size
         max_size = max(max(max(sublist) for sublist in filled_cluster_sizes), max(max(sublist) for sublist in empty_cluster_sizes))
-        bins = np.logspace(np.log10(min_size), np.log10(max_size), num=num_bins)
+        bins = np.logspace(np.log10(min_size), np.log10(max_size)+1, num=num_bins)
 
         # Calculate histograms and plot for filled clusters
         flat_filled_cluster_sizes = [item for sublist in filled_cluster_sizes for item in sublist]
@@ -95,7 +95,7 @@ def main(directory, outputfilename, tau1=1.8, tau2=1.9):
         ax.set_title(f'p: {p},  L: {L}')
 
     plt.tight_layout()
-    plt.savefig('src/directedPercolation/plots/csd/' + outputfilename + '.png', dpi=300)
+    # plt.savefig('src/directedPercolation/plots/csd/' + outputfilename + '.png', dpi=300)
     plt.show()
 
 
