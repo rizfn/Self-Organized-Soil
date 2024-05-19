@@ -127,7 +127,7 @@ def main():
             k = np.sqrt(2/theta)
             x = np.linspace(1, 20, 100)
             # Set the prefactor to the value of the correlation histogram at x=1
-            prefactor = group.correlation_hist.iloc[i][1] / np.exp(-1/k)
+            prefactor = 2*group.correlation_hist.iloc[i][4] / np.exp(-1/k)
             y = prefactor * np.exp(-x / k)
             plt.plot(x, y, color=color, label=f"theta={theta:.2f}, exponential of slope -{1/k:.2f}", linestyle='--')
 
@@ -141,9 +141,14 @@ def main():
     plt.title(f"Correlation histogram for source={source_site}, target={target_site}, {L=}")
     # plt.xscale('log')
     plt.yscale('log')
+    plt.xlabel("Manhattan distance")
+    plt.ylabel("Correlation")
+    plt.grid()
+    plt.xlim(-0.5, 20.5)
+    plt.ylim(1e-3, 2)
 
     plt.legend()  # Add a legend
-    # plt.savefig("src/nutrient_model/plots/correlation_histogram.png", dpi=300)
+    plt.savefig("src/nutrient_model/plots/correlation_histogram.png", dpi=300)
     plt.show()  # Display the plot
 
 
@@ -170,13 +175,16 @@ def main_logbinned():
     plt.title(f"Logbinned correlation histogram for source={source_site}, target={target_site}, {L=}")
     plt.xscale('log')
     plt.yscale('log')
+    plt.xlabel("Manhattan distance")
+    plt.grid()
     plt.legend()  # Add a legend
-    # plt.savefig("src/nutrient_model/plots/correlation_histogram.png", dpi=300)
+    plt.tight_layout()
+    plt.savefig("src/nutrient_model/plots/correlation_histogram.png", dpi=300)
     plt.show()  # Display the plot
 
 
 
 if __name__ == "__main__":
-    main()
+    # main()
     # main_fulldata()
-    # main_logbinned()
+    main_logbinned()
