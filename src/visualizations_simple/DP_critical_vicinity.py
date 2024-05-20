@@ -15,10 +15,10 @@ def main():
         for i in range(0, N_steps):
             for j in range(L):
                 if array[i, j] == 1:
-                    if array[i+1, (j-1+L)%L] == 0:
-                        array[i+1, (j-1+L)%L] = np.random.rand() < p
-                    if array[i+1, (j+L)%L] == 0:
-                        array[i+1, (j+1+L)%L] = np.random.rand() < p
+                    if j > 0 and array[i+1, j-1] == 0:  # Check if not at left boundary
+                        array[i+1, j-1] = np.random.rand() < p
+                    if j < L-1 and array[i+1, j] == 0:  # Check if not at right boundary
+                        array[i+1, j+1] = np.random.rand() < p
 
         cmap = ListedColormap([(1,1,1,0), '#901A1E'])  # Create a custom colormap
         axs[idx].imshow(np.flip(array[::2, ::2]), cmap=cmap)

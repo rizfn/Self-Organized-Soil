@@ -142,7 +142,7 @@ def main():
     # plt.xscale('log')
     plt.yscale('log')
     plt.xlabel("Manhattan distance")
-    plt.ylabel("Correlation")
+    plt.ylabel("(Observed / Expected) - 1")
     plt.grid()
     plt.xlim(-0.5, 20.5)
     plt.ylim(1e-3, 2)
@@ -178,13 +178,12 @@ def main_logbinned():
     plt.xlabel("Manhattan distance")
     plt.grid()
     plt.legend()  # Add a legend
-    plt.tight_layout()
     plt.savefig("src/nutrient_model/plots/correlation_histogram.png", dpi=300)
     plt.show()  # Display the plot
 
 
 
 if __name__ == "__main__":
-    # main()
+    main()
     # main_fulldata()
-    main_logbinned()
+    # main_logbinned()

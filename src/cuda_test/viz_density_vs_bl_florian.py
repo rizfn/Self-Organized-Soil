@@ -51,7 +51,7 @@ def main():
 
     total_error = np.sqrt(np.array(std_list)**2 + stochastic_error**2)
 
-    axs[1].errorbar(bl_list, np.array(mean_list)-stochastic_value, yerr=total_error, fmt='x', linestyle='', elinewidth=1, c='#901A1E')
+    axs[1].errorbar(bl_list, np.abs(np.array(mean_list)-stochastic_value), yerr=total_error, fmt='x', linestyle='', elinewidth=1, c='#901A1E')
     axs[1].set_xlabel("Block Length $L_b$")
     axs[1].set_ylabel("Deviation from stochastic value")
     axs[1].set_xscale("log")
