@@ -40,13 +40,15 @@ def main(directory, outputfilename, tau):
     csv_files = sorted(glob.glob(f'{directory}/*.tsv'))
     dimension = int(directory.rsplit('/', 3)[1][3])  # super hacky to get the dimension from fname
 
-    # Separate files into filled and empty based on dimension
+    n_files = len(csv_files)
+
+    # Separate files into filled and empty based on dimension (because fspl and espl order changes at D>2)
     if dimension == 2:
-        filled_files = csv_files[3:]
-        empty_files = csv_files[:3]
+        filled_files = csv_files[n_files//2:]
+        empty_files = csv_files[:n_files//2]
     else:
-        filled_files = csv_files[:3]
-        empty_files = csv_files[3:]
+        filled_files = csv_files[:n_files//2]
+        empty_files = csv_files[n_files//2:]
 
     fig, axs = plt.subplots(1, 2, figsize=(14, 6))  # Create 2 subplots
 
@@ -90,7 +92,6 @@ def main(directory, outputfilename, tau):
 
 
 
-        
 
     plt.tight_layout()
     plt.savefig('src/directedPercolation/plots/csdRenormalized/' + outputfilename + f'_{tau}' + '.png', dpi=300)
@@ -98,7 +99,8 @@ def main(directory, outputfilename, tau):
 
 
 if __name__ == '__main__':
-    main('src/directedPercolation/outputs/CSD2D/criticalPointsLarge/', 'criticalPoints2DLarge', 1.87)
+    # main('src/directedPercolation/outputs/CSD2D/criticalPointsLarge/', 'criticalPoints2DLarge2', 1.87)
+    main('src/directedPercolation/outputs/CSD2D/criticalPointsVLarge/', 'criticalPoints2DVLarge2', 1.85)
     # main('src/directedPercolation/outputs/CSD3D/criticalPointsCPUBCC/', 'criticalPoints3DCPUBCC', 2.25)
     # main('src/directedPercolation/outputs/CSD4D/criticalPointsCPUBCC/', 'criticalPoints4DCPUBCC', 2.7)
     # main('src/directedPercolation/outputs/CSD5D/criticalPointsCPUBCC/', 'criticalPoints5DCPUBCC', 2.8)

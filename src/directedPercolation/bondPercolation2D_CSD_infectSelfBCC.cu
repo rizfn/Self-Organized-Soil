@@ -1,6 +1,7 @@
 // CUDA C++
 #include <cuda.h>
 #include <curand_kernel.h>
+#include <chrono>
 #include <random>
 #include <vector>
 #include <array>
@@ -14,7 +15,7 @@
 
 // Define constants
 constexpr double P = 0.344;
-constexpr int L = 1024;
+constexpr int L = 4096;
 constexpr int N_STEPS = 2000;
 constexpr int RECORDING_STEP = N_STEPS / 2;
 constexpr int RECORDING_INTERVAL = 5;
@@ -225,14 +226,21 @@ void run(std::ofstream &file, double p)
 
         if (step >= RECORDING_STEP && step % RECORDING_INTERVAL == 0)
         {
-
             // Copy lattice data from GPU to CPU
             std::vector<char> lattice_cpu(L * L);
             cudaMemcpy(lattice_cpu.data(), d_lattice, L * L * sizeof(char), cudaMemcpyDeviceToHost);
             std::vector<bool> lattice_bool(lattice_cpu.begin(), lattice_cpu.end());
 
+            // record start time
+            auto start = std::chrono::high_resolution_clock::now();
+
             // Calculate cluster sizes
             auto [sizes_filled, sizes_empty] = get_cluster_sizes(lattice_bool);
+
+            // record end time and print to console
+            auto end = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> elapsed = end - start;
+            std::cout << "Elapsed time: " << elapsed.count() << " s\n";
 
             file << step << "\t";
             // Write cluster sizes to a file

@@ -95,7 +95,7 @@ def main(directory, outputfilename, tau1=1.8, tau2=1.9):
         ax.set_title(f'p: {p},  L: {L}')
 
     plt.tight_layout()
-    # plt.savefig('src/directedPercolation/plots/csd/' + outputfilename + '.png', dpi=300)
+    plt.savefig('src/directedPercolation/plots/csd/' + outputfilename + '.png', dpi=300)
     plt.show()
 
 
@@ -152,12 +152,13 @@ def plot_one(filename):
 if __name__ == '__main__':
     # main('src/directedPercolation/outputs/CSD2D/criticalPoints/', 'criticalPoints2D')
     # main('src/directedPercolation/outputs/CSD2D/criticalPointsLarge/', 'criticalPoints2DLarge')
+    main('src/directedPercolation/outputs/CSD2D/criticalPointsVLarge/', 'criticalPoints2DVLarge2')
     # main('src/directedPercolation/outputs/CSD2D/otherPoints/', 'standardCriticalPoint2D')
     # main('src/directedPercolation/outputs/CSD2D/criticalPointsCPU/', 'criticalPoints2DCPU')
     # main('src/directedPercolation/outputs/CSD3D/criticalPointsCPU/', 'criticalPoints3DCPU')
     # main('src/directedPercolation/outputs/CSD3D/criticalPointsCPUBCC/', 'criticalPoints3DCPUBCC', 2.2, 2.3)
     # main('src/directedPercolation/outputs/CSD4D/criticalPointsCPUBCC/', 'criticalPoints4DCPUBCC', 2.5, 3)
-    main('src/directedPercolation/outputs/CSD5D/criticalPointsCPUBCC/', 'criticalPoints5DCPUBCC', 2.5, 3)
+    # main('src/directedPercolation/outputs/CSD5D/criticalPointsCPUBCC/', 'criticalPoints5DCPUBCC', 2.5, 3)
     # plot_one('src/directedPercolation/outputs/CSD2D/p_0.46_L_1024.tsv')
     # plot_one('src/directedPercolation/outputs/CSD2D/criticalPointsTest/p_0.318_L_1024.tsv')
     # plot_one('src/directedPercolation/outputs/CSD2D/criticalPointsTest/p_0.344_L_1024.tsv')
