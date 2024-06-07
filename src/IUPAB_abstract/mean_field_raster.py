@@ -143,7 +143,7 @@ def check_if_oscillating(df, prominence=0.01):
     return oscillating
 
 
-def run_raster(n_steps, rho, theta_list, sigma_list, delta, tolerance=1e-6):
+def run_raster(n_steps, rho, theta_list, sigma_list, delta, S0=0.25, E0=0.25, N0=0.25, W0=0.25, tolerance=1e-6):
     """Scans the ODE integrator over s and d for n_steps timesteps.
     
     Parameters
@@ -169,7 +169,7 @@ def run_raster(n_steps, rho, theta_list, sigma_list, delta, tolerance=1e-6):
     grid = np.meshgrid(theta_list, sigma_list)
     ts_pairs = np.reshape(grid, (2, -1)).T  # all possible pairs of d and s
     state_data = []
-    S0, E0, N0, W0 = 0.25, 0.25, 0.25, 0.25
+    # S0, E0, N0, W0 = 0.25, 0.25, 0.25, 0.25
     for i in tqdm(range(len(ts_pairs))):  # todo: parallelize
         theta, sigma = ts_pairs[i]
         T, S, E, N, W = ode_integrate_rk4(sigma, theta, rho, delta, stoptime=n_steps, nsteps=n_steps, S_0=S0, E_0=E0, N_0=N0, W_0=W0)
@@ -197,10 +197,13 @@ def main():
     theta_list = np.linspace(0, 0.3, 200)  # death rate
     sigma_list = np.linspace(0, 1, 200)  # soil filling rate
 
-    state_data = run_raster(n_steps, rho, theta_list, sigma_list, delta)
+    S0, E0, N0, W0 = 0.25, 0.25, 0.25, 0.25
+
+    state_data = run_raster(n_steps, rho, theta_list, sigma_list, delta, S0, E0, N0, W0)
 
     df = pd.DataFrame(state_data)
-    df.to_csv("src/IUPAB_abstract/outputs/TimeseriesMeanField/raster.csv", index=False)
+    # df.to_csv("src/IUPAB_abstract/outputs/TimeseriesMeanField/raster.csv", index=False)
+    df.to_json(f"docs/data/nutrient/meanfield_attractors/S0_{S0}_E0_{E0}_N0_{N0}_W0_{W0}.json", orient="records")
 
 
 
