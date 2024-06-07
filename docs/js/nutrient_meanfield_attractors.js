@@ -103,11 +103,12 @@ var yLinear = d3.scaleLinear()
 var canvas = d3.select("div#raster")
     .append("canvas")
     .attr("id", "canvas")
+    // Subtract the top margin from the height
+    .attr("height", height + margin.bottom)
     .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
     .style("position", "absolute")
     .style("top", margin.top + "px");
-
+    
 var context = canvas.node().getContext("2d");
 
 // Translate the canvas context to the right by margin.left
