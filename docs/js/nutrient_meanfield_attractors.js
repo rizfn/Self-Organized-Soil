@@ -8,7 +8,8 @@ let { default: data_25_25_25_25 } = await import("../data/nutrient/meanfield_att
 var form = d3.select("div#select-data")
     .append("form")
     .attr("id", "radio-buttons")
-    .attr("class", "radio-buttons");
+    .attr("class", "radio-buttons")
+    .style("margin-bottom", "20px");
 
 function createRadioButton(form, labelText, value, checked = false) {
     var form_label = form.append("label")
@@ -59,7 +60,6 @@ document.addEventListener('keydown', function (event) {
 var colorMap = d3.scaleOrdinal()
     .domain(["Soil", "Empty", "Oscillating", "Stable"])
     .range(["#996220", "#e8e9f3", "#429ea6", "#d7cf07"]);
-
 
 let data = data_25_25_25_25;
 
@@ -193,6 +193,42 @@ context.stroke();
 
 // Call the draw function instead of creating SVG rectangles
 draw(data);
+
+
+// Define your color map
+var colorMap = d3.scaleOrdinal()
+    .domain(["Soil", "Empty", "Oscillating", "Stable"])
+    .range(["#996220", "#e8e9f3", "#429ea6", "#d7cf07"]);
+
+// Select the div#select-data
+var legendDiv = d3.select("div#select-data");
+
+// Create the legend
+colorMap.domain().forEach(function(state, i) {
+    var legendRow = legendDiv.append('div')
+        .attr('class', 'legend')
+        .style('display', 'flex')
+        .style('align-items', 'center')
+        .style('margin-left', '30px')
+        .style('margin-top', '10px')
+        .style('margin-bottom', '0px');
+
+    // Add the colored square
+    legendRow.append('div')
+        .attr('class', 'legend-color')
+        .style('background-color', colorMap(state))
+        .style('border', '1px solid black')
+        .style('width', '1em')
+        .style('height', '1em')
+        .style('margin-right', '8px');
+
+    // Add the label
+    legendRow.append('div')
+        .attr('class', 'legend-label')
+        .text(state)
+        .style('font-size', '16px');
+});
+
 
 
 function change_data(state) {
