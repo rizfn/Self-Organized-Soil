@@ -1,6 +1,6 @@
-// const { default: data } = await import("../data/twospec_samenutrient/lattice2D_L_100_rho1_0.5_rho2_1.json", { assert: { type: "json" } });
-// const { default: data } = await import("../data/twospec_samenutrient/lattice2D_L_100_rho1_0.25_rho2_1.json", { assert: { type: "json" } });
-const { default: data } = await import("../data/twospec_samenutrient/lattice2D_L_100_rho1_0.25_rho2_0.5.json", { assert: { type: "json" } });
+// let data = await (await fetch("../data/twospec_samenutrient/lattice2D_L_100_rho1_0.5_rho2_1.json")).json();
+// let data = await (await fetch("../data/twospec_samenutrient/lattice2D_L_100_rho1_0.25_rho2_1.json")).json();
+let data = await (await fetch("../data/twospec_samenutrient/lattice2D_L_100_rho1_0.25_rho2_0.5.json")).json();
 
 // check if mobile
 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {

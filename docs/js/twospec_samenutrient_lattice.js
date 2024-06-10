@@ -1,4 +1,4 @@
-const { default: data } = await import("../data/twospec_samenutrient/lattice_L=100_sigma=0.5_theta=0.025_rho1=0.5_mu1=0.5.json", { assert: { type: "json" } });
+const data = await (await fetch("../data/twospec_samenutrient/lattice_L=100_sigma=0.5_theta=0.025_rho1=0.5_mu1=0.5.json")).json();
 
 // check if mobile
 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {

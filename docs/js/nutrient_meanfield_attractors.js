@@ -1,7 +1,7 @@
-let { default: data_10_00_80_10 } = await import("../data/nutrient/meanfield_attractors/S0_0.1_E0_0.0_N0_0.8_W0_0.1.json", { assert: { type: "json" } });
-let { default: data_30_30_30_10 } = await import("../data/nutrient/meanfield_attractors/S0_0.3_E0_0.3_N0_0.3_W0_0.1.json", { assert: { type: "json" } });
-let { default: data_80_00_00_20 } = await import("../data/nutrient/meanfield_attractors/S0_0.8_E0_0.0_N0_0.0_W0_0.2.json", { assert: { type: "json" } });
-let { default: data_25_25_25_25 } = await import("../data/nutrient/meanfield_attractors/S0_0.25_E0_0.25_N0_0.25_W0_0.25.json", { assert: { type: "json" } });
+let data_10_00_80_10 = await (await fetch("../data/nutrient/meanfield_attractors/S0_0.1_E0_0.0_N0_0.8_W0_0.1.json")).json();
+let data_30_30_30_10 = await (await fetch("../data/nutrient/meanfield_attractors/S0_0.3_E0_0.3_N0_0.3_W0_0.1.json")).json();
+let data_80_00_00_20 = await (await fetch("../data/nutrient/meanfield_attractors/S0_0.8_E0_0.0_N0_0.0_W0_0.2.json")).json();
+let data_25_25_25_25 = await (await fetch("../data/nutrient/meanfield_attractors/S0_0.25_E0_0.25_N0_0.25_W0_0.25.json")).json();
 
 
 // add 4 radio buttons to switch between meanfield, stochastic, parallel, 3d, wellmixed data
