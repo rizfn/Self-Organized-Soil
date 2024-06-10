@@ -1,4 +1,4 @@
-const data = await (await fetch("../data/nutrient/lattice_oscillation_L=100_rho=1_delta=0.json")).json();
+const data = await (await fetch("../../data/nutrient/lattice_oscillation_L=100_rho=1_delta=0.json")).json();
 
 // check if mobile
 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
