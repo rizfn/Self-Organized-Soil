@@ -390,6 +390,14 @@ Renormalized to $x^{1.85}$. Site percolation $\approx$ 2.05
 
 ---
 
+#### Parasite Coexistence and  $\rho_2/\rho_1$
+
+$~~~~~~~$ $\rho_2/\rho_1$=2 $~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~$ $\rho_2/\rho_1$=4
+
+![width:1100px](images/defence/parasite_rhofactor_coexistence.png)
+
+---
+
 
 ### Multiple Nutrients
 <br>

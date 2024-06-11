@@ -146,7 +146,7 @@ var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHei
 camera.position.z = 1.5;
 
 // Create a renderer
-var renderer = new THREE.WebGLRenderer({ canvas: canvas.node() , alpha: true});
+var renderer = new THREE.WebGLRenderer({ canvas: canvas.node(), alpha: true });
 // renderer.setSize(window.innerWidth, window.innerHeight);
 d3.select('div#lattice').node().appendChild(renderer.domElement);
 
@@ -387,11 +387,11 @@ async function update_step() {
     current_file_idx += 1;
 
     try {
-        data = await import(data_prefix + `step${current_file_idx}.json`, { assert: { type: "json" } });
-        update_data(data.default);
+        data = await (await fetch(data_prefix + `step${current_file_idx}.json`)).json();
+        update_data(data);
     } catch (error) {
         current_file_idx = 0;
-        data = await import(data_prefix + `step${current_file_idx}.json`, { assert: { type: "json" } });
-        update_data(data.default);
+        data = await (await fetch(data_prefix + `step${current_file_idx}.json`)).json();
+        update_data(data);
     }
 }
