@@ -5,16 +5,16 @@ from skimage import measure
 from stl import mesh
 
 def main():
-    p = 0.28734
-    fname = 'DP'
+    # p = 0.28734
+    # fname = 'DP'
     # p = 0.3435
     # fname = 'FSPL'
-    # p = 0.3185
-    # fname = 'ESPL'
+    p = 0.3185
+    fname = 'ESPL'
     np.random.seed(0)
-    L = 200
-    N_steps = 400
-    timeskip = 1
+    L = 150
+    N_steps = 230
+    timeskip = 2
     scaling_factor = 4
 
     while True:
@@ -39,19 +39,19 @@ def main():
         else:
             break
 
-    for i in range(10):
-        plt.cla()
-        plt.xlim(90, 110)
-        plt.ylim(90, 110)
-        plt.imshow(array[i], cmap='gray')
-        plt.show()
+    # for i in range(10):
+    #     plt.cla()
+    #     plt.xlim(90, 110)
+    #     plt.ylim(90, 110)
+    #     plt.imshow(array[i], cmap='gray')
+    #     plt.show()
 
     condensed_array = array[::2*timeskip, ::2, ::2]
 
-    for i in range(10):
-        plt.cla()
-        plt.imshow(condensed_array[i], cmap='gray')
-        plt.show()
+    # for i in range(10):
+    #     plt.cla()
+    #     plt.imshow(condensed_array[i], cmap='gray')
+    #     plt.show()
 
     condensed_array = np.repeat(np.repeat(np.repeat(condensed_array, scaling_factor, axis=0), scaling_factor, axis=1), scaling_factor, axis=2)
     # add a border of zeros to the condensed array to avoid artifacts in the 3D model
