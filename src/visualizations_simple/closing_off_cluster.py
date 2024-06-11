@@ -53,23 +53,17 @@ def viz_fspl():
                     if lattice[step+1, (i+1)%L, (j+1)%L] == 0:
                         lattice[step+1, (i+1)%L, (j+1)%L] = np.random.rand() < p
 
-    cmap = ListedColormap([(1,1,1,1), '#901A1E'])
 
     labels, n_clusters = cc3d.connected_components(lattice[-1], connectivity=4, periodic_boundary=True, return_N=True)
 
-    # randomly shuffly the label numbering, except for 0s
     label_map = np.arange(n_clusters+1)
     np.random.shuffle(label_map[1:])
     labels = label_map[labels]
-    
-    # Define the start and end colors
+
+    # Create a colormap of reds
     start_color = (1, 0.75, 0.75, 1)  # Pink
     end_color = (0.5647, 0.1019, 0.1176, 1)  # Dark red
-    
-    # Create a colormap that linearly interpolates between the start and end colors
     cmap = LinearSegmentedColormap.from_list("my_colormap", [start_color, end_color], N=n_clusters)
-    
-    # Generate the colors for each cluster
     colors = [(1,1,1,1)] + [cmap(i) for i in range(n_clusters)]
 
     fig, ax = plt.subplots(1, 1, figsize=(8, 8))

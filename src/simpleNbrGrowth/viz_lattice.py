@@ -114,9 +114,16 @@ def color_clusters(filename):
     labels_out = np.vectorize(lambda x: labels_out_unique[x])(labels_out)
     
     fig, axs = plt.subplots(1, 2, figsize=(10, 5))
-    axs[0].imshow(lattice, origin='lower')
+    axs[0].imshow(np.logical_not(lattice), origin='lower', cmap='binary')  # not so filled sites are white
+    axs[0].set_xticklabels([])  # Remove x-axis labels
+    axs[0].set_yticklabels([])  # Remove y-axis labels
+    axs[0].tick_params(axis='both', which='both', length=0)
     axs[1].imshow(labels_out, cmap=cmap, origin='lower')
-    # plt.savefig(f'src/simpleNbrGrowth/plots/lattice2D/colored_clusters_FSPL.png', dpi=300)
+    axs[1].set_xticklabels([])  # Remove x-axis labels
+    axs[1].set_yticklabels([])  # Remove y-axis labels
+    axs[1].tick_params(axis='both', which='both', length=0)
+
+    plt.savefig(f'src/simpleNbrGrowth/plots/lattice2D/colored_clusters_FSPL.png', dpi=300, bbox_inches='tight', pad_inches=0, transparent=True)
     plt.show()
 
 

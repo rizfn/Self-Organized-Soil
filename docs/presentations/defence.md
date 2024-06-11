@@ -193,6 +193,11 @@ $$
 
 ---
 
+<iframe width="auto" height="1000px" src="https://rizfn.github.io/Self-Organized-Soil/visualizations/defence/nutrient_lattice_3D_density.html" style="border: 1px solid #ccc" frameborder=0>
+</iframe>
+
+---
+
 ### Survival in lattice vs Meanfield
 
 ![w:1150](images/defence/rasterscan_attractors.png)
@@ -224,7 +229,8 @@ Spatial structure **damps** oscillations
 
 - Worms don't care who creates the nutrient
 - A slight advantage mean you dominate
-- **Competitive Exclusion:** Higher $\rho$ always wins
+- **Coexistence is impossible!**
+  *Competitive exclusion*: Higher $\rho$ always wins
 
 
 ---
@@ -273,21 +279,47 @@ $\implies$ both are a cluster of size 36!
 
 </div>
 
+
+---
+
+![bg fit right:30%](images/defence/DP_1D_slice.png)
+
+### Investigating Cluster Size Distributions
+
+
+- Take a slice at *constant time*
+
+- Observe the distribution of filled and empty clusters
+
+- 1+1D: Empty CSD = Distance between branches ($p$=$p_c$)
+
+- Filled CSD at $p$=1, as infinite clusters can be broken easily
+
+
+
+---
+
+<div class="columns">
+
+<iframe width="100%" height="100%" src="https://rizfn.github.io/Self-Organized-Soil/visualizations/defence/DP_2D_stl.html" style="max-width:100% border: 1px solid #ccc" frameborder=0>
+</iframe>
+
+- In the 2D supercritical region, we let the system stabilize at $\rho^\text{stat}$
+
+- Clusters cannot be broken apart with a single break
+
+- Similar to site percolation, but with short range correlations
+
+
+</div>
+
+
 ---
 
 ### New Critical Points
 
-<div class="columns">
+![width:1100](images/defence/colored_clusters_FSPL.png)
 
-<img src="images/defence/fspl_2D_lattice.png" style="max-width: 90%; "></img>
-
-- In the supercritical region, we let the system stabilize at $\rho^\text{stat}$
-
-- Investigate **cluster size distributions** of filled and empty sites
-
-- $\sim$ Site percolation, with short range correlations
-
-</div>
 
 ---
 
@@ -300,6 +332,27 @@ $\implies$ both are a cluster of size 36!
 - Exponent $\approx 1.85$ same for both!
 
 ![width:1100](images/defence/2D_newcriticalpoints.png)
+
+
+---
+
+### Dimensionality scaling
+
+Critical points *swap positions* in 3D and beyond:
+
+DP $\rightarrow$ Filled $\rightarrow$ Empty
+
+![width:550](images/defence/DP_criticalpoints_dims_linear.png) $~$ ![width:550](images/defence/DP_criticalpoints_dims_normalized.png)
+
+
+---
+
+### Renormalized power laws
+
+Renormalized to $x^{1.85}$. Site percolation $\approx$ 2.05
+
+![width:1150px](images/defence/2D_renormalized_DP_criticalPoints.png)
+
 
 ---
 
@@ -482,19 +535,5 @@ Different exponent of $\approx 2.05$
 
 ![width:1150px](images/defence/site_percolation_CSD.png)
 
----
-
-Renormalized to $x^{1.85}$
-
-![width:1150px](images/defence/2D_renormalized_DP_criticalPoints.png)
-
-
----
-
-### Dimensionality scaling
-
-<br>
-
-![width:550](images/defence/DP_criticalpoints_dims_linear.png) $~$ ![width:550](images/defence/DP_criticalpoints_dims_normalized.png)
 
 

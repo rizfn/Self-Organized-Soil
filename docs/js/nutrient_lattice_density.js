@@ -142,7 +142,7 @@ var mouseover_rgb = function (event, d) {
 var mousemove_rgb = function (event, d) {
 	var heatmap2_location = getOffset(document.getElementById("soil_amounts"))
 	Tooltip
-		.html("d=" + d3.format("0.2f")(d.theta) + ", " + "s=" + d3.format("0.2f")(d.sigma) + "<br>" + d3.format("0.2")(d.soil) + ", " + d3.format("0.2")(d.vacancy) + ", " + d3.format("0.2")(d.nutrient) + ", " + d3.format("0.2")(d.worm))
+		.html("θ=" + d3.format("0.2f")(d.theta) + ", " + "σ=" + d3.format("0.2f")(d.sigma) + "<br>" + d3.format("0.2")(d.soil) + ", " + d3.format("0.2")(d.vacancy) + ", " + d3.format("0.2")(d.nutrient) + ", " + d3.format("0.2")(d.worm))
 		.style("left", (d3.pointer(event)[0] + heatmap2_location.left + 30) + "px")
 		.style("top", (d3.pointer(event)[1] + heatmap2_location.top - 20) + "px")
 }
