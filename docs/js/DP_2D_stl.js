@@ -7,7 +7,7 @@ const scene = new THREE.Scene();
 
 // Create a camera
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.z = 50;
+camera.position.z = 40;
 
 // Create a renderer with a transparent background
 const renderer = new THREE.WebGLRenderer({ alpha: true });
@@ -30,7 +30,7 @@ directionalLight2.position.set(1, 0, 0);
 scene.add(directionalLight2);
 
 const pointLight = new THREE.PointLight(0xffffff, 100);
-pointLight.position.set(20, 0, 0);
+pointLight.position.set(10, 0, 0);
 scene.add(pointLight);
 
 // Load the STL file
@@ -40,13 +40,13 @@ loader.load('../../../src/visualizations_simple/3D_model/ESPL.stl', function (ge
     const material = new THREE.MeshPhongMaterial({ color: 0x901a1e });  // changed material
     const mesh = new THREE.Mesh(geometry, material);
     mesh.scale.set(0.1, 0.1, 0.1);  // scale down
-    mesh.position.set(-30, -20, 0);  // center
+    mesh.position.set(-15, -15, 0);  // center
 
     // Add the mesh to the scene
     scene.add(mesh);
 });
 
-controls.target.set(0, 0, 20);  // center
+controls.target.set(0, 0, 15);  // center
 
 console.log("Loaded STL file");
 

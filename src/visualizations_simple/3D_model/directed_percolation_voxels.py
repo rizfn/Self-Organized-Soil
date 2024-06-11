@@ -64,7 +64,7 @@ def main():
     for i, f in enumerate(faces):
         obj_3d.vectors[i] = verts[f]
     
-    obj_3d.save(f'src/visualizations_simple/3D_model/{fname}.stl')
+    obj_3d.save(f'docs/data/directed_percolation/{fname}.stl')
 
 
 
