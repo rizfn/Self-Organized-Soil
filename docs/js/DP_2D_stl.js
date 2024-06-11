@@ -35,7 +35,7 @@ scene.add(pointLight);
 
 // Load the STL file
 const loader = new STLLoader();
-loader.load('../../../src/visualizations_simple/3D_model/ESPL.stl', function (geometry) {
+loader.load('../../data/directed_percolation/ESPL.stl', function (geometry) {
     // Create a mesh using the loaded geometry
     const material = new THREE.MeshPhongMaterial({ color: 0x901a1e });  // changed material
     const mesh = new THREE.Mesh(geometry, material);
