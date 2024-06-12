@@ -31,7 +31,7 @@ style: |
 
 # Self-Organised Soil
 
-<br>
+$\\$
 Riz Fernando Noronha
 
 Supervised by Kim Sneppen and Kunihiko Kaneko
@@ -40,7 +40,7 @@ Supervised by Kim Sneppen and Kunihiko Kaneko
 ---
 
 ## Why soil?
-<br>
+$\\$
 
 - Soil drives agriculture, and helps sustain the biosphere
 <br>
@@ -74,9 +74,8 @@ Supervised by Kim Sneppen and Kunihiko Kaneko
 - Modelling as a purely inorganic substance is not enough
 <br>
 - *'Biomaterial'*
-
 <br>
-<br><br>
+
 <span class="caption"><a href="https://www.pnas.org/doi/full/10.1073/pnas.2304663120">Anthony, Bender, & Heijden, 2023</a></span>
 
 ---
@@ -93,7 +92,6 @@ Control, Bulk, Rhizophere
 
 
 ---
-<br>
 
 - **Soil porosity** appears to increase
 
@@ -122,7 +120,7 @@ Control, Bulk, Rhizophere
 - $\mu$: Nutrient generation rate $=1$
 - $\rho$: Reproductive rate of worms $=1$
 
-<br>
+$\\$
 
 > *One is a great number!*
 
@@ -138,13 +136,6 @@ Control, Bulk, Rhizophere
 - Worms use nutrients to reproduce
 - Soil 'grows' from empty and nutrients
 - Predator-prey with time-delay
-
-<!-- <ul style="line-height:1.3em;">
-<li> Worms convert soil to nutrients
-<li> Worms use nutrients to reproduce
-<li> Soil 'grows' from empty and nutrients
-<li> Predator-prey with time-delay
-</ul> -->
 
 </div>
 
@@ -172,7 +163,7 @@ $$
 
 ### Cellular Automaton Model
 
-<br>
+$\\$
 
 <div class="columns">
 
@@ -213,6 +204,8 @@ Spatial structure **damps** oscillations
 
 ### Two Species
 
+$$\\$$
+
 - Add a second species, and make it asymmetric in terms of:
   - $\mu$, nutrient generation rate
   - $\rho$, reproduction rate
@@ -223,7 +216,7 @@ Spatial structure **damps** oscillations
 
 #### Mean-Field: Parasite Problem
 
-<br>
+$\\$
 
 ![w:800px](images/feb29/competitive_exclusion.png)
 
@@ -357,7 +350,8 @@ Renormalized to $x^{1.85}$. Site percolation $\approx$ 2.05
 ---
 
 ## Conclusion
-<br>
+
+$\\$
 
 - Model emphasizes **mutual feedback** between soil structure and ecosystem dynamics
 
@@ -400,7 +394,7 @@ $~~~~~~~$ $\rho_2/\rho_1$=2 $~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~$ $\rho_2/\rho_1$=4
 
 
 ### Multiple Nutrients
-<br>
+$\\$
 
 - Have worms eat all other nutrients, besides their own
   - Worms simply oscillate in phase
@@ -465,7 +459,7 @@ Literature suggests **spiral waves**...
 
 ### Spatial confinement
 
-<br>
+$\\$
 
 - Assuming you're surrounded by soil, how do you propagate into it?
 
@@ -487,7 +481,7 @@ Literature suggests **spiral waves**...
 ---
 
 ### Powerlaw math
-<br>
+$\\$
 
 <div class="columns">
 

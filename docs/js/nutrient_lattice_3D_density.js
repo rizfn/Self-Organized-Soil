@@ -5,7 +5,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 let current_file_idx = 0;
 const data_prefix = `../../data/nutrient/lattice3D_L=50_rho=1_delta=0/`;
 
-const data = await (await fetch(data_prefix + `step${current_file_idx}.json`)).json();
+let data = await (await fetch(data_prefix + `step${current_file_idx}.json`)).json();
 
 
 // on spacebar, call update_step

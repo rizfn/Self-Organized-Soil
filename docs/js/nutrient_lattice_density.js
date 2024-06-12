@@ -43,7 +43,7 @@ data.forEach((d) => {
 console.log(data);
 
 
-let step = step_list[1]  // start from 2nd step, cause why not
+let step = step_list[0]
 
 let filtereddata = data.filter(function (d) { return d.step == step });
 
