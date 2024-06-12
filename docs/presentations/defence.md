@@ -173,7 +173,7 @@ $\\$
 
 - Worms thus help each other survive
 
-<img src="images/feb29/algo_grid.png" style="max-width: 100%; "></img>
+<img src="images/defence/algo_grid.png" style="max-width: 75%; "></img>
 
 </div>
 
@@ -337,14 +337,31 @@ Renormalized to $x^{1.85}$. Site percolation $\approx$ 2.05
 
 $\\$
 
-- Model emphasizes **mutual feedback** between soil structure and ecosystem dynamics
+- Model emphasizes **mutual feedback** between soil structure and ecosystem dynamics.
 
-- Spatial structure can solve the **parasite problem**
+- Spatial structure can solve the **parasite problem**.
 
-- Power-laws seen in the model can be explained through **directed percolation**.
+- Power-laws seen in the model can be seen as a new universality class of **directed percolation**.
 
 
 ---
+
+## Future Work
+
+$\\$
+
+- More experimental evidence needed!
+
+- Mutation of parameters
+
+- Verify universality of exponents
+
+- RG analysis to differentiate from site percolation
+
+
+---
+
+
 
 # Additional Slides
 
