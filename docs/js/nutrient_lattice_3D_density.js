@@ -339,8 +339,8 @@ function resizeRendererToDisplaySize(renderer) {
 // Create a function to animate the scene
 function animate() {
     requestAnimationFrame(animate);
-    group.rotation.x += 0.001;
-    group.rotation.y += 0.001;
+    group.rotation.x += 0.0005;
+    group.rotation.y += 0.0005;
     controls.update();
     if (resizeRendererToDisplaySize(renderer)) {
         const canvas = renderer.domElement;

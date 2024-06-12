@@ -275,22 +275,7 @@ $\implies$ both are a cluster of size 36!
 
 ---
 
-![bg fit right:30%](images/defence/DP_1D_slice.png)
-
 ### Investigating Cluster Size Distributions
-
-
-- Take a slice at *constant time*
-
-- Observe the distribution of filled and empty clusters
-
-- 1+1D: Empty CSD = Distance between branches ($p$=$p_c$)
-
-- Filled CSD at $p$=1, as infinite clusters can be broken easily
-
-
-
----
 
 <div class="columns">
 
@@ -299,13 +284,12 @@ $\implies$ both are a cluster of size 36!
 
 - In the 2D supercritical region, we let the system stabilize at $\rho^\text{stat}$
 
-- Clusters cannot be broken apart with a single break
+- Take slice at *constant time*, and look at the 2D structure
 
 - Similar to site percolation, but with short range correlations
 
 
 </div>
-
 
 ---
 
@@ -521,6 +505,23 @@ For $\tau\approx2.25$, $D\approx3.75$
 </div>
 
 </div>
+
+
+---
+
+![bg fit right:30%](images/defence/DP_1D_slice.png)
+
+### 1+1D Critical Points
+
+
+- Take a slice at *constant time*
+
+- Observe the distribution of filled and empty clusters
+
+- 1+1D: Empty CSD = Distance between branches ($p$=$p_c$)
+
+- Filled CSD at $p$=1, as infinite clusters can be broken easily
+
 
 ---
 
