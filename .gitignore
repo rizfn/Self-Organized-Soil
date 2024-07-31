@@ -13,6 +13,7 @@ src/coupled_map_lattice/outputs/
 src/coupled_map_lattice/snowflake/outputs/
 src/cuda_test/outputs/
 src/directedPercolation/outputs/
+src/dp_paper/outputs/
 src/sitePercolation/outputs/
 src/simpleNbrGrowth/outputs/
 src/nutrient_model/outputs/
