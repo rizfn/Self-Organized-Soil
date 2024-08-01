@@ -7,15 +7,15 @@ from nutrient_utils import run_stochastic, run_stochastic_3D, ode_integrate_rk4
 def main():
 
     # initialize the parameters
-    steps_per_latticepoint = 1000  # number of bacteria moves per lattice point
+    steps_per_latticepoint = 500  # number of bacteria moves per lattice point
     # L = 100  # side length of the square lattice
     # n_steps = steps_per_latticepoint * L**2  # number of timesteps to run the simulation for
     L = 50  # side length of the cubic lattice
     n_steps = steps_per_latticepoint * L**3  # 3D
     rho = 1  # reproduction rate
     delta = 0
-    sigma = 0.16
-    theta = 0.09
+    sigma = 0.37
+    theta = 0.06
 
     # steps_to_record = np.arange(1, n_steps+1, L**2, dtype=np.int32)
     # soil_lattice_data = run_stochastic(n_steps, L, rho, theta, sigma, delta, steps_to_record=steps_to_record)
@@ -45,7 +45,7 @@ def main():
 
     plt.rcParams['font.family'] = 'monospace'
     # fig, axs = plt.subplots(nrows=1, ncols=2, sharey=True, figsize=(15,6))
-    fig, axs = plt.subplots(nrows=2, ncols=1, sharey=True, figsize=(15,6))
+    fig, axs = plt.subplots(nrows=2, ncols=1, sharey=True, figsize=(8,5))
 
     steps_to_record = steps_to_record / L**3
     # First subplot
@@ -55,8 +55,9 @@ def main():
     axs[0].plot(steps_to_record, worms, label="worms", c="green")
     axs[0].set_title(f"3D Lattice, {L=}")
     axs[0].set_xlabel("Timestep")
-    axs[0].set_ylabel("Fraction of lattice points")
-    axs[0].legend()
+    axs[0].set_ylabel("Fraction")
+    axs[0].set_ylim(-0.05, 1.05)
+    axs[0].legend(loc="upper right")
     
     # Second subplot
     T, S, E, N, W = ode_integrate_rk4(sigma, theta, rho, delta, stoptime=steps_per_latticepoint, nsteps=steps_per_latticepoint)
@@ -68,7 +69,8 @@ def main():
     axs[1].set_title("Mean-Field")
     axs[1].set_xlabel("Timestep")
     axs[1].set_ylabel("Fraction")
-    axs[1].legend()
+    axs[1].set_ylim(-0.05, 1.05)
+    axs[1].legend(loc="upper right")
     
     plt.tight_layout()
     plt.savefig(f'src/nutrient_model/plots/time_series/3D_vs_MF/s_{sigma}_t_{theta}.png', dpi=300)
