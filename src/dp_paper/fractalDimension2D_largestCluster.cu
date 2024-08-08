@@ -2,8 +2,10 @@
 #include <cuda.h>
 #include <curand_kernel.h>
 #include <chrono>
+#include <cmath>
 #include <random>
 #include <vector>
+#include <numeric>
 #include <stack>
 #include <array>
 #include <unordered_map>
@@ -20,6 +22,14 @@ constexpr double P = 0.34375; // 0.344 for FSPL, 0.318 for ESPL
 constexpr int L = 4096;
 constexpr int N_STEPS = 4000;
 constexpr int RECORDING_STEP = N_STEPS * 5 / 10;
+constexpr int RECORDING_SKIP = 5;
+template<int N>
+constexpr int log2()
+{
+    return (N < 2) ? 0 : 1 + log2<N / 2>();
+}
+constexpr int N_BOX_SIZES = log2<L>() - 1;
+
 
 std::vector<bool> initLattice(int L)
 {
@@ -128,46 +138,100 @@ private:
     std::vector<int> parent, rank;
 };
 
-void dfs(const std::vector<bool> &lattice, std::vector<std::vector<bool>> &visited, std::vector<std::vector<bool>> &mask, int x, int y, int &size)
+void boxCount2D(std::vector<bool> &lattice, std::vector<unsigned int> &boxCounts)
 {
-    std::stack<std::pair<int, int>> stack;
-    stack.push({x, y});
+    unsigned int s = 2;
+    unsigned int size = L;
+    unsigned char ni = 0;
 
-    while (!stack.empty())
+    while (size > 2)
     {
-        auto [cx, cy] = stack.top();
-        stack.pop();
+        int sm = s >> 1; // s/2
+        unsigned long im;
+        unsigned long ismm;
 
-        if (visited[cx][cy])
-            continue;
-
-        visited[cx][cy] = true; // Mark the current site as visited
-        mask[cx][cy] = true;    // Mark the current site in the mask
-        size++;                 // Increment the size of the cluster
-
-        // Directions: up, down, left, right
-        int dx[] = {-1, 1, 0, 0};
-        int dy[] = {0, 0, -1, 1};
-
-        for (int i = 0; i < 4; ++i)
-        {                                                             // Explore all four directions
-            int nx = (cx + dx[i] + L) % L, ny = (cy + dy[i] + L) % L; // Periodic boundary conditions
-            if (!visited[nx][ny] && lattice[nx * L + ny] == lattice[cx * L + cy])
+        boxCounts[ni] = 0;
+        for (unsigned long i = 0; i < (L - 1); i += s)
+        {
+            im = i * L;
+            ismm = (i + sm) * L;
+            for (unsigned long j = 0; j < (L - 1); j += s)
             {
-                stack.push({nx, ny}); // Push the neighbor to the stack if it is part of the cluster and not visited
+                lattice[im + j] = lattice[im + j] || lattice[im + (j + sm)] || lattice[ismm + j] || lattice[ismm + (j + sm)];
+                boxCounts[ni] += lattice[im + j];
             }
         }
+        ni++;
+        s <<= 1;    // s *= 2;
+        size >>= 1; // size /= 2;
     }
 }
 
-// Function to get the size of the cluster that includes the targetPoint, considering periodic boundary conditions
-std::pair<int, std::vector<std::vector<bool>>> get_cluster_size(const std::vector<bool> &lattice, std::pair<int, int> targetPoint)
+std::vector<unsigned int> get_fractal_dimension(const std::vector<bool> &lattice)
 {
-    std::vector<std::vector<bool>> visited(L, std::vector<bool>(L, false));
-    std::vector<std::vector<bool>> mask(L, std::vector<bool>(L, false));
-    int size = 0;                                                             // Initialize cluster size
-    dfs(lattice, visited, mask, targetPoint.first, targetPoint.second, size); // Start DFS from targetPoint
-    return {size, mask};                                                      // Return the size of the cluster and the mask
+    UnionFind uf_filled(L * L);
+    for (int i = 0; i < L; ++i)
+    {
+        for (int j = 0; j < L; ++j)
+        {
+            int index = i * L + j;
+            if (lattice[index])
+            {
+                if (lattice[((i - 1 + L) % L) * L + j])
+                    uf_filled.union_set(index, ((i - 1 + L) % L) * L + j);
+                if (lattice[i * L + (j - 1 + L) % L])
+                    uf_filled.union_set(index, i * L + (j - 1 + L) % L);
+                if (lattice[((i + 1) % L) * L + j])
+                    uf_filled.union_set(index, ((i + 1) % L) * L + j);
+                if (lattice[i * L + (j + 1) % L])
+                    uf_filled.union_set(index, i * L + (j + 1) % L);
+            }
+        }
+    }
+
+    std::unordered_map<int, int> cluster_sizes_filled;
+    for (int i = 0; i < L; ++i)
+    {
+        for (int j = 0; j < L; ++j)
+        {
+            int index = i * L + j;
+            if (lattice[index])
+            {
+                int root = uf_filled.find(index);
+                ++cluster_sizes_filled[root];
+            }
+        }
+    }
+
+    int max_cluster_size = 0;
+    int max_cluster_root = -1;
+    for (const auto &pair : cluster_sizes_filled)
+    {
+        if (pair.second > max_cluster_size)
+        {
+            max_cluster_size = pair.second;
+            max_cluster_root = pair.first;
+        }
+    }
+
+    std::vector<bool> max_cluster_mask(L * L, false);
+    for (int i = 0; i < L; ++i)
+    {
+        for (int j = 0; j < L; ++j)
+        {
+            int index = i * L + j;
+            if (lattice[index] && uf_filled.find(index) == max_cluster_root)
+            {
+                max_cluster_mask[index] = true;
+            }
+        }
+    }
+
+    std::vector<unsigned int> box_counts(N_BOX_SIZES, 0);
+    boxCount2D(max_cluster_mask, box_counts);
+
+    return box_counts;
+
 }
 
 void run(std::ofstream &file, double p)
@@ -187,8 +251,6 @@ void run(std::ofstream &file, double p)
     cudaMalloc(&d_latticeUpdated, L * L * sizeof(bool));
     cudaMalloc(&d_state, L * L * sizeof(curandState));
 
-    std::vector<float> total_histogram(L, 0.0f);
-
     dim3 blockSize(1, 1);
     dim3 gridSize(L, L);
 
@@ -197,6 +259,12 @@ void run(std::ofstream &file, double p)
     std::vector<char> temp_lattice(soil_lattice.begin(), soil_lattice.end());
     cudaMemcpy(d_lattice, temp_lattice.data(), L * L * sizeof(char), cudaMemcpyHostToDevice);
 
+    std::vector<unsigned int> box_lengths(N_BOX_SIZES);
+    box_lengths[0] = 2;
+    for (size_t i = 1; i < N_BOX_SIZES; ++i) {
+        box_lengths[i] = box_lengths[i - 1] * 2;
+    }
+
     for (int step = 0; step < N_STEPS; ++step)
     {
         cudaMemset(d_latticeUpdated, 0, L * L * sizeof(bool));
@@ -204,104 +272,25 @@ void run(std::ofstream &file, double p)
         updateKernel<<<gridSize, blockSize>>>(d_lattice, d_latticeUpdated, p, d_state);
         cudaDeviceSynchronize();
 
-        cudaError err = cudaGetLastError();
-        if (err != cudaSuccess)
-            printf("Error after updateKernel: %s\n", cudaGetErrorString(err));
-
         cudaMemcpy(d_lattice, d_latticeUpdated, L * L * sizeof(bool), cudaMemcpyDeviceToDevice);
 
-        if (step >= RECORDING_STEP)
+        if ((step >= RECORDING_STEP) && (step % RECORDING_SKIP == 0))
         {
             // copy lattice to CPU
             std::vector<char> lattice_cpu(L * L);
             cudaMemcpy(lattice_cpu.data(), d_lattice, L * L * sizeof(char), cudaMemcpyDeviceToHost);
             std::vector<bool> lattice_bool(lattice_cpu.begin(), lattice_cpu.end());
 
-            // randomly choose a point on the lattice which is true
-            int activePoint = dis(gen);
-            while (!lattice_bool[activePoint])
+            std::vector<unsigned int> box_counts = get_fractal_dimension(lattice_bool);
+            
+            for (size_t i = 0; i < N_BOX_SIZES; ++i)
             {
-                activePoint = dis(gen);
+                file << step << "\t" << box_lengths[i] << "\t" << box_counts[i] << std::endl;
             }
-
-            // get the cluster size and mask
-            auto [clusterSize, mask] = get_cluster_size(lattice_bool, {activePoint / L, activePoint % L});
-
-            if (clusterSize == 1)
-            {
-                continue;
-            }
-
-            std::vector<int> distances(clusterSize);
-            int distanceArrayCounter = 0;
-            for (int i = 0; i < L; ++i)
-            {
-                for (int j = 0; j < L; ++j)
-                {
-                    if (mask[i][j] == 1)
-                    {
-                        int dx = abs(activePoint / L - i);
-                        int dy = abs(activePoint % L - j);
-                        dx = std::min(dx, L - dx); // Account for periodic boundary conditions
-                        dy = std::min(dy, L - dy); // Account for periodic boundary conditions
-                        distances[distanceArrayCounter] = dx + dy;
-                        distanceArrayCounter++;
-                    }
-                }
-            }
-
-            // for (int i = 0; i < distanceArrayCounter; ++i)
-            // {
-            //     std::cout << distances[i] << " ";
-            // }
-            // std::cout << std::endl;
-
-            std::vector<float> histogram(L, 0.0f);
-            for (int i = 0; i < distanceArrayCounter; ++i)
-            {
-                histogram[distances[i]] += 1.0f;
-            }
-
-            // for (int i = 0; i < L; ++i)
-            // {
-            //     std::cout << histogram[i] << " ";
-            // }
-            // std::cout << std::endl;
-
-            for (int i = 0; i < L; ++i)
-            {
-                histogram[i] /= ((float)clusterSize - 1) / ((float)L * L);
-                total_histogram[i] += histogram[i];
-            }
-            // for (int i = 0; i < L; ++i)
-            // {
-            //     std::cout << histogram[i] << " ";
-            // }
-            // std::cout << std::endl;
         }
         std::cout << "Progress: " << std::fixed << std::setprecision(2) << static_cast<double>(step) / (N_STEPS - 1) * 100 << "%\r" << std::flush;
     }
 
-    // Normalize the histogram
-    for (int i = 0; i < L; ++i)
-    {
-        if (i != 0)
-        {
-            total_histogram[i] /= i < L / 2 ? 4 * i : 4 * (L - i);
-            total_histogram[i] /= (N_STEPS - RECORDING_STEP);
-        }
-    }
-
-    std::cout << "Histogram: ";
-    for (int i = 0; i < L; ++i)
-    {
-        std::cout << total_histogram[i] << " ";
-    }
-
-    for (int i = 0; i < L; ++i)
-    {
-        file << i << "\t" << total_histogram[i] << "\n";
-    }
 
     cudaFree(d_lattice);
     cudaFree(d_latticeUpdated);
@@ -319,11 +308,12 @@ int main(int argc, char *argv[])
     std::string exePath = argv[0];
     std::string exeDir = std::filesystem::path(exePath).parent_path().string();
     std::ostringstream filePathStream;
-    filePathStream << exeDir << "/outputs/Corr2D/sameCluster/p_" << p << "_L_" << L << ".tsv";
+    filePathStream << exeDir << "/outputs/FractalDim/p_" << p << "_L_" << L << ".tsv";
     std::string filePath = filePathStream.str();
 
     std::ofstream file;
     file.open(filePath);
+    file << "step\tbox_length\tbox_count" << std::endl;
     run(file, p); // Pass p to the run function
     file.close();
 
