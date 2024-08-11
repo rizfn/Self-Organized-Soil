@@ -65,7 +65,7 @@ def main():
     set_matplotlib_params()
 
     p = 0.34375
-    L = 2048
+    L = 4096
     df = pd.read_csv(f'src/dp_paper/outputs/FractalDim/p_{p}_L_{L}.tsv', sep='\t')
 
     # df = df[(df['box_length'] <= L/8) & (df['box_length'] >= 16)]
