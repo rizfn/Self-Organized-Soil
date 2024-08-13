@@ -66,15 +66,13 @@ def main():
     set_matplotlib_params()
 
     p = 0.592746
-    L = 8192
+    L = 2048 * 4
+    fractalDim = 91/48
 
     dfs = []
     for file in glob.glob(f'src/sitePercolation/outputs/fractalDim/p_{p}_L_{L}/*.tsv'):
         dfs.append(pd.read_csv(file, sep='\t'))
     df = pd.concat(dfs, ignore_index=True)
-
-    # df = df[(df['box_length'] <= L/2) & (df['box_length'] >= 16)]
-    df = df[df['box_length'] < L/2]
 
     N = df['box_length'].value_counts().values[0]  # Number of data points
     df = df.groupby('box_length').agg(['mean', 'std']).reset_index()  # get the mean and std of the box count
@@ -84,7 +82,9 @@ def main():
     def power_law(x, a, d):
         return a*x**d
 
-    chi2_object = Chi2Regression(power_law, df['box_length'], df['box_count']['mean'], sy=df['box_count']['std']/np.sqrt(N))
+    subdf = df[df['box_length'] < L/2]  # because error is 0 at percolating parameter
+
+    chi2_object = Chi2Regression(power_law, subdf['box_length'], subdf['box_count']['mean'], sy=subdf['box_count']['std']/np.sqrt(N))
     chi2_object.errordef = 1.0  # Chi2 definition (for Minuit)
     minuit = Minuit(chi2_object, a=df['box_count']['mean'][0], d=-1.89)  # What to minimize, what the starting values are
     minuit.migrad()  # Perform the minimisation
@@ -95,18 +95,29 @@ def main():
     Chi2_fit = minuit.fval                          # The chi2 value
     Prob_fit = stats.chi2.sf(Chi2_fit, Ndof_fit)    # The chi2 probability given N degrees of freedom
 
-    fig, ax = plt.subplots(figsize=(6, 4.5), tight_layout=True)
-    plt.errorbar(df['box_length'], df['box_count']['mean'], yerr=df['box_count']['std']/np.sqrt(N), fmt='o', label='Data')
+    fig, axs = plt.subplots(1, 2, figsize=(12, 4.5), tight_layout=True)
+    axs[0].errorbar(df['box_length'], df['box_count']['mean'], yerr=df['box_count']['std']/np.sqrt(N), fmt='o', label='Data')
     x = np.linspace(df['box_length'].min(), df['box_length'].max(), 100)
-    plt.plot(x, power_law(x, *minuit.values), label=f'$d_f$ = {-minuit.values["d"]:.3f} $\pm$ {minuit.errors["d"]:.3f}')
-    plt.title(f'$\chi^2$={Chi2_fit:.2f}, p={Prob_fit:.2f}')
-    plt.xlabel('Box length')
-    plt.ylabel('Box count')
-    plt.yscale('log')
-    plt.xscale('log')
-    plt.legend()
+    axs[0].plot(x, power_law(x, *minuit.values), label=f'$d_f$ = {-minuit.values["d"]:.3f} $\pm$ {minuit.errors["d"]:.3f}')
+    axs[0].set_title(f'$\chi^2$={Chi2_fit:.2f}, p={Prob_fit:.2f}')
+    axs[0].set_xlabel('Box length')
+    axs[0].set_ylabel('Box count')
+    axs[0].set_yscale('log')
+    axs[0].set_xscale('log')
+    axs[0].legend()
+
+    axs[1].errorbar(df['box_length'], df['box_length']**fractalDim * df['box_count']['mean'], yerr=df['box_count']['std']/np.sqrt(N), fmt='o', label='Data')
+    axs[1].plot(x, x**fractalDim * power_law(x, *minuit.values), label=f'$d_f$ = {-minuit.values["d"]:.3f} $\pm$ {minuit.errors["d"]:.3f}')
+    axs[1].set_title(f'$\chi^2$={Chi2_fit:.2f}, p={Prob_fit:.2f}')
+    axs[1].set_xlabel('Box length')
+    axs[1].set_ylabel(r'Normalized with SP $d_f$')
+    axs[1].set_yscale('log')
+    axs[1].set_xscale('log')
+    axs[1].legend()
+
     plt.savefig(f'src/sitePercolation/plots/fractalDim/p_{p}_L_{L}.png', dpi=300)
     plt.show()
+
 
 if __name__ == '__main__':
     main()
