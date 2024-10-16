@@ -29,7 +29,7 @@ constexpr int L = 4096; // side length of the square lattice
 constexpr double RHO = 1;
 constexpr double MU = 1;
 constexpr double SIGMA = 0.53;
-constexpr double THETA = 0.142;
+constexpr double THETA = 0.081;
 constexpr int STEPS_PER_LATTICEPOINT = 6000;
 constexpr int RECORDING_STEP = 3 * STEPS_PER_LATTICEPOINT / 4;
 constexpr int RECORDING_INTERVAL = 20;
@@ -170,22 +170,22 @@ private:
     std::vector<int> parent, rank;
 };
 
-std::vector<int> get_soil_cluster_sizes(const std::vector<std::vector<int>> &soil_lattice)
+std::vector<int> get_empty_cluster_sizes(const std::vector<std::vector<int>> &soil_lattice)
 {
     UnionFind uf(L * L);
     for (int i = 0; i < L; ++i)
     {
         for (int j = 0; j < L; ++j)
         {
-            if (soil_lattice[i][j] == SOIL)
+            if (soil_lattice[i][j] == EMPTY)
             {
-                if (soil_lattice[(i - 1 + L) % L][j] == SOIL)
+                if (soil_lattice[(i - 1 + L) % L][j] == EMPTY)
                     uf.union_set(i * L + j, ((i - 1 + L) % L) * L + j);
-                if (soil_lattice[i][(j - 1 + L) % L] == SOIL)
+                if (soil_lattice[i][(j - 1 + L) % L] == EMPTY)
                     uf.union_set(i * L + j, i * L + ((j - 1 + L) % L));
-                if (soil_lattice[(i + 1) % L][j] == SOIL)
+                if (soil_lattice[(i + 1) % L][j] == EMPTY)
                     uf.union_set(i * L + j, ((i + 1) % L) * L + j);
-                if (soil_lattice[i][(j + 1) % L] == SOIL)
+                if (soil_lattice[i][(j + 1) % L] == EMPTY)
                     uf.union_set(i * L + j, i * L + ((j + 1) % L));
             }
         }
@@ -196,7 +196,7 @@ std::vector<int> get_soil_cluster_sizes(const std::vector<std::vector<int>> &soi
     {
         for (int j = 0; j < L; ++j)
         {
-            if (soil_lattice[i][j] == SOIL)
+            if (soil_lattice[i][j] == EMPTY)
             {
                 int root = uf.find(i * L + j);
                 ++cluster_sizes[root];
@@ -223,7 +223,7 @@ void run_csd(std::ofstream &file)
 
         if ((step >= RECORDING_STEP) && (step % RECORDING_INTERVAL == 0))
         {
-            std::vector<int> cluster_sizes = get_soil_cluster_sizes(soil_lattice);
+            std::vector<int> cluster_sizes = get_empty_cluster_sizes(soil_lattice);
 
             file << step;
             for (size_t i = 0; i < cluster_sizes.size(); ++i)
@@ -249,13 +249,12 @@ int main(int argc, char *argv[])
     std::string exePath = argv[0];
     std::string exeDir = std::filesystem::path(exePath).parent_path().string();
     std::ostringstream filePathStream;
-    // filePathStream << exeDir << "\\outputs\\csd2D_thesis\\sigma_" << sigma << "_theta_" << theta << ".tsv";
-    filePathStream << exeDir << "\\outputs\\csd2D_paper\\sigma_" << sigma << "_theta_" << theta << ".tsv";
+    filePathStream << exeDir << "\\outputs\\csd2D_paper_empty\\sigma_" << sigma << "_theta_" << theta << ".tsv";
     std::string filePath = filePathStream.str();
 
     std::ofstream file;
     file.open(filePath);
-    file << "step\tcsd_empty\tcsd_nutrient\tcsd_soil\tcsd_green\n";
+    file << "step\tcsd_empty\n";
 
     run_csd(file);
 

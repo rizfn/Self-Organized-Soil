@@ -143,8 +143,71 @@ def plot_thesis(directory, outputfilename):
     plt.show()
 
 
+def plot_paper(directory, outputfilename, cluster_type='Filled'):
+    from cycler import cycler
+    color_cycle = cycler(color=['#901A1E', '#666666', '#17BEBB'])
+    plt.rcParams['axes.prop_cycle'] = color_cycle
+    plt.rcParams['font.size'] = 14
+
+    csv_files = glob.glob(f'{directory}/*.tsv')
+    num_files = len(csv_files)
+    
+    fig, axs = plt.subplots(1, num_files, figsize=(6*num_files, 5))
+
+    xlims = []
+    ylims = []
+
+    for ax, filename in zip(axs, csv_files):
+        match = re.search(r'sigma_\d+(\.\d+)?_theta_\d+(\.\d+)?', filename)
+        if match:
+            sigma_theta_part = match.group()
+            sigma, theta = sigma_theta_part.split('_')[1], sigma_theta_part.split('_')[3]
+
+        steps, filled_cluster_sizes = load_csv(filename)
+        # histogram and plot all the cluster sizes
+        num_bins = 100
+        min_size = 1  # smallest cluster size
+        max_size = max(max(sublist) for sublist in filled_cluster_sizes)
+        bins = np.logspace(np.log10(min_size), np.log10(max_size), num=num_bins)
+
+        # Calculate histograms and plot for filled clusters
+        flat_filled_cluster_sizes = [item for sublist in filled_cluster_sizes for item in sublist]
+        hist, edges = np.histogram(flat_filled_cluster_sizes, bins=bins, density=False)
+        bin_widths = np.diff(edges)
+        hist = hist / bin_widths  # Normalize by bin width
+        ax.plot(edges[:-1], hist, 'x', label=f'{cluster_type} Clusters')
+
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+        ax.grid()
+        ax.set_xlabel('Cluster size')
+        ax.set_ylabel('Probability density')
+        ylim = ax.get_ylim()
+
+        tau1 = 1.85
+        x = np.array(edges[:-1])
+        ax.plot(x, 1e6*x**-tau1, label=r'$\tau=$' + f'{tau1} power law', linestyle='--', alpha=0.8)
+        ax.legend()
+        ax.set_ylim(ylim)
+
+        xlims.append(ax.get_xlim())
+        ylims.append(ax.get_ylim())
+
+        ax.set_title(f'$\sigma$: {sigma}, $\\theta$: {theta}')
+
+    for ax in axs:
+        ax.set_xlim([min([x[0] for x in xlims]), max([x[1] for x in xlims])])
+        ax.set_ylim([min([y[0] for y in ylims]), max([y[1] for y in ylims])])
+
+    plt.tight_layout()
+    plt.savefig('src/nutrient_model/plots/csd/' + outputfilename + '.png', dpi=300)
+    plt.show()
+
+
 
 if __name__ == "__main__":
     # main('src/nutrient_model/outputs/csd2D', 'soil_clusters')
-    plot_thesis('src/nutrient_model/outputs/csd2D_thesis', 'soil_clusters_thesis')
+    # plot_thesis('src/nutrient_model/outputs/csd2D_thesis', 'soil_clusters_thesis')
+    # plot_paper('src/nutrient_model/outputs/csd2D_paper', 'soil_clusters_paper')
+    plot_paper('src/nutrient_model/outputs/csd2D_paper_empty', 'empty_clusters_paper', 'Empty')
 
