@@ -173,7 +173,7 @@ def main():
     # Create a single figure
     fig, ax = plt.subplots(figsize=(7, 7))  # Adjust the figure size to make the plot square
 
-    highlighted = [(1, 0.11), (0.526, 0.063), (0.526, 0.11), (0.526, 0.142), (0.158, 0.11)]
+    highlighted = [(0.21, 0.14), (0.21, 0.09), (0.89, 0.09)]
     
     # Plot 2D data
     im_2D = ax.imshow(pivot_2D, cmap=cmap, vmin=-0.5, vmax=3.5, extent=[0, 0.3, 1, 0], aspect='auto')
@@ -187,7 +187,7 @@ def main():
         x, y, width, height = ellipse
         ax.add_patch(Ellipse((x, y), width=width, height=height, fill=False, edgecolor='#901A1E', lw=2))
 
-    plt.savefig("src/IUPAB_abstract/plots/raster_highlighted/2D_4params.png", dpi=300)
+    plt.savefig("src/IUPAB_abstract/plots/raster_highlighted/2D_3params.png", dpi=300)
     plt.show()
 
 

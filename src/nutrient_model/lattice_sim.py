@@ -10,7 +10,7 @@ def main():
     steps_per_latticepoint = 500  # number of bacteria moves per lattice point
     # L = 100  # side length of the square lattice
     # n_steps = steps_per_latticepoint * L**2  # number of timesteps to run the simulation for
-    L = 50  # side length of the cubic lattice
+    L = 75  # side length of the cubic lattice
     n_steps = steps_per_latticepoint * L**3  # 3D
     rho = 1  # reproduction rate
     delta = 0
