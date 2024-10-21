@@ -1,6 +1,20 @@
-// const { default: data } = await import("../data/twospec_samenutrient/lattice2D_L_100_rho1_0.5_rho2_1.json", { assert: { type: "json" } });
-const { default: data } = await import("../data/twospec_samenutrient/lattice2D_L_100_rho1_0.25_rho2_1.json", { assert: { type: "json" } });
-// const { default: data } = await import("../data/twospec_samenutrient/lattice2D_L_100_rho1_0.25_rho2_0.5.json", { assert: { type: "json" } });
+async function loadData(url) {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching the JSON data:', error);
+    }
+}
+
+// const data = await loadData("../data/twospec_samenutrient/lattice2D_L_100_rho1_0.5_rho2_1.json");
+// const data = await loadData("../data/twospec_samenutrient/lattice2D_L_100_rho1_0.25_rho2_1.json");
+const data = await loadData("../data/twospec_samenutrient/lattice2D_L_100_rho1_0.25_rho2_0.5.json");
+
 
 // check if mobile
 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {

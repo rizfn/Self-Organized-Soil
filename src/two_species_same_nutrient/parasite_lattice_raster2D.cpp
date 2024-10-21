@@ -27,22 +27,19 @@ struct Coordinate
 };
 
 // Define constants
-constexpr int STEPS_PER_LATTICEPOINT = 2000;
+constexpr int STEPS_PER_LATTICEPOINT = 6000;
 constexpr double SIGMA = 1;
 constexpr double THETA = 0.1;
-constexpr double RHO1 = 0.25;
+constexpr double RHO1 = 0.125;
 constexpr double MU1 = 1;
-constexpr double RHO2 = 0.5;
+constexpr double RHO2 = 1;
 constexpr double MU2 = 0;
-constexpr int L = 100; // side length of the square lattice
+constexpr int L = 256; // side length of the square lattice
 constexpr long long N_STEPS = STEPS_PER_LATTICEPOINT * L * L;
 
 constexpr auto STEPS_TO_RECORD = []() {
-    return std::array<long long, 4> {
-        N_STEPS * 70 / 100,
-        N_STEPS * 80 / 100,
-        N_STEPS * 90 / 100,
-        N_STEPS * 100 / 100
+    return std::array<long long, 1> {
+        N_STEPS
     };
 }();
 
@@ -257,7 +254,7 @@ std::vector<double> generate_values(double start, double stop, int num_values)
 int main(int argc, char *argv[])
 {
     std::vector<double> sigma_values = generate_values(0, 1.0, 20);
-    std::vector<double> theta_values = generate_values(0.0, 0.1, 20);
+    std::vector<double> theta_values = generate_values(0.0, 0.03, 20);
 
     std::filesystem::path exePath = std::filesystem::path(argv[0]).parent_path();
     std::string exeDir = exePath.string();
