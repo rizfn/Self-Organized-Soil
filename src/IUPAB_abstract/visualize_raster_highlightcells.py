@@ -58,6 +58,11 @@ def get_highlight_coordinates(pivot_table, pairs):
     return ellipses
 
 
+def custom_tick_labels(ax):
+    for label in ax.get_xticklabels()[0:-1]:
+        label.set_visible(False)
+    for label in ax.get_yticklabels()[0:-1]:
+        label.set_visible(False)
 
 
 
@@ -126,49 +131,109 @@ def main():
     pivot_2D = df_2D.pivot(index="sigma", columns="theta", values="state_num")
     pivot_3D = df_3D.pivot(index="sigma", columns="theta", values="state_num")
 
-    # # Create a gridspec instance with 3 rows and 1 column
-    # gs = gridspec.GridSpec(3, 1, height_ratios=[1, 1, 0.1])
+    plt.rcParams.update({
+        'font.size': 20,
+        'axes.labelpad': -25,  # Move the axes labels closer to the plot
+        # reduce margins
+        'figure.autolayout': True,
+        'axes.xmargin': 0,
+        'axes.ymargin': 0,
+    })
 
-    # # Create a single figure
-    # fig = plt.figure(figsize=(7, 14))  # Adjust the figure size to make the plots square
+    # Create a gridspec instance with 3 rows and 1 column
+    gs = gridspec.GridSpec(3, 1, height_ratios=[1, 1, 0.1])
 
-    # # highlighted = [(0.16, 0.09), (0.37, 0.06), (0.37, 0.09), (0.37, 0.16), (0.47, 0.16)]
-    # highlighted = [(0.37, 0.06), (0.37, 0.16)]
+    # Create a single figure
+    fig = plt.figure(figsize=(7, 14))  # Adjust the figure size to make the plots square
+
+    # highlighted = [(0.16, 0.09), (0.37, 0.06), (0.37, 0.09), (0.37, 0.16), (0.47, 0.16)]
+    highlighted = [(0.37, 0.06), (0.37, 0.16)]
     
-    # # Plot 3D data first
-    # ax0 = plt.subplot(gs[0, 0])
-    # im_3D = ax0.imshow(pivot_3D, cmap=cmap, vmin=-0.5, vmax=3.5, extent=[0, 0.3, 1, 0], aspect='auto')
-    # ax0.set_ylabel(r"Soil filling rate ($\sigma$)")
-    # ax0.set_title("3D: L=75", fontweight='bold')
-    # ax0.invert_yaxis()
+    # Plot 3D data first
+    ax0 = plt.subplot(gs[0, 0])
+    im_3D = ax0.imshow(pivot_3D, cmap=cmap, vmin=-0.5, vmax=3.5, extent=[0, 0.3, 1, 0], aspect='auto')
+    ax0.set_ylabel(r"Soil filling rate ($\sigma$)")
+    ax0.set_title("3D", fontweight='bold')
+    ax0.invert_yaxis()
     
-    # # Highlight specified sigma, theta pairs
-    # for ellipse in get_highlight_coordinates(pivot_3D, highlighted):
-    #     x, y, width, height = ellipse
-    #     ax0.add_patch(Ellipse((x, y), width=width, height=height, fill=False, edgecolor='#901A1E', lw=2))
+    custom_tick_labels(ax0)
+    ax0.annotate('0.0', xy=(0, 0), xytext=(-15, -15), textcoords='offset points', ha='center', va='center')
+
+    # Highlight specified sigma, theta pairs
+    for ellipse in get_highlight_coordinates(pivot_3D, highlighted):
+        x, y, width, height = ellipse
+        ax0.add_patch(Ellipse((x, y), width=width, height=height, fill=False, edgecolor='#901A1E', lw=2))
 
     
-    # # Plot meanfield data second
-    # ax1 = plt.subplot(gs[1, 0], sharex=ax0)
-    # im_meanfield = ax1.imshow(pivot_meanfield, cmap=cmap, vmin=-0.5, vmax=3.5, extent=[0, 0.3, 1, 0], aspect='auto')
-    # ax1.set_xlabel(r"Death rate ($\theta$)")
-    # ax1.set_ylabel(r"Soil filling rate ($\sigma$)")
-    # ax1.set_title("Meanfield", fontweight='bold')
-    # ax1.invert_yaxis()
+    # Plot meanfield data second
+    ax1 = plt.subplot(gs[1, 0], sharex=ax0)
+    im_meanfield = ax1.imshow(pivot_meanfield, cmap=cmap, vmin=-0.5, vmax=3.5, extent=[0, 0.3, 1, 0], aspect='auto')
+    ax1.xaxis.labelpad = -15
+    ax1.set_xlabel(r"Death rate ($\theta$)")
+    ax1.set_ylabel(r"Soil filling rate ($\sigma$)")
+    ax1.set_title("Mean-field", fontweight='bold')
+    ax1.invert_yaxis()
 
-    # # Highlight specified sigma, theta pairs
-    # for ellipse in get_highlight_coordinates(pivot_3D, highlighted):
-    #     x, y, width, height = ellipse
-    #     ax1.add_patch(Ellipse((x, y), width=width, height=height, fill=False, edgecolor='#901A1E', lw=2))
+    custom_tick_labels(ax1)
+    ax1.annotate('0.0', xy=(0, 0), xytext=(-15, -15), textcoords='offset points', ha='center', va='center')
 
-    # # Create a single horizontal colorbar for all plots
-    # cbar_ax = fig.add_axes([0.15, 0.08, 0.7, 0.02])  # Adjust the position and size of the colorbar
-    # cbar = fig.colorbar(im_3D, cax=cbar_ax, orientation='horizontal', ticks=[0, 1, 2, 3])
-    # cbar.ax.set_xticklabels(['Soil', 'Empty', 'Oscillating', 'Stable'])  # set the state names
+    # Highlight specified sigma, theta pairs
+    for ellipse in get_highlight_coordinates(pivot_3D, highlighted):
+        x, y, width, height = ellipse
+        ax1.add_patch(Ellipse((x, y), width=width, height=height, fill=False, edgecolor='#901A1E', lw=2))
 
-    # # plt.tight_layout()
-    # plt.savefig("src/IUPAB_abstract/plots/raster_highlighted/snic.png", dpi=300)
+    # Create a single horizontal colorbar for all plots
+    cbar_ax = fig.add_axes([0.12, 0.05, 0.8, 0.02])  # Adjust the position and size of the colorbar
+    cbar = fig.colorbar(im_3D, cax=cbar_ax, orientation='horizontal', ticks=[0, 1, 2, 3])
+    cbar.ax.set_xticklabels(['Soil', 'Empty', 'Oscillating', 'Stable'], fontsize=17)  # set the state names
+
+    # plt.tight_layout()
+    plt.savefig("src/IUPAB_abstract/plots/raster_highlighted/snic.png", dpi=300)
     # plt.show()
+
+
+def paper_2D_3highlights():
+    plt.rcParams.update({
+        'font.size': 20,
+        'axes.labelpad': -25,  # Move the axes labels closer to the plot
+        # reduce margins
+        'figure.autolayout': True,
+        'axes.xmargin': 0,
+        'axes.ymargin': 0,
+    })
+
+    data_list_2D = []
+    for filename in glob("src/IUPAB_abstract/outputs/timeseries2D/*.csv"):
+        df = pandas.read_csv(filename)
+        sigma = filename.split("_")[2]
+        theta = filename.split("_")[4].rsplit(".", 1)[0]
+        df["sigma"] = sigma
+        df["theta"] = theta
+        if df.iloc[-1]["greens"] == 0:
+            if df.iloc[-1]["soil"] == 0:
+                state = "Empty"
+            else:
+                state = "Soil"
+        else:
+            is_oscillating = check_if_oscillating(df)
+            if is_oscillating:
+                state = "Oscillating"
+            else:
+                state = "Stable"                
+        data_list_2D.append({"sigma": sigma, "theta": theta, "state": state})
+    df_2D = pandas.DataFrame(data_list_2D)
+
+    # map states to numbers
+    state_dict = {"Soil": 0, "Empty": 1, "Oscillating": 2, "Stable": 3}
+    df_2D['state_num'] = df_2D['state'].map(state_dict)
+
+    cmap = ListedColormap([np.array([153, 98, 30])/255, 
+                            np.array([232, 233, 243])/255, 
+                            np.array([66, 158, 166])/255, 
+                            np.array([215, 207, 7])/255])
+
+    # Create pivot tables
+    pivot_2D = df_2D.pivot(index="sigma", columns="theta", values="state_num")
 
     # Create a single figure
     fig, ax = plt.subplots(figsize=(7, 7))  # Adjust the figure size to make the plot square
@@ -177,20 +242,35 @@ def main():
     
     # Plot 2D data
     im_2D = ax.imshow(pivot_2D, cmap=cmap, vmin=-0.5, vmax=3.5, extent=[0, 0.3, 1, 0], aspect='auto')
+    ax.xaxis.labelpad = -15
     ax.set_xlabel(r"Death rate ($\theta$)")
     ax.set_ylabel(r"Soil filling rate ($\sigma$)")
     ax.set_title("2D", fontweight='bold')
     ax.invert_yaxis()
+    
+    # Hide all tick labels except the first and last
+    def custom_tick_labels(ax):
+        for label in ax.get_xticklabels()[0:-1]:
+            label.set_visible(False)
+        for label in ax.get_yticklabels()[0:-1]:
+            label.set_visible(False)
+
+    custom_tick_labels(ax)
+
+    ax.annotate('0.0', xy=(0, 0), xytext=(-15, -15),
+                textcoords='offset points', ha='center', va='center')
 
     # Highlight specified sigma, theta pairs
     for ellipse in get_highlight_coordinates(pivot_2D, highlighted):
         x, y, width, height = ellipse
         ax.add_patch(Ellipse((x, y), width=width, height=height, fill=False, edgecolor='#901A1E', lw=2))
 
+    plt.tight_layout()
+
     plt.savefig("src/IUPAB_abstract/plots/raster_highlighted/2D_3params.png", dpi=300)
     plt.show()
 
 
-    
 if __name__ == "__main__":
     main()
+    # paper_2D_3highlights()

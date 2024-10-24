@@ -60,7 +60,7 @@ datasets.forEach((data, index) => {
     console.log(filtereddata);
 
     // set the dimensions and margins of the graph
-    var margin = {top: 40, right: 10, bottom: 40, left: 40},
+    var margin = {top: 40, right: 10, bottom: 40, left: index === 0 ? 40 : 10},
         width = innerWidth / 3 - margin.left - margin.right,
         height = innerHeight / 1.2 - margin.top - margin.bottom;
 
@@ -119,14 +119,16 @@ datasets.forEach((data, index) => {
         .style("text-anchor", "middle")
         .text("Worm death rate (θ)");
 
-    svg.append("text")
-        .attr("class", "axis_label")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 0 - margin.left / 1.5)
-        .attr("x", 0 - (height / 2))
-        .attr("dy", "1em")
-        .style("text-anchor", "middle")
-        .text("Soil filling rate (σ)");
+    if (index === 0) {
+        svg.append("text")
+            .attr("class", "axis_label")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 0 - margin.left / 1.5)
+            .attr("x", 0 - (height / 2))
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .text("Soil filling rate (σ)");
+    }
 
     svg.append("text")
         .attr("class", "title")

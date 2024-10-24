@@ -12,8 +12,8 @@ async function loadData(url) {
 }
 
 // const data = await loadData("../data/twospec_samenutrient/lattice2D_L_100_rho1_0.5_rho2_1.json");
-// const data = await loadData("../data/twospec_samenutrient/lattice2D_L_100_rho1_0.25_rho2_1.json");
-const data = await loadData("../data/twospec_samenutrient/lattice2D_L_100_rho1_0.25_rho2_0.5.json");
+const data = await loadData("../data/twospec_samenutrient/lattice2D_L_100_rho1_0.25_rho2_1.json");
+// const data = await loadData("../data/twospec_samenutrient/lattice2D_L_100_rho1_0.25_rho2_0.5.json");
 
 
 // check if mobile
@@ -238,7 +238,7 @@ function color_lattice(d) {
 	} else if (d === 3) {
 		return "rgb(0, 150, 0)"
 	} else if (d === 4) {
-        return "rgb(0, 0, 150)"
+        return "rgb(60, 60, 224)"
     }
 }
 

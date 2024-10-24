@@ -1,7 +1,22 @@
-let data_10_00_80_10 = await (await fetch("../data/nutrient/meanfield_attractors/S0_0.1_E0_0.0_N0_0.8_W0_0.1.json")).json();
-let data_30_30_30_10 = await (await fetch("../data/nutrient/meanfield_attractors/S0_0.3_E0_0.3_N0_0.3_W0_0.1.json")).json();
-let data_80_00_00_20 = await (await fetch("../data/nutrient/meanfield_attractors/S0_0.8_E0_0.0_N0_0.0_W0_0.2.json")).json();
-let data_25_25_25_25 = await (await fetch("../data/nutrient/meanfield_attractors/S0_0.25_E0_0.25_N0_0.25_W0_0.25.json")).json();
+async function loadData(url) {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching the JSON data:', error);
+    }
+}
+
+let data_10_00_80_10 = await loadData("../data/nutrient/meanfield_attractors/S0_0.1_E0_0.0_N0_0.8_W0_0.1.json");
+let data_30_30_30_10 = await loadData("../data/nutrient/meanfield_attractors/S0_0.3_E0_0.3_N0_0.3_W0_0.1.json");
+let data_80_00_00_20 = await loadData("../data/nutrient/meanfield_attractors/S0_0.8_E0_0.0_N0_0.0_W0_0.2.json");
+let data_25_25_25_25 = await loadData("../data/nutrient/meanfield_attractors/S0_0.25_E0_0.25_N0_0.25_W0_0.25.json");
+
+console.log(data_10_00_80_10);
 
 
 // add 4 radio buttons to switch between meanfield, stochastic, parallel, 3d, wellmixed data
