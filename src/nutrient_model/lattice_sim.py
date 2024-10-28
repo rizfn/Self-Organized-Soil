@@ -15,7 +15,7 @@ def main():
     rho = 1  # reproduction rate
     delta = 0
     sigma = 0.37
-    theta = 0.06
+    theta = 0.16
 
     # steps_to_record = np.arange(1, n_steps+1, L**2, dtype=np.int32)
     # soil_lattice_data = run_stochastic(n_steps, L, rho, theta, sigma, delta, steps_to_record=steps_to_record)
@@ -43,9 +43,10 @@ def main():
     worms = fractions[:, 3]
 
 
-    plt.rcParams['font.family'] = 'monospace'
+    plt.rcParams['font.size'] = 20
+
     # fig, axs = plt.subplots(nrows=1, ncols=2, sharey=True, figsize=(15,6))
-    fig, axs = plt.subplots(nrows=2, ncols=1, sharey=True, figsize=(8,5))
+    fig, axs = plt.subplots(nrows=2, ncols=1, sharey=True, sharex=True, figsize=(8,6))
 
     steps_to_record = steps_to_record / L**3
     # First subplot
@@ -53,11 +54,11 @@ def main():
     axs[0].plot(steps_to_record, emptys, label="empty", c="grey")
     axs[0].plot(steps_to_record, nutrients, label="nutrients", c="turquoise")
     axs[0].plot(steps_to_record, worms, label="worms", c="green")
-    axs[0].set_title(f"3D Lattice, {L=}")
-    axs[0].set_xlabel("Timestep")
-    axs[0].set_ylabel("Fraction")
+    # axs[0].set_title(f"3D Lattice, {L=}")
+    # axs[0].set_xlabel("Timestep")
+    axs[0].set_ylabel("Population")
     axs[0].set_ylim(-0.05, 1.05)
-    axs[0].legend(loc="upper right")
+    # axs[0].legend(loc="upper right", fontsize=15)
     
     # Second subplot
     T, S, E, N, W = ode_integrate_rk4(sigma, theta, rho, delta, stoptime=steps_per_latticepoint, nsteps=steps_per_latticepoint)
@@ -66,11 +67,11 @@ def main():
     axs[1].plot(T, E, label="empty", c="grey")
     axs[1].plot(T, N, label="nutrient", c="turquoise")
     axs[1].plot(T, W, label="worm", c="green")
-    axs[1].set_title("Mean-Field")
+    # axs[1].set_title("Mean-Field")
     axs[1].set_xlabel("Timestep")
-    axs[1].set_ylabel("Fraction")
+    axs[1].set_ylabel("Population")
     axs[1].set_ylim(-0.05, 1.05)
-    axs[1].legend(loc="upper right")
+    axs[1].legend(loc="right", fontsize=20)
     
     plt.tight_layout()
     plt.savefig(f'src/nutrient_model/plots/time_series/3D_vs_MF/s_{sigma}_t_{theta}.png', dpi=300)

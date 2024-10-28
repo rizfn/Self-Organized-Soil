@@ -1,13 +1,17 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+async function loadData(url) {
+    const response = await fetch(url);
+    const data = await response.json();
+    return data;
+}
 
 let current_file_idx = 0;
 const data_prefix = `../data/nutrient/lattice3D_L=50_rho=1_delta=0/`
 // const data_prefix = `../data/nutrient/lattice3D_L=75_rho=1_delta=0/`
 
-let { default: data } = await import(data_prefix + `step${current_file_idx}.json`, { assert: { type: "json" } });
-
+let data = await loadData(data_prefix + `step${current_file_idx}.json`);
 
 // on spacebar, call update_step
 document.addEventListener('keydown', function (event) {
@@ -142,7 +146,7 @@ var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHei
 camera.position.z = 1.5;
 
 // Create a renderer
-var renderer = new THREE.WebGLRenderer({ canvas: canvas.node() });
+var renderer = new THREE.WebGLRenderer({ canvas: canvas.node(), alpha: true });
 // renderer.setSize(window.innerWidth, window.innerHeight);
 d3.select('div#lattice').node().appendChild(renderer.domElement);
 
@@ -382,11 +386,11 @@ async function update_step() {
     current_file_idx += 1;
 
     try {
-        data = await import(data_prefix + `step${current_file_idx}.json`, { assert: { type: "json" } });
-        update_data(data.default);
+        data = await loadData(data_prefix + `step${current_file_idx}.json`);
+        update_data(data);
     } catch (error) {
         current_file_idx = 0;
-        data = await import(data_prefix + `step${current_file_idx}.json`, { assert: { type: "json" } });
-        update_data(data.default);
+        data = await loadData(data_prefix + `step${current_file_idx}.json`);
+        update_data(data);
     }
 }
