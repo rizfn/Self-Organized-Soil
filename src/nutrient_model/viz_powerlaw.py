@@ -31,6 +31,30 @@ def load_csv(filename):
     return steps, filled_cluster_sizes
 
 
+def load_csv_checkEmpty(filename):
+    maxInt = sys.maxsize
+    decrement = True
+
+    while decrement:
+        decrement = False
+        try:
+            csv.field_size_limit(maxInt)
+        except OverflowError:
+            maxInt = int(maxInt/10)
+            decrement = True
+
+    with open(filename, 'r') as f:
+        reader = csv.reader(f, delimiter='\t')
+        next(reader)  # Skip the header
+        steps = []
+        filled_cluster_sizes = []
+        for row in reader:
+            steps.append(int(row[0]))  # Convert to int and add to steps
+            # Check if the row is empty before splitting and converting to int
+            filled_cluster_sizes.append([int(x) for x in row[1].split(',') if x.isdigit()] if row[1] else [0])
+    return steps, filled_cluster_sizes
+
+
 def main(directory, outputfilename):
     csv_files = glob.glob(f'{directory}/*.tsv')
     num_files = len(csv_files)
@@ -51,7 +75,7 @@ def main(directory, outputfilename):
     axs = axs.flatten()[:num_files]
 
     for ax, filename in zip(axs, csv_files):
-        steps, filled_cluster_sizes = load_csv(filename)
+        steps, filled_cluster_sizes = load_csv_checkEmpty(filename)
         # histogram and plot all the cluster sizes
         num_bins = 100
         min_size = 1  # smallest cluster size
@@ -145,19 +169,22 @@ def plot_thesis(directory, outputfilename):
 
 def plot_paper(directory, outputfilename, cluster_type='Filled'):
     from cycler import cycler
-    color_cycle = cycler(color=['#901A1E', '#666666', '#17BEBB'])
+    if cluster_type == 'Filled':
+        color_cycle = cycler(color=['#901A1E', '#17BEBB'])
+    else:
+        color_cycle = cycler(color=['#666666', '#17BEBB'])
     plt.rcParams['axes.prop_cycle'] = color_cycle
-    plt.rcParams['font.size'] = 14
+    plt.rcParams['font.size'] = 16
 
     csv_files = glob.glob(f'{directory}/*.tsv')
     num_files = len(csv_files)
     
-    fig, axs = plt.subplots(1, num_files, figsize=(6*num_files, 5))
+    fig, axs = plt.subplots(1, num_files, figsize=(6*num_files, 5), sharex=True)
 
     xlims = []
     ylims = []
 
-    for ax, filename in zip(axs, csv_files):
+    for i, (ax, filename) in enumerate(zip(axs, csv_files)):
         match = re.search(r'sigma_\d+(\.\d+)?_theta_\d+(\.\d+)?', filename)
         if match:
             sigma_theta_part = match.group()
@@ -180,20 +207,28 @@ def plot_paper(directory, outputfilename, cluster_type='Filled'):
         ax.set_xscale('log')
         ax.set_yscale('log')
         ax.grid()
-        ax.set_xlabel('Cluster size')
-        ax.set_ylabel('Probability density')
+        ax.set_xlabel('Cluster size', fontsize=24)
+
         ylim = ax.get_ylim()
 
         tau1 = 1.85
         x = np.array(edges[:-1])
         ax.plot(x, 1e6*x**-tau1, label=r'$\tau=$' + f'{tau1} power law', linestyle='--', alpha=0.8)
-        ax.legend()
         ax.set_ylim(ylim)
+
+        if i == 0:
+            ax.set_ylabel('Frequency', fontsize=24)
+            ax.legend(loc='upper right')
+        else:
+            ax.set_yticklabels([])  # Remove y tick labels
+            ax.set_ylabel('')  # Remove y label
 
         xlims.append(ax.get_xlim())
         ylims.append(ax.get_ylim())
 
-        ax.set_title(f'$\sigma$: {sigma}, $\\theta$: {theta}')
+        # Add the parameters with a box around them
+        ax.text(0.716, 0.7, f'$\sigma$ = {sigma}\n$\\theta$ = {theta}', transform=ax.transAxes,
+                fontsize=18, verticalalignment='top', bbox=dict(facecolor='white', alpha=0.8, edgecolor='black'))
 
     for ax in axs:
         ax.set_xlim([min([x[0] for x in xlims]), max([x[1] for x in xlims])])
@@ -208,6 +243,7 @@ def plot_paper(directory, outputfilename, cluster_type='Filled'):
 if __name__ == "__main__":
     # main('src/nutrient_model/outputs/csd2D', 'soil_clusters')
     # plot_thesis('src/nutrient_model/outputs/csd2D_thesis', 'soil_clusters_thesis')
-    # plot_paper('src/nutrient_model/outputs/csd2D_paper', 'soil_clusters_paper')
-    plot_paper('src/nutrient_model/outputs/csd2D_paper_empty', 'empty_clusters_paper', 'Empty')
+    plot_paper('src/nutrient_model/outputs/csd2D_paper', 'soil_clusters_paper')
+    # plot_paper('src/nutrient_model/outputs/csd2D_paper_empty', 'empty_clusters_paper', 'Empty')
+    # main('src/nutrient_model/outputs/csd2D_low_s', 'low_sigma')
 
