@@ -18,7 +18,6 @@ let data_25_25_25_25 = await loadData("../data/nutrient/meanfield_attractors/S0_
 
 console.log(data_10_00_80_10);
 
-
 // add 4 radio buttons to switch between meanfield, stochastic, parallel, 3d, wellmixed data
 var form = d3.select("div#select-data")
     .append("form")
@@ -51,7 +50,6 @@ createRadioButton(form, "[30, 30, 30, 10]  (2)", "30_30_30_10");
 createRadioButton(form, "[80, 0, 0, 20] (3)", "80_00_00_20");
 createRadioButton(form, "[10, 0, 80, 10] (4)", "10_00_80_10");
 
-
 // on 1,2,3,4 set radio buttons
 document.addEventListener('keydown', function (event) {
     if (event.code === 'Digit1') {
@@ -83,7 +81,6 @@ var margin = { top: 40, right: 40, bottom: 100, left: 100 },
     width = innerWidth * 0.8 - margin.left - margin.right,
     height = innerHeight - margin.top - margin.bottom;
 
-
 function getOffset(element) {
     const rect = element.getBoundingClientRect();
     return {
@@ -105,14 +102,12 @@ var y = d3.scaleBand()
 
 // Create new scales for plotting the function
 var xLinear = d3.scaleLinear()
-.range([0, width])
-.domain(d3.extent(data, d => d.theta));
+    .range([0, width])
+    .domain(d3.extent(data, d => d.theta));
 
 var yLinear = d3.scaleLinear()
-.range([height, 0])
-.domain(d3.extent(data, d => d.sigma));
-
-
+    .range([height, 0])
+    .domain(d3.extent(data, d => d.sigma));
 
 // Create the canvas
 var canvas = d3.select("div#raster")
@@ -123,7 +118,7 @@ var canvas = d3.select("div#raster")
     .attr("width", width + margin.left + margin.right)
     .style("position", "absolute")
     .style("top", margin.top + "px");
-    
+
 var context = canvas.node().getContext("2d");
 
 // Translate the canvas context to the right by margin.left
@@ -149,7 +144,7 @@ svg.append("g")
 // Add X axis label:
 svg.append("text")
     .attr("text-anchor", "end")
-    .attr("x", width/2 + margin.left + 50)
+    .attr("x", width / 2 + margin.left + 50)
     .attr("y", height + margin.top + 40)
     .text("Death rate (θ)");
 
@@ -158,10 +153,9 @@ svg.append("text")
     .attr("text-anchor", "end")
     .attr("transform", "rotate(-90)")
     .attr("y", margin.left - 50)
-    .attr("x", -height/2 + 20)
+    .attr("x", -height / 2 + 20)
     .text("Soil filling rate (σ)");
 
-    
 function draw(data) {
     // Clear the canvas
     context.clearRect(0, 0, width, height);
@@ -175,40 +169,60 @@ function draw(data) {
         context.closePath();
     });
 
-// Draw the line
-context.beginPath();
-context.strokeStyle = 'k'; // Change this to the color you want
-context.lineWidth = 0.5; // Change this to the width you want
+    // Draw the existing line
+    context.beginPath();
+    context.strokeStyle = 'k'; // Change this to the color you want
+    context.lineWidth = 0.5; // Change this to the width you want
 
-// Calculate the start and end points of the line
-let thetaStart = xLinear.domain()[0];
-let thetaEnd = xLinear.domain()[xLinear.domain().length - 1];
+    // Calculate the start and end points of the line
+    let thetaStart = xLinear.domain()[0];
+    let thetaEnd = xLinear.domain()[xLinear.domain().length - 1];
 
-// Draw the line
-for (let theta = thetaStart; theta <= thetaEnd; theta += (thetaEnd - thetaStart) / 1000) {
-    let sigma = (1 - 2 * Math.sqrt(theta)) / theta;
+    // Draw the line
+    for (let theta = thetaStart; theta <= thetaEnd; theta += (thetaEnd - thetaStart) / 1000) {
+        let sigma = (1 - 2 * Math.sqrt(theta)) / theta;
 
-    // Only draw the line if sigma is greater than 0
-    if (sigma > 0) {
-        // Convert the theta and sigma values to pixel coordinates
-        let xPos = xLinear(theta);
-        let yPos = yLinear(sigma);
+        // Only draw the line if sigma is greater than 0
+        if (sigma > 0) {
+            // Convert the theta and sigma values to pixel coordinates
+            let xPos = xLinear(theta);
+            let yPos = yLinear(sigma);
 
-        // Draw a line to the current point
-        context.lineTo(xPos, yPos);
-    } else {
-        // If sigma is less than or equal to 0, stop drawing the line
-        context.stroke();
-        context.beginPath();
+            // Draw a line to the current point
+            context.lineTo(xPos, yPos);
+        } else {
+            // If sigma is less than or equal to 0, stop drawing the line
+            context.stroke();
+            context.beginPath();
+        }
     }
-}
 
-context.stroke();
+    context.stroke();
+
+    // Draw the new straight line
+    context.beginPath();
+    context.strokeStyle = 'red'; // Change this to the color you want
+    context.lineWidth = 3; // Change this to the width you want
+
+    // Define the start and end points of the new line
+    let startPoint = { sigma: 0.53, theta: 0.14 };
+    let endPoint = { sigma: 0.1, theta: 0.13 };
+
+    // Convert the start and end points to pixel coordinates
+    let startX = xLinear(startPoint.theta);
+    let startY = yLinear(startPoint.sigma);
+    let endX = xLinear(endPoint.theta);
+    let endY = yLinear(endPoint.sigma);
+
+    // Draw the new line
+    context.moveTo(startX, startY);
+    context.lineTo(endX, endY);
+
+    context.stroke();
 }
 
 // Call the draw function instead of creating SVG rectangles
 draw(data);
-
 
 // Define your color map
 var colorMap = d3.scaleOrdinal()
@@ -219,7 +233,7 @@ var colorMap = d3.scaleOrdinal()
 var legendDiv = d3.select("div#select-data");
 
 // Create the legend
-colorMap.domain().forEach(function(state, i) {
+colorMap.domain().forEach(function (state, i) {
     var legendRow = legendDiv.append('div')
         .attr('class', 'legend')
         .style('display', 'flex')
@@ -243,8 +257,6 @@ colorMap.domain().forEach(function(state, i) {
         .text(state)
         .style('font-size', '16px');
 });
-
-
 
 function change_data(state) {
     console.log('Changing data to ' + state);

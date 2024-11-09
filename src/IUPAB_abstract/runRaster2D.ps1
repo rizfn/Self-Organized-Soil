@@ -1,9 +1,13 @@
-# Define the number of elements
-$elements = 20
+# # Define the number of elements
+# $elements = 20
 
-# Define the sigma and theta values
-$sigma_values = 0..($elements-1) | ForEach-Object { $_ / ($elements-1) }
-$theta_values = 0..($elements-1) | ForEach-Object { $_ * 0.3 / ($elements-1) }
+# # Define the sigma and theta values
+# $sigma_values = 0..($elements-1) | ForEach-Object { $_ / ($elements-1) }
+# $theta_values = 0..($elements-1) | ForEach-Object { $_ * 0.3 / ($elements-1) }
+
+# Redefine the sigma and theta values for WormCount
+$sigma_values = @(0.1, 0.5, 1.0)
+$theta_values = 0..49 | ForEach-Object { $_ * 0.2 / 49 }
 
 # Define the maximum number of concurrent jobs
 $maxJobs = (Get-WmiObject -Class Win32_ComputerSystem).NumberOfLogicalProcessors

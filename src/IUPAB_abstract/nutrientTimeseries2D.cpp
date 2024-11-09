@@ -20,11 +20,10 @@ struct Coordinate
 };
 
 // Define constants
-constexpr int STEPS_PER_LATTICEPOINT = 1000;
+constexpr int STEPS_PER_LATTICEPOINT = 4000;
 constexpr double RHO1 = 1;
 constexpr double MU1 = 1;
-constexpr int L = 500; // side length of the square lattice
-constexpr int N_STEPS = STEPS_PER_LATTICEPOINT * L * L;
+constexpr int L = 1024; // side length of the square lattice
 
 constexpr int EMPTY = 0;
 constexpr int NUTRIENT = 1;
@@ -65,7 +64,6 @@ std::vector<std::vector<int>> init_lattice(int L)
     }
     return soil_lattice;
 }
-
 
 void update(std::vector<std::vector<int>> &soil_lattice, int L, double sigma, double theta, double rho1, double mu1)
 {
@@ -129,33 +127,33 @@ void update(std::vector<std::vector<int>> &soil_lattice, int L, double sigma, do
     }
 }
 
-void run_timeseries(int N_STEPS, int L, double sigma, double theta, double rho1, double mu1, std::ofstream& file)
+void run_timeseries(int STEPS_PER_LATTICEPOINT, int L, double sigma, double theta, double rho1, double mu1, std::ofstream &file)
 {
     std::vector<std::vector<int>> soil_lattice = init_lattice(L);
 
     int i = 0; // indexing for recording steps
 
-    for (int step = 0; step <= N_STEPS; ++step)
+    for (int step = 0; step <= STEPS_PER_LATTICEPOINT; ++step)
     {
-        update(soil_lattice, L, sigma, theta, rho1, mu1);
-        if (step % (L * L) == 0)
+        for (int i = 0; i < L * L; ++i)
         {
-            int counts[5] = {0};
-            for (const auto &row : soil_lattice)
-            {
-                for (int cell : row)
-                {
-                    ++counts[cell];
-                }
-            }
-            double emptys = static_cast<double>(counts[EMPTY]) / (L * L);
-            double nutrients = static_cast<double>(counts[NUTRIENT]) / (L * L);
-            double soil = static_cast<double>(counts[SOIL]) / (L * L);
-            double greens = static_cast<double>(counts[GREEN_WORM]) / (L * L);
-
-            file << step / (L * L) << "," << emptys << "," << nutrients << "," << soil << "," << greens << "\n";
-            std::cout << "Progress: " << std::fixed << std::setprecision(2) << static_cast<double>(step) / N_STEPS * 100 << "%\r" << std::flush;
+            update(soil_lattice, L, sigma, theta, rho1, mu1);
         }
+        int counts[5] = {0};
+        for (const auto &row : soil_lattice)
+        {
+            for (int cell : row)
+            {
+                ++counts[cell];
+            }
+        }
+        double emptys = static_cast<double>(counts[EMPTY]) / (L * L);
+        double nutrients = static_cast<double>(counts[NUTRIENT]) / (L * L);
+        double soil = static_cast<double>(counts[SOIL]) / (L * L);
+        double greens = static_cast<double>(counts[GREEN_WORM]) / (L * L);
+
+        file << step << "," << emptys << "," << nutrients << "," << soil << "," << greens << "\n";
+        std::cout << "Progress: " << std::fixed << std::setprecision(2) << static_cast<double>(step) / STEPS_PER_LATTICEPOINT * 100 << "%\r" << std::flush;
     }
 }
 
@@ -172,13 +170,14 @@ int main(int argc, char *argv[])
     GetModuleFileNameW(NULL, exePath, MAX_PATH);
     std::string exeDir = std::filesystem::path(exePath).parent_path().string();
     std::ostringstream filePathStream;
-    filePathStream << exeDir << "\\outputs\\timeseries2D\\sigma_" << sigma << "_theta_" << theta << ".csv";
+    // filePathStream << exeDir << "\\outputs\\timeseries2D\\sigma_" << sigma << "_theta_" << theta << ".csv";
+    filePathStream << exeDir << "\\outputs\\timeseriesWormCounts2D\\sigma_" << sigma << "_theta_" << theta << ".csv";
     std::string filePath = filePathStream.str();
-    
+
     std::ofstream file;
     file.open(filePath);
     file << "step,emptys,nutrients,soil,greens\n";
-    run_timeseries(N_STEPS, L, sigma, theta, RHO1, MU1, file);
+    run_timeseries(STEPS_PER_LATTICEPOINT, L, sigma, theta, RHO1, MU1, file);
     file.close();
 
     return 0;
