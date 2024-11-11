@@ -56,7 +56,7 @@ def main():
     ax2.legend()
 
     plt.tight_layout()
-    plt.savefig('src/IUPAB_abstract/plots/worm_counts/3sigmas.png')
+    plt.savefig('src/IUPAB_abstract/plots/worm_counts/3sigmas_2D.png')
     plt.show()
 
 if __name__ == "__main__":
