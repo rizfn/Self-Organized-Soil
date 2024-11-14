@@ -243,7 +243,8 @@ def plot_paper(directory, outputfilename, cluster_type='Filled'):
 if __name__ == "__main__":
     # main('src/nutrient_model/outputs/csd2D', 'soil_clusters')
     # plot_thesis('src/nutrient_model/outputs/csd2D_thesis', 'soil_clusters_thesis')
-    plot_paper('src/nutrient_model/outputs/csd2D_paper', 'soil_clusters_paper')
+    # plot_paper('src/nutrient_model/outputs/csd2D_paper', 'soil_clusters_paper')
     # plot_paper('src/nutrient_model/outputs/csd2D_paper_empty', 'empty_clusters_paper', 'Empty')
     # main('src/nutrient_model/outputs/csd2D_low_s', 'low_sigma')
+    main('src/nutrient_model/outputs/csd2D_high_s', 'high_sigma')
 

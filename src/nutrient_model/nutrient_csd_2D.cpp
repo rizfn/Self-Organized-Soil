@@ -28,8 +28,8 @@ struct Coordinate
 constexpr int L = 4096; // side length of the square lattice
 constexpr double RHO = 1;
 constexpr double MU = 1;
-constexpr double SIGMA = 0.1;
-constexpr double THETA = 0.13;
+constexpr double SIGMA = 1;
+constexpr double THETA = 0.134;
 constexpr int STEPS_PER_LATTICEPOINT = 6000;
 constexpr int RECORDING_STEP = 3 * STEPS_PER_LATTICEPOINT / 4;
 constexpr int RECORDING_INTERVAL = 20;
@@ -251,7 +251,8 @@ int main(int argc, char *argv[])
     std::ostringstream filePathStream;
     // filePathStream << exeDir << "\\outputs\\csd2D_thesis\\sigma_" << sigma << "_theta_" << theta << ".tsv";
     // filePathStream << exeDir << "\\outputs\\csd2D_paper\\sigma_" << sigma << "_theta_" << theta << ".tsv";
-    filePathStream << exeDir << "\\outputs\\csd2D_low_s\\sigma_" << sigma << "_theta_" << theta << ".tsv";
+    // filePathStream << exeDir << "\\outputs\\csd2D_low_s\\sigma_" << sigma << "_theta_" << theta << ".tsv";
+    filePathStream << exeDir << "\\outputs\\csd2D_high_s\\sigma_" << sigma << "_theta_" << theta << ".tsv";
     std::string filePath = filePathStream.str();
 
     std::ofstream file;
