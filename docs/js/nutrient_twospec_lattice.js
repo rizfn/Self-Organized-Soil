@@ -1,4 +1,17 @@
-const { default: data } = await import("../data/nutrient_twospec/soil_lattice_L=50_rho1=1_rho2=1_delta=0_theta1=0.02.json", { assert: { type: "json" } });
+async function loadData(url) {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching the JSON data:', error);
+    }
+}
+
+const data = await loadData("../data/nutrient_twospec/soil_lattice_L=50_rho1=1_rho2=1_delta=0_theta1=0.02.json");
 
 // check if mobile
 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {

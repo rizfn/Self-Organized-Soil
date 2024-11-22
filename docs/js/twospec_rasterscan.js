@@ -1,4 +1,18 @@
-const { default: data } = await import("../data/two_species/stochastic_dynamics_r=1.json", { assert: { type: "json" } });
+async function loadData(url) {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching the JSON data:', error);
+    }
+}
+
+// const { default: data } = await import("../data/two_species/stochastic_dynamics_r=1.json", { assert: { type: "json" } });
+const data = await loadData("../data/two_species/stochastic_dynamics_r=1.json");
 
 // check if mobile
 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {

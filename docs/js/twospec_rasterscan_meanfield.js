@@ -1,7 +1,20 @@
-let { default: data_meanfield } = await import("../data/two_species/mean_field_data_r=1.json", { assert: { type: "json" } });
-let { default: data_stochastic } = await import("../data/two_species/stochastic_dynamics_r=1.json", { assert: { type: "json" } });
-// let { default: data_3D } = await import("../data/two_species/3D_stochastic_dynamics_r=1.json", { assert: { type: "json" } });
-let { default: data_wellmixed } = await import("../data/two_species/wellmixed_stochastic_dynamics_r=1.json", { assert: { type: "json" } });
+async function loadData(url) {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching the JSON data:', error);
+    }
+}
+
+let data_meanfield = await loadData("../data/two_species/mean_field_data_r=1.json");
+let data_stochastic = await loadData("../data/two_species/stochastic_dynamics_r=1.json");
+// let data_3D = await loadData("../data/two_species/3D_stochastic_dynamics_r=1.json");
+let data_wellmixed = await loadData("../data/two_species/wellmixed_stochastic_dynamics_r=1.json");
 
 
 // add 4 radio buttons to switch between meanfield, stochastic, parallel, 3d, wellmixed data
