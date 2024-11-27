@@ -18,6 +18,7 @@ src/sitePercolation/outputs/
 src/simpleNbrGrowth/outputs/
 src/nutrient_model/outputs/
 src/nutrient_mutations/outputs/
+src/nutrient_model_two_species/outputs/
 src/two_species_same_nutrient/outputs/
 src/IUPAB_abstract/outputs/
 src/multi_species_nutrient/outputs/
