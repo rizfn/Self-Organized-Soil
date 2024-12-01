@@ -199,26 +199,26 @@ function draw(data) {
 
     context.stroke();
 
-    // Draw the new straight line
-    context.beginPath();
-    context.strokeStyle = 'red'; // Change this to the color you want
-    context.lineWidth = 3; // Change this to the width you want
+    // // Draw the new straight line
+    // context.beginPath();
+    // context.strokeStyle = 'red'; // Change this to the color you want
+    // context.lineWidth = 3; // Change this to the width you want
 
-    // Define the start and end points of the new line
-    let startPoint = { sigma: 0.53, theta: 0.14 };
-    let endPoint = { sigma: 0.1, theta: 0.13 };
+    // // Define the start and end points of the new line
+    // let startPoint = { sigma: 0.53, theta: 0.14 };
+    // let endPoint = { sigma: 0.1, theta: 0.13 };
 
-    // Convert the start and end points to pixel coordinates
-    let startX = xLinear(startPoint.theta);
-    let startY = yLinear(startPoint.sigma);
-    let endX = xLinear(endPoint.theta);
-    let endY = yLinear(endPoint.sigma);
+    // // Convert the start and end points to pixel coordinates
+    // let startX = xLinear(startPoint.theta);
+    // let startY = yLinear(startPoint.sigma);
+    // let endX = xLinear(endPoint.theta);
+    // let endY = yLinear(endPoint.sigma);
 
-    // Draw the new line
-    context.moveTo(startX, startY);
-    context.lineTo(endX, endY);
+    // // Draw the new line
+    // context.moveTo(startX, startY);
+    // context.lineTo(endX, endY);
 
-    context.stroke();
+    // context.stroke();
 }
 
 // Call the draw function instead of creating SVG rectangles
