@@ -283,10 +283,7 @@ $\\$
 
 - No self-organisation: selfishness!
 
-- Worms are **altruistic???**
-
-![width:1100px](images/hiroshima/Mishelam_beach.png)
-
+- Worms are altruistic???
 
 ---
 
