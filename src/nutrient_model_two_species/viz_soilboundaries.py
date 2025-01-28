@@ -35,7 +35,7 @@ def main():
     
     sigma_values = df["sigma"].unique()
     colors = plt.cm.Reds([0.5, 0.7, 1])
-    critical_points = {0.2: 0.0144, 0.5: 0.0372, 1.0: 0.0414}
+    critical_points = {0.3: 0.0315, 0.6: 0.039, 1.0: 0.04125}
 
     num_themes = len(themes)
     num_quantities_per_theme = max(len(quantities) for quantities in themes.values())
@@ -63,7 +63,7 @@ def main():
             axs[row, col].legend()
 
     plt.tight_layout()
-    plt.savefig('src/nutrient_model_two_species/plots/soil_boundaries/all_themes.png', dpi=300)
+    plt.savefig('src/nutrient_model_two_species/plots/soil_boundaries/all_themes_L_2048.png', dpi=300)
     plt.show()
     
 if __name__ == "__main__":

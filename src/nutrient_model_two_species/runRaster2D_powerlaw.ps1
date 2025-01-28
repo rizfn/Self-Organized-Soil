@@ -1,8 +1,8 @@
 # Define the sigma and theta values for WormCount
 $sigma_theta_pairs = @{
-    0.2 = @(0.0142, 0.0144, 0.0146, 0.0148)
-    0.5 = @(0.0367, 0.0368, 0.037, 0.0372)
-    1.0 = @(0.0408, 0.041, 0.0412, 0.0414)
+    0.3 = @(0.031, 0.0315, 0.032, 0.0325)
+    0.6 = @(0.038, 0.0385, 0.039, 0.0395)
+    1.0 = @(0.0405, 0.041, 0.0415, 0.042)
 }
 
 # Define the maximum number of concurrent jobs, leaving 4 processors free

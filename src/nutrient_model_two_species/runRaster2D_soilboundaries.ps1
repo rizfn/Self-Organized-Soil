@@ -1,5 +1,5 @@
 # Define the sigma and theta values for WormCount
-$sigma_values = @(0.2, 0.5, 1.0)
+$sigma_values = @(0.3, 0.6, 1.0)
 $theta_values = 0..39 | ForEach-Object { 0 + $_ * (0.05 - 0) / 39 }
 
 # Define the maximum number of concurrent jobs, leaving 2 processors free

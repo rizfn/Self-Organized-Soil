@@ -119,4 +119,4 @@ def main(directory, outputfilename):
 
 
 if __name__ == "__main__":
-    main('src/nutrient_model_two_species/outputs/sametheta/CSD2D', '2D')
+    main('src/nutrient_model_two_species/outputs/sametheta/CSD2D', '2D_L_4052')
