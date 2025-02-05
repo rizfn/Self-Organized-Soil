@@ -114,7 +114,7 @@ def main():
         for i, quantity in enumerate(quantities):
             axs[i].plot(theta_values, mean_values[quantity], marker='.', label=f'$\sigma$ = {sigma}', color=color)
 
-    y_labels = ["Soil boundaries", "Nutrient production"]
+    y_labels = ["Soil boundary fraction", "Nutrient production rate"]
     for i, quantity in enumerate(quantities):
         axs[i].set_xlabel("Worm death rate ($\\theta$)", fontsize=20)
         axs[i].set_ylabel(y_labels[i], fontsize=20)

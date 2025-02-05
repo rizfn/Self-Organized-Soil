@@ -174,7 +174,7 @@ def plot_paper(directory, outputfilename, cluster_type='Filled'):
     else:
         color_cycle = cycler(color=['#666666', '#17BEBB'])
     plt.rcParams['axes.prop_cycle'] = color_cycle
-    plt.rcParams['font.size'] = 16
+    plt.rcParams['font.size'] = 20
 
     csv_files = glob.glob(f'{directory}/*.tsv')
     num_files = len(csv_files)
@@ -207,17 +207,17 @@ def plot_paper(directory, outputfilename, cluster_type='Filled'):
         ax.set_xscale('log')
         ax.set_yscale('log')
         ax.grid()
-        ax.set_xlabel('Cluster size', fontsize=24)
+        ax.set_xlabel('Cluster size', fontsize=30)
 
         ylim = ax.get_ylim()
 
         tau1 = 1.85
         x = np.array(edges[:-1])
-        ax.plot(x, 1e6*x**-tau1, label=r'$\tau=$' + f'{tau1} power law', linestyle='--', alpha=0.8)
+        ax.plot(x, 1e6*x**-tau1, label=f'$\\tau$ = {tau1} power law', linestyle='--', alpha=0.8)
         ax.set_ylim(ylim)
 
         if i == 0:
-            ax.set_ylabel('Frequency', fontsize=24)
+            ax.set_ylabel('Frequency', fontsize=30)
             ax.legend(loc='upper right')
         else:
             ax.set_yticklabels([])  # Remove y tick labels
@@ -227,8 +227,8 @@ def plot_paper(directory, outputfilename, cluster_type='Filled'):
         ylims.append(ax.get_ylim())
 
         # Add the parameters with a box around them
-        ax.text(0.716, 0.7, f'$\sigma$ = {sigma}\n$\\theta$ = {theta}', transform=ax.transAxes,
-                fontsize=18, verticalalignment='top', bbox=dict(facecolor='white', alpha=0.8, edgecolor='black'))
+        ax.text(0.65, 0.65, f'$\sigma$ = {sigma}\n$\\theta$ = {theta}', transform=ax.transAxes,
+                fontsize=22, verticalalignment='top', bbox=dict(facecolor='white', alpha=0.8, edgecolor='black'))
 
     for ax in axs:
         ax.set_xlim([min([x[0] for x in xlims]), max([x[1] for x in xlims])])
@@ -244,7 +244,7 @@ if __name__ == "__main__":
     # main('src/nutrient_model/outputs/csd2D', 'soil_clusters')
     # plot_thesis('src/nutrient_model/outputs/csd2D_thesis', 'soil_clusters_thesis')
     # plot_paper('src/nutrient_model/outputs/csd2D_paper', 'soil_clusters_paper')
-    # plot_paper('src/nutrient_model/outputs/csd2D_paper_empty', 'empty_clusters_paper', 'Empty')
+    plot_paper('src/nutrient_model/outputs/csd2D_paper_empty', 'empty_clusters_paper', 'Empty')
     # main('src/nutrient_model/outputs/csd2D_low_s', 'low_sigma')
-    main('src/nutrient_model/outputs/csd2D_high_s', 'high_sigma')
+    # main('src/nutrient_model/outputs/csd2D_high_s', 'high_sigma')
 

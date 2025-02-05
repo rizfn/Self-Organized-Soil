@@ -91,7 +91,7 @@ def plot_paper():
     quantities = ["soil_nonsoil_boundaries", "nutrient_production"]
     colors = plt.cm.Reds([0.5, 0.7, 1])
     plt.rcParams['axes.prop_cycle'] = plt.cycler(color=colors)
-    plt.rcParams['font.size'] = 16
+    plt.rcParams['font.size'] = 17
 
     fig, axs = plt.subplots(2, 1, figsize=(6.5, 12), sharex=True)
     axs = axs.flatten()
@@ -115,9 +115,9 @@ def plot_paper():
         for i, quantity in enumerate(quantities):
             axs[i].plot(theta_values, mean_values[quantity], marker='.', label=f'$\sigma$ = {sigma}', color=color)
 
-    y_labels = ["Soil boundaries", "Nutrient production"]
+    y_labels = ["Soil boundary fraction", "Nutrient production rate"]
     for i, quantity in enumerate(quantities):
-        axs[i].set_ylabel(y_labels[i], fontsize=20)
+        axs[i].set_ylabel(y_labels[i], fontsize=24)
         axs[i].grid()
         if i == 0:
             axs[i].legend()
@@ -128,10 +128,10 @@ def plot_paper():
         axs[i].axvline(x=critical_points[0.6], color=colors[1], linestyle='--', label='$\sigma$=0.6 soil power law', alpha=0.8)
         axs[i].axvline(x=critical_points[1.0], color=colors[2], linestyle='--', label='$\sigma$=1.0 soil power law', alpha=0.8)
 
-    axs[-1].set_xlabel("Worm death rate ($\\theta$)", fontsize=20)
+    axs[-1].set_xlabel("Worm death rate ($\\theta$)", fontsize=24)
 
     plt.tight_layout()
-    plt.savefig('src/nutrient_model_two_species/plots/soil_boundaries/2quantities_soilboundaries_2D.png', dpi=300)
+    plt.savefig('src/nutrient_model_two_species/plots/soil_boundaries/twospec_twonutrient_soilboundaries.png', dpi=300)
     plt.show()
 
 if __name__ == "__main__":
