@@ -28,7 +28,7 @@ $$
 $$
 
 
-### Longer Living Parasite:
+### Longer Living Parasite (aka `different_thetas`):
 
 $$
 \begin{align}

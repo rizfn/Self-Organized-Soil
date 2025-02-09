@@ -194,6 +194,146 @@ def run(n_steps, L, sigma, theta, rho1, rho2, mu1, mu2, steps_to_record=np.array
     return soil_lattice_data
 
 
+@njit
+def update_different_theta(soil_lattice, L, sigma, theta1, theta2, rho, mu1, mu2):
+    """Update the lattice stochastically. Called once every timestep.
+
+    The function mutates a global variable, to avoid slowdowns from numba primitives.
+    It works by choosing a random site, and then giving a dynamics ascribed to the said site.
+    
+    Parameters:
+    -----------
+    soil_lattice : numpy.ndarray
+        Lattice with worms randomly placed on it.
+    L : int
+        Side length of the square lattice.
+    sigma : float
+        Soil filling rate.
+    theta1 : float
+        Death rate of green worms.
+    theta2 : float
+        Death rate of blue worms.
+    rho : float
+        Worm reproduction rate.
+    mu1 : float
+        Nutrient creation rate of green worms.
+    mu2 : float
+        Nutrient creation rate of blue worms.
+
+    Returns:
+    --------
+    None
+    """
+
+    # select a random site
+    site = np.random.randint(0, L), np.random.randint(0, L)
+
+    if (soil_lattice[site[0], site[1]] == 0) or (soil_lattice[site[0], site[1]] == 1):  # empty or nutrient
+        # choose a random neighbour
+        nbr = get_random_neighbour(site, L)
+        if soil_lattice[nbr[0], nbr[1]] == 2:  # if neighbour is soil
+            # fill with soil-filling rate
+            if np.random.rand() < sigma:
+                soil_lattice[site[0], site[1]] = 2
+
+    elif soil_lattice[site[0], site[1]] == 3:  # green worm
+        # check for death
+        if np.random.rand() < theta1:
+            soil_lattice[site[0], site[1]] = 0
+        else:
+            # move into a neighbour
+            new_site = get_random_neighbour(site, L)
+            # check the value of the new site
+            new_site_value = soil_lattice[new_site[0], new_site[1]]
+            # move the worm
+            soil_lattice[new_site[0], new_site[1]] = 3
+            soil_lattice[site[0], site[1]] = 0
+            # check if the new site is nutrient
+            if new_site_value == 1:
+                # reproduce behind you
+                if np.random.rand() < rho:
+                    soil_lattice[site[0], site[1]] = 3
+            # check if the new site is soil
+            elif new_site_value == 2:
+                # leave nutrient behind
+                if np.random.rand() < mu1:
+                    soil_lattice[site[0], site[1]] = 1
+            # check if the new site is a worm
+            elif (new_site_value == 3) or (new_site_value == 4):
+                # keep both with worms (undo the vacant space in original site)
+                soil_lattice[site[0], site[1]] = new_site_value
+
+    elif soil_lattice[site[0], site[1]] == 4:  # blue worm
+        # check for death
+        if np.random.rand() < theta2:
+            soil_lattice[site[0], site[1]] = 0
+        else:
+            # move into a neighbour
+            new_site = get_random_neighbour(site, L)
+            # check the value of the new site
+            new_site_value = soil_lattice[new_site[0], new_site[1]]
+            # move the worm
+            soil_lattice[new_site[0], new_site[1]] = 4
+            soil_lattice[site[0], site[1]] = 0
+            # check if the new site is nutrient
+            if new_site_value == 1:
+                # reproduce behind you
+                if np.random.rand() < rho:
+                    soil_lattice[site[0], site[1]] = 4
+            # check if the new site is soil
+            elif new_site_value == 2:
+                # leave nutrient behind
+                if np.random.rand() < mu2:
+                    soil_lattice[site[0], site[1]] = 1
+            # check if the new site is a worm
+            elif (new_site_value == 3) or (new_site_value == 4):
+                # keep both with worms (undo the vacant space in original site)
+                soil_lattice[site[0], site[1]] = new_site_value
+
+
+@njit
+def run_different_theta(n_steps, L, sigma, theta1, theta2, rho, mu1, mu2, steps_to_record=np.array([100, 1000, 10000, 100000])):
+    """Run the stochastic simulation for n_steps timesteps.
+
+    Parameters
+    ----------
+    n_steps : int
+        Number of timesteps to run the simulation for.
+    L : int
+        Side length of the square lattice.
+    sigma : float
+        Soil filling rate.
+    theta1 : float
+        Death rate of green worms.
+    theta2 : float
+        Death rate of blue worms.
+    rho : float
+        Worm reproduction rate.
+    mu1 : float 
+        Nutrient creation rate of green worms.
+    mu2 : float
+        Nutrient creation rate of blue worms.
+    steps_to_record : ndarray, optional
+        Array of timesteps to record the lattice data for, by default [100, 1000, 10000, 100000].
+
+    Returns
+    -------
+    soil_lattice_data : ndarray
+        List of soil_lattice data for specific timesteps.
+    """
+    soil_lattice = init_lattice(L)
+
+    soil_lattice_data = np.zeros((len(steps_to_record), L, L), dtype=np.int8)
+
+    for step in range(1, n_steps+1):
+        update_different_theta(soil_lattice, L, sigma, theta1, theta2, rho, mu1, mu2)
+        if step in steps_to_record:
+            soil_lattice_data[steps_to_record == step] = soil_lattice
+
+    return soil_lattice_data
+
+
+
 ## TODO: ADD THE WELL-MIXED MODEL
 @njit
 def update_stochastic_wellmixed(soil_lattice, L, r, d, s):
