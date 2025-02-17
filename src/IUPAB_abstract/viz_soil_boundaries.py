@@ -67,6 +67,7 @@ def plot_all():
     plt.show()
 
 
+
 def main():
     # Define the colors for the different sigma values
     colors = plt.cm.Reds([0.5, 0.7, 1])
@@ -114,19 +115,52 @@ def main():
         for i, quantity in enumerate(quantities):
             axs[i].plot(theta_values, mean_values[quantity], marker='.', label=f'$\sigma$ = {sigma}', color=color)
 
+    # Get y_extent after plotting all lines
+    y_extents = [axs[i].get_ylim()[1] - axs[i].get_ylim()[0] for i in range(num_quantities)]
+
+    for sigma, color in zip(sigma_values, colors):
+        same_sigma = df[df["sigma"] == sigma]
+        theta_values = []
+
+        mean_values = {quantity: [] for quantity in quantities}
+
+        for theta in same_sigma["theta"].unique():
+            if theta == "0":
+                continue
+            same_theta = same_sigma[same_sigma["theta"] == theta]
+            final_fraction = same_theta.iloc[int(len(same_theta) * (1 - equilibrium_step_fraction)):]  # Select the final fraction steps
+            theta_values.append(float(theta))
+
+            for quantity in quantities:
+                mean_value = final_fraction[quantity].mean()  # Calculate the mean value for the quantity
+                mean_values[quantity].append(mean_value)
+
+        for i, quantity in enumerate(quantities):
+            # Add arrows instead of vertical dashed lines
+            x_val_map = {0.1: 0.13, 0.5: 0.14, 1.0: 0.134}
+            if float(sigma) in x_val_map:
+                x_val = x_val_map[float(sigma)]
+                if x_val < min(theta_values) or x_val > max(theta_values):
+                    continue
+                left_idx = max(i for i in range(len(theta_values)) if theta_values[i] <= x_val)
+                right_idx = min(i for i in range(len(theta_values)) if theta_values[i] >= x_val)
+                if left_idx == right_idx:
+                    y_val = mean_values[quantity][left_idx]
+                else:
+                    x_left, x_right = theta_values[left_idx], theta_values[right_idx]
+                    y_left, y_right = mean_values[quantity][left_idx], mean_values[quantity][right_idx]
+                    y_val = y_left + (y_right - y_left) * (x_val - x_left) / (x_right - x_left)
+                arrow_height = 0.1 * y_extents[i]  # Set a fixed percentage of the y extent for the arrow height
+                axs[i].annotate('', xy=(x_val, y_val), xytext=(x_val, y_val + arrow_height),
+                                arrowprops=dict(facecolor=color, edgecolor=color, arrowstyle='-|>', lw=2, shrinkA=2, shrinkB=0))
+
     y_labels = ["Soil boundary fraction", "Nutrient production rate"]
     for i, quantity in enumerate(quantities):
-        axs[i].set_xlabel("Worm death rate ($\\theta$)", fontsize=20)
+        axs[i].set_xlabel("Microbe death rate ($\\theta$)", fontsize=20)
         axs[i].set_ylabel(y_labels[i], fontsize=20)
         axs[i].grid()
         if i == 0:
             axs[i].legend()
-
-        # Add vertical dashed lines
-        axs[i].axvline(x=0.13, color=colors[0], linestyle='--', label='$\sigma$=0.1 soil power law', alpha=0.8)
-        axs[i].axvline(x=0.14, color=colors[1], linestyle='--', label='$\sigma$=0.5 soil power law', alpha=0.8)
-        axs[i].axvline(x=0.134, color=colors[2], linestyle='--', label='$\sigma$=1.0 soil power law', alpha=0.8)
-
 
     plt.tight_layout()
     plt.savefig('src/IUPAB_abstract/plots/worm_counts/2quantities_soilboundaries_2D.png')
