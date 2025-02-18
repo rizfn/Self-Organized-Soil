@@ -12,12 +12,18 @@ async function loadData(url) {
 }
 
 const data_2x = await loadData("../data/twospec_samenutrient/different_theta/lattice_L=256_thetafactor=2.json");
-const data_3x = await loadData("../data/twospec_samenutrient/different_theta/lattice_L=256_thetafactor=3.json");
+// const data_3x = await loadData("../data/twospec_samenutrient/different_theta/lattice_L=256_thetafactor=3.json");
 const data_4x = await loadData("../data/twospec_samenutrient/different_theta/lattice_L=256_thetafactor=4.json");
+const data_8x = await loadData("../data/twospec_samenutrient/different_theta/lattice_L=256_thetafactor=8.json");
 
-const datasets = [data_2x, data_3x, data_4x];
-const titles = ["2x", "3x", "4x"];
-const ids = ["raster_2x", "raster_3x", "raster_4x"];
+// const datasets = [data_2x, data_3x, data_4x];
+// const titles = ["2x", "3x", "4x"];
+// const ids = ["raster_2x", "raster_3x", "raster_4x"];
+
+const datasets = [data_2x, data_4x, data_8x];
+const titles = ["2x", "4x", "8x"];
+const ids = ["raster_2x", "raster_4x", "raster_8x"];
+
 
 datasets.forEach((data, index) => {
     data.sort((a, b) => {
@@ -117,7 +123,7 @@ datasets.forEach((data, index) => {
         .attr("class", "axis_label")
         .attr("transform", "translate(" + (width / 2) + " ," + (height + margin.bottom / 2) + ")")
         .style("text-anchor", "middle")
-        .text("Worm death rate (θ)");
+        .text("Microbe death rate (θ)");
 
     if (index === 0) {
         svg.append("text")

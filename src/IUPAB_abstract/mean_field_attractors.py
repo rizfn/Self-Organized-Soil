@@ -97,7 +97,7 @@ def plot_combined():
 
     # Left subplot: raster with line
     im_meanfield = ax1.imshow(pivot_meanfield, cmap=cmap, vmin=-0.5, vmax=3.5, extent=[0, 0.3, 1, 0], aspect=1/3)
-    ax1.set_xlabel(r"Death rate ($\theta$)")
+    ax1.set_xlabel(r"Microbe death rate ($\theta$)")
     ax1.set_ylabel(r"Soil filling rate ($\sigma$)")
     ax1.invert_yaxis()
 
@@ -123,7 +123,7 @@ def plot_combined():
 
     ax2.set_xlabel('E')
     ax2.set_ylabel('S')
-    ax2.set_zlabel('W')
+    ax2.set_zlabel('M')
     ax2.view_init(elev=30, azim=45)  # Change these values to set the desired orientation    
 
     for theta, sigma, color in zip(theta_list, sigma_list, color_list):

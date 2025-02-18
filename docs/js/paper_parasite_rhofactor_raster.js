@@ -117,7 +117,7 @@ datasets.forEach((data, index) => {
         .attr("class", "axis_label")
         .attr("transform", "translate(" + (width / 2) + " ," + (height + margin.bottom / 2) + ")")
         .style("text-anchor", "middle")
-        .text("Worm death rate (θ)");
+        .text("Microbe death rate (θ)");
 
     if (index === 0) {
         svg.append("text")

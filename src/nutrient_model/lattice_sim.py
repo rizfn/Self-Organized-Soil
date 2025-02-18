@@ -50,10 +50,10 @@ def main():
 
     steps_to_record = steps_to_record / L**3
     # First subplot
-    axs[0].plot(steps_to_record, soil, label="soil", c="brown")
-    axs[0].plot(steps_to_record, emptys, label="empty", c="grey")
-    axs[0].plot(steps_to_record, nutrients, label="nutrients", c="turquoise")
-    axs[0].plot(steps_to_record, worms, label="worms", c="green")
+    axs[0].plot(steps_to_record, soil, label="Soil", c="brown")
+    axs[0].plot(steps_to_record, emptys, label="Empty", c="grey")
+    axs[0].plot(steps_to_record, nutrients, label="Nutrient", c="turquoise")
+    axs[0].plot(steps_to_record, worms, label="Microbe", c="green")
     # axs[0].set_title(f"3D Lattice, {L=}")
     # axs[0].set_xlabel("Timestep")
     axs[0].set_ylabel("Population")
@@ -63,10 +63,10 @@ def main():
     # Second subplot
     T, S, E, N, W = ode_integrate_rk4(sigma, theta, rho, delta, stoptime=steps_per_latticepoint, nsteps=steps_per_latticepoint)
     
-    axs[1].plot(T, S, label="soil", c="brown")
-    axs[1].plot(T, E, label="empty", c="grey")
-    axs[1].plot(T, N, label="nutrient", c="turquoise")
-    axs[1].plot(T, W, label="worm", c="green")
+    axs[1].plot(T, S, label="Soil", c="brown")
+    axs[1].plot(T, E, label="Empty", c="grey")
+    axs[1].plot(T, N, label="Nutrient", c="turquoise")
+    axs[1].plot(T, W, label="Microbe", c="green")
     # axs[1].set_title("Mean-Field")
     axs[1].set_xlabel("Timestep")
     axs[1].set_ylabel("Population")
