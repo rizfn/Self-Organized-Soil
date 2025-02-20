@@ -54,7 +54,7 @@ def main():
                     mean_value = same_theta[quantity].mean()
                     mean_values.append(mean_value)
 
-                axs[row, col].plot(theta_values, mean_values, marker='o', label=f'σ = {sigma}', color=color)
+                axs[row, col].plot(theta_values, mean_values, marker='', label=f'σ = {sigma}', color=color)
                 axs[row, col].axvline(x=critical_points[sigma], color=color, linestyle='--', alpha=0.8)
             
             axs[row, col].set_title(f'{quantity.replace("_", " ").capitalize()}')
@@ -74,6 +74,9 @@ def plot_paper():
     data_list = []
 
     for filename in glob(f"src/nutrient_model_two_species/outputs/sametheta/soil_boundaries/*.tsv"):
+        # continue if file has  no lines
+        if sum(1 for line in open(filename)) <= 1:
+            continue
         sub_df = pd.read_csv(filename, sep='\t')
         sigma = float(filename.split("_")[5])
         theta = float(filename.split("_")[7].rsplit(".", 1)[0])
@@ -113,26 +116,50 @@ def plot_paper():
                 mean_values[quantity].append(mean_theta_values[quantity])
 
         for i, quantity in enumerate(quantities):
-            axs[i].plot(theta_values, mean_values[quantity], marker='.', label=f'$\sigma$ = {sigma}', color=color)
+            axs[i].plot(theta_values, mean_values[quantity], marker='', color=color)
+
+    # Get y_extent after plotting all lines
+    y_extents = [axs[i].get_ylim()[1] - axs[i].get_ylim()[0] for i in range(len(quantities))]
+
+    # critical_points = {0.3: 0.0315, 0.6: 0.039, 1.0: 0.04125}  # maybe a bit inaccurate?
+    critical_points = {0.3: 0.031, 0.6: 0.0385, 1.0: 0.0411}
+    for sigma, color in zip(sigma_values, colors):
+        for i, quantity in enumerate(quantities):
+            x_val = critical_points[sigma]
+            same_sigma = df[df["sigma"] == sigma]
+            theta_values = sorted(same_sigma["theta"].unique())
+            mean_values = {quantity: [] for quantity in quantities}
+
+            for theta in theta_values:
+                same_theta = same_sigma[same_sigma["theta"] == theta]
+                mean_value = same_theta[quantity].mean()
+                mean_values[quantity].append(mean_value)
+
+            if x_val < min(theta_values) or x_val > max(theta_values):
+                continue
+            left_idx = max(i for i in range(len(theta_values)) if theta_values[i] <= x_val)
+            right_idx = min(i for i in range(len(theta_values)) if theta_values[i] >= x_val)
+            if left_idx == right_idx:
+                y_val = mean_values[quantity][left_idx]
+            else:
+                x_left, x_right = theta_values[left_idx], theta_values[right_idx]
+                y_left, y_right = mean_values[quantity][left_idx], mean_values[quantity][right_idx]
+                y_val = y_left + (y_right - y_left) * (x_val - x_left) / (x_right - x_left)
+            arrow_height = 0.1 * y_extents[i]  # Set a fixed percentage of the y extent for the arrow height
+            axs[i].annotate('', xy=(x_val, y_val), xytext=(x_val, y_val + arrow_height),
+                            arrowprops=dict(facecolor=color, edgecolor=color, arrowstyle='-|>', lw=4, shrinkA=2, shrinkB=0))
 
     y_labels = ["Soil boundary fraction", "Nutrient production rate"]
     for i, quantity in enumerate(quantities):
         axs[i].set_ylabel(y_labels[i], fontsize=24)
         axs[i].grid()
-        if i == 0:
-            axs[i].legend()
 
-        # Add vertical dashed lines
-        critical_points = {0.3: 0.0315, 0.6: 0.039, 1.0: 0.04125}
-        axs[i].axvline(x=critical_points[0.3], color=colors[0], linestyle='--', label='$\sigma$=0.3 soil power law', alpha=0.8)
-        axs[i].axvline(x=critical_points[0.6], color=colors[1], linestyle='--', label='$\sigma$=0.6 soil power law', alpha=0.8)
-        axs[i].axvline(x=critical_points[1.0], color=colors[2], linestyle='--', label='$\sigma$=1.0 soil power law', alpha=0.8)
-
-    axs[-1].set_xlabel("Worm death rate ($\\theta$)", fontsize=24)
+    axs[-1].set_xlabel("Microbe death rate ($\\theta$)", fontsize=24)
 
     plt.tight_layout()
     plt.savefig('src/nutrient_model_two_species/plots/soil_boundaries/twospec_twonutrient_soilboundaries.png', dpi=300)
     plt.show()
+
 
 if __name__ == "__main__":
     # main()

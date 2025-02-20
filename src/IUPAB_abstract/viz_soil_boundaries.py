@@ -113,7 +113,7 @@ def main():
                 mean_values[quantity].append(mean_value)
 
         for i, quantity in enumerate(quantities):
-            axs[i].plot(theta_values, mean_values[quantity], marker='.', label=f'$\sigma$ = {sigma}', color=color)
+            axs[i].plot(theta_values, mean_values[quantity], marker='', label=f'$\sigma$ = {sigma}', color=color)
 
     # Get y_extent after plotting all lines
     y_extents = [axs[i].get_ylim()[1] - axs[i].get_ylim()[0] for i in range(num_quantities)]
@@ -137,7 +137,8 @@ def main():
 
         for i, quantity in enumerate(quantities):
             # Add arrows instead of vertical dashed lines
-            x_val_map = {0.1: 0.13, 0.5: 0.14, 1.0: 0.134}
+            # x_val_map = {0.1: 0.13, 0.5: 0.14, 1.0: 0.134}  # maybe a bit unaccurate?
+            x_val_map = {0.1: 0.128, 0.5: 0.138, 1.0: 0.132}
             if float(sigma) in x_val_map:
                 x_val = x_val_map[float(sigma)]
                 if x_val < min(theta_values) or x_val > max(theta_values):
@@ -152,18 +153,16 @@ def main():
                     y_val = y_left + (y_right - y_left) * (x_val - x_left) / (x_right - x_left)
                 arrow_height = 0.1 * y_extents[i]  # Set a fixed percentage of the y extent for the arrow height
                 axs[i].annotate('', xy=(x_val, y_val), xytext=(x_val, y_val + arrow_height),
-                                arrowprops=dict(facecolor=color, edgecolor=color, arrowstyle='-|>', lw=2, shrinkA=2, shrinkB=0))
+                                arrowprops=dict(facecolor=color, edgecolor=color, arrowstyle='-|>', lw=4, shrinkA=2, shrinkB=0))
 
     y_labels = ["Soil boundary fraction", "Nutrient production rate"]
     for i, quantity in enumerate(quantities):
         axs[i].set_xlabel("Microbe death rate ($\\theta$)", fontsize=20)
         axs[i].set_ylabel(y_labels[i], fontsize=20)
         axs[i].grid()
-        if i == 0:
-            axs[i].legend()
 
     plt.tight_layout()
-    plt.savefig('src/IUPAB_abstract/plots/worm_counts/2quantities_soilboundaries_2D.png')
+    plt.savefig('src/IUPAB_abstract/plots/worm_counts/2quantities_soilboundaries_2D.png', dpi=300)
     plt.show()
 
 

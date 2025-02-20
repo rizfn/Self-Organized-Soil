@@ -25,7 +25,7 @@ struct Coordinate
 };
 
 // Define constants
-constexpr int L = 1024*4; // side length of the square lattice
+constexpr int L = 1024*2; // side length of the square lattice
 constexpr double SIGMA = 1;
 constexpr double THETA = 0.134;
 constexpr int STEPS_PER_LATTICEPOINT = 4000;
