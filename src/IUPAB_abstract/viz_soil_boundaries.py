@@ -70,7 +70,7 @@ def plot_all():
 
 def main():
     # Define the colors for the different sigma values
-    colors = plt.cm.Reds([0.5, 0.7, 1])
+    colors = ['#f48c06', '#dd1c1a', '#6a040f']
     plt.rcParams['axes.prop_cycle'] = plt.cycler(color=colors)
     plt.rcParams['font.size'] = 16
     equilibrium_step_fraction = 3/4  # Fraction of the final steps to consider for the equilibrium

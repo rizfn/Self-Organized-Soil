@@ -92,7 +92,7 @@ def plot_paper():
     df['nutrient_production'] = df['green_nutrient_production'] + df['blue_nutrient_production']
 
     quantities = ["soil_nonsoil_boundaries", "nutrient_production"]
-    colors = plt.cm.Reds([0.5, 0.7, 1])
+    colors = ['#f48c06', '#dd1c1a', '#6a040f']
     plt.rcParams['axes.prop_cycle'] = plt.cycler(color=colors)
     plt.rcParams['font.size'] = 17
 
