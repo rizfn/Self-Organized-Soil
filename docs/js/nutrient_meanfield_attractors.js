@@ -11,6 +11,7 @@ async function loadData(url) {
     }
 }
 
+let data_node = await loadData("../data/nutrient/meanfield_attractors/node.json");
 let data_10_00_80_10 = await loadData("../data/nutrient/meanfield_attractors/S0_0.1_E0_0.0_N0_0.8_W0_0.1.json");
 let data_30_30_30_10 = await loadData("../data/nutrient/meanfield_attractors/S0_0.3_E0_0.3_N0_0.3_W0_0.1.json");
 let data_80_00_00_20 = await loadData("../data/nutrient/meanfield_attractors/S0_0.8_E0_0.0_N0_0.0_W0_0.2.json");
@@ -45,10 +46,12 @@ function createRadioButton(form, labelText, value, checked = false) {
         .attr("class", "checkmark");
 }
 
-createRadioButton(form, "[25, 25, 25, 25] (1)", "25_25_25_25", true);
+createRadioButton(form, "[25, 25, 25, 25] (1)", "25_25_25_25");
 createRadioButton(form, "[30, 30, 30, 10]  (2)", "30_30_30_10");
 createRadioButton(form, "[80, 0, 0, 20] (3)", "80_00_00_20");
 createRadioButton(form, "[10, 0, 80, 10] (4)", "10_00_80_10");
+createRadioButton(form, "Stable Fixed Point (5)", "node", true);
+
 
 // on 1,2,3,4 set radio buttons
 document.addEventListener('keydown', function (event) {
@@ -68,13 +71,17 @@ document.addEventListener('keydown', function (event) {
         document.getElementById("radio-buttons").elements[3].checked = true;
         change_data('10_00_80_10')
     }
+    if (event.code === 'Digit5') {
+        document.getElementById("radio-buttons").elements[4].checked = true;
+        change_data('node')
+    }
 });
 
 var colorMap = d3.scaleOrdinal()
     .domain(["Soil", "Empty", "Oscillating", "Stable"])
     .range(["#996220", "#e8e9f3", "#429ea6", "#d7cf07"]);
 
-let data = data_25_25_25_25;
+let data = data_node;
 
 // set the dimensions and margins of the graph
 var margin = { top: 40, right: 40, bottom: 100, left: 100 },
@@ -272,6 +279,9 @@ function change_data(state) {
     }
     else if (state == '10_00_80_10') {
         data = data_10_00_80_10;
+    }
+    else if (state == 'node') {
+        data = data_node;
     }
 
     draw(data);

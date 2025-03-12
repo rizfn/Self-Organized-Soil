@@ -206,6 +206,81 @@ def main():
     df.to_json(f"docs/data/nutrient/meanfield_attractors/S0_{S0}_E0_{E0}_N0_{N0}_W0_{W0}.json", orient="records")
 
 
+def run_raster_node_start(n_steps, rho, theta_list, sigma_list, delta, tolerance=1e-6):
+    """Scans the ODE integrator over s and d for n_steps timesteps.
+    
+    Parameters
+    ----------
+    n_steps : int
+        Number of timesteps to run the simulation for.
+    L : int
+        Side length of the square lattice.
+    r : float
+        Reproduction rate.
+    d_list : ndarray
+        List of death rates.
+    s_list : ndarray
+        List of soil filling rates.
+    steps_to_record : ndarray, optional
+        Array of timesteps to record the lattice data for, by default [100, 1000, 10000, 100000].
+    
+    Returns
+    -------
+    soil_lattice_list : list
+        List of soil_lattice data for specific timesteps and parameters.
+    """
+    grid = np.meshgrid(theta_list, sigma_list)
+    ts_pairs = np.reshape(grid, (2, -1)).T  # all possible pairs of d and s
+    state_data = []
+
+    def stable_fixed_point(sigma, theta):
+        sqrt_argument = sigma**2 * theta**2 - 2 * sigma * theta - 4 * theta + 1
+        if sqrt_argument < 0:  # if the stable fixed point does not exist
+            return 0.3, 0.3, 0.1
+        sqrt_term = np.sqrt(sqrt_argument)
+        E = (sqrt_term - sigma * theta - 2 * theta + 1) / (2 * (sigma + 1))
+        S = 0.5 * (-sqrt_term - sigma * theta + 1)
+        W = sigma * (sqrt_term + sigma * theta + 1) / (2 * (sigma + 1))
+        return E, S, W
+    
+
+    for i in tqdm(range(len(ts_pairs))):  # todo: parallelize
+        theta, sigma = ts_pairs[i]
+        E0, S0, W0 = stable_fixed_point(sigma, theta)
+        E0, S0, W0 = max(0, E0 - 1e-3), max(0, S0 - 1e-3), max(0, W0 - 1e-3)
+        N0 = 1 - E0 - S0 - W0
+        T, S, E, N, W = ode_integrate_rk4(sigma, theta, rho, delta, stoptime=n_steps, nsteps=n_steps, S_0=S0, E_0=E0, N_0=N0, W_0=W0)
+        if W[-1] <= tolerance:
+            if S[-1] <= tolerance:
+                state = "Empty"
+            else:
+                state = "Soil"
+        else:
+            df = pd.DataFrame({"emptys": E, "nutrients": N, "greens": W, "soil": S, "step": np.arange(len(E))})
+            is_oscillating = check_if_oscillating(df)
+            if is_oscillating:
+                state = "Oscillating"
+            else:
+                state = "Stable"
+        state_data.append({"sigma": sigma, "theta": theta, "state": state})
+    return state_data
+
+
+def start_near_node():
+    
+    n_steps = 10_000  # number of worm moves
+    rho = 1  # reproduction rate
+    delta = 0  # nutrient decay rate
+    theta_list = np.linspace(0, 0.3, 200)  # death rate
+    sigma_list = np.linspace(0, 1, 200)  # soil filling rate
+
+    state_data = run_raster_node_start(n_steps, rho, theta_list, sigma_list, delta)
+
+    df = pd.DataFrame(state_data)
+    df.to_json(f"docs/data/nutrient/meanfield_attractors/node.json", orient="records")
+
+
 
 if __name__ == "__main__":
-    main()
+    # main()
+    start_near_node()

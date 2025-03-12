@@ -167,7 +167,7 @@ var group = new THREE.Group();
 var controlsDiv = d3.select('div#controls');
 
 // Define the checkbox data
-var checkboxes = ['empty', 'nutrient', 'soil', 'worm'];
+var checkboxes = ['empty', 'nutrient', 'soil', 'microbe'];
 
 // Bind the data to the divs
 var divSelection = controlsDiv.selectAll('div')
@@ -214,7 +214,7 @@ checkboxSelection.on('change', function (event, d) {
                     target_site = 2;
                     color = 0xa54a2a; // brown
                     break;
-                case 'worm':
+                case 'microbe':
                     target_site = 3;
                     color = 0x008000; // green
                     break;
@@ -308,7 +308,7 @@ function update_soil_lattice(newData) {
                     target_site = 2;
                     color = 0xa54a2a; // brown
                     break;
-                case 'worm':
+                case 'microbe':
                     target_site = 3;
                     color = 0x008000; // green
                     break;
