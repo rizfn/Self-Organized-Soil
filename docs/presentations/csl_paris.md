@@ -104,7 +104,7 @@ Control, Bulk, Rhizophere
 
 <img src="images/defence/feeney_porosity.png" style="max-width: 100%;"></img>
 
-<img src="images/defence/feeney_soil_cluster_size.png" style="max-width: 100%;"></img>
+<img src="images/csl_paris/feeney_soil_cluster_size.png" style="max-width: 100%;"></img>
 
 </div>
 
@@ -227,7 +227,7 @@ $\\$
 - Microbes don't care who creates the nutrient
 - A slight advantage mean you dominate
 - **Coexistence is impossible!**
-  *Competitive exclusion*: Higher $\rho$ always wins
+  *Competitive exclusion*: Lower $\theta$ always wins
 
 
 ---
@@ -250,6 +250,12 @@ $\\$
 
 Nearest neighbour connected components for clusters:
 $\implies$ both are a cluster of size 36!
+
+
+---
+
+<iframe width="100%" height="100%" src="https://rizfn.github.io/Self-Organized-Soil/visualizations/defence/nutrient_lattice_density.html" style="border: 1px solid #ccc" frameborder=0>
+</iframe>
 
 ---
 
