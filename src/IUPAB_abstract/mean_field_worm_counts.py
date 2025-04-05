@@ -68,6 +68,7 @@ def run_raster(n_steps, rho, theta_list, sigma_list, delta, equilibrium_step_fra
 
     mean_worm_concentrations = []
     mean_nutrient_concentrations = []
+    mean_soil_concentrations = []  # New list to store mean soil concentrations
 
     for i in tqdm(range(len(ts_pairs))):  # todo: parallelize
         theta, sigma = ts_pairs[i]
@@ -76,11 +77,13 @@ def run_raster(n_steps, rho, theta_list, sigma_list, delta, equilibrium_step_fra
         final_fraction = int(len(T) * (1 - equilibrium_step_fraction))
         mean_worm = np.mean(W[final_fraction:])  # Calculate the mean worm concentration
         mean_nutrient = np.mean(N[final_fraction:])  # Calculate the mean nutrient concentration
+        mean_soil = np.mean(S[final_fraction:])  # Calculate the mean soil concentration
 
         mean_worm_concentrations.append((sigma, theta, mean_worm))
         mean_nutrient_concentrations.append((sigma, theta, mean_nutrient))
+        mean_soil_concentrations.append((sigma, theta, mean_soil))  # Append mean soil concentration
 
-    return mean_worm_concentrations, mean_nutrient_concentrations
+    return mean_worm_concentrations, mean_nutrient_concentrations, mean_soil_concentrations
 
 def main():
     n_steps = 100_000  # number of worm moves
@@ -92,24 +95,28 @@ def main():
 
     S0, E0, N0, W0 = 0.25, 0.25, 0.25, 0.25
 
-    mean_worm_concentrations, mean_nutrient_concentrations = run_raster(
+    mean_worm_concentrations, mean_nutrient_concentrations, mean_soil_concentrations = run_raster(
         n_steps, rho, theta_list, sigma_list, delta, equilibrium_step_fraction, S0, E0, N0, W0)
 
     plt.rcParams['axes.prop_cycle'] = plt.cycler(color=plt.cm.Reds([0.5, 0.7, 1]))
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 7))
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(20, 7))
 
     for sigma in sigma_list:
         worm_data = [(theta, mean_worm) for s, theta, mean_worm in mean_worm_concentrations if s == sigma]
         nutrient_data = [(theta, mean_nutrient) for s, theta, mean_nutrient in mean_nutrient_concentrations if s == sigma]
+        soil_data = [(theta, mean_soil) for s, theta, mean_soil in mean_soil_concentrations if s == sigma]
 
         worm_data.sort()
         nutrient_data.sort()
+        soil_data.sort()
 
         theta_values_worm, mean_worm_values = zip(*worm_data)
         theta_values_nutrient, mean_nutrient_values = zip(*nutrient_data)
+        theta_values_soil, mean_soil_values = zip(*soil_data)
 
         ax1.plot(theta_values_worm, mean_worm_values, label=f'sigma = {sigma}')
         ax2.plot(theta_values_nutrient, mean_nutrient_values, label=f'sigma = {sigma}')
+        ax3.plot(theta_values_soil, np.array(mean_worm_values) * np.array(mean_soil_values), label=f'sigma = {sigma}')
 
     ax1.set_title('Worm vs Theta')
     ax1.set_xlabel("Theta")
@@ -123,9 +130,17 @@ def main():
     ax2.grid()
     ax2.legend()
 
+    ax3.set_title('Nutrient Production vs Theta')
+    ax3.set_xlabel("Theta")
+    ax3.set_ylabel("Mean Worm * Soil Concentration")
+    ax3.grid()
+    ax3.legend()
+
     plt.tight_layout()
     plt.savefig('src/IUPAB_abstract/plots/worm_counts/3sigmas_meanfield.png')
     plt.show()
+
+    
 
 if __name__ == "__main__":
     main()
