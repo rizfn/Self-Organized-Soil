@@ -1,6 +1,6 @@
 # Self Organized Soil
 
-[The paper](https://doi.org/10.1103/v8hj-k8t8) is finally out! Please take a look!
+[The paper](https://journals.aps.org/prresearch/abstract/10.1103/PhysRevResearch.7.023207) is finally out! Please take a look!
 
 
 This repository contains all the code used in the simulations and analysis in my masters thesis.
