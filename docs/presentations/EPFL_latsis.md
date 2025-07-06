@@ -22,6 +22,8 @@ style: |
           letter-spacing: 0.01em;
           margin-top: -100px;
           margin-bottom: -100px;
+          padding-top: -100px;
+          padding-bottom: -100px;
         }
 
 ---
@@ -77,23 +79,18 @@ $\\$
 
 ---
 
-### Biological impact on soil structure
+#### Biological impact on soil structure
 
-- **Soil porosity** appears to increase
-
-- *Larger particles* (>2μm) of soil are observed
-
-- Perhaps biologically induced **soil-aggregation**?
+- **Soil porosity** appears to increase, and **larger particles** (>2μm) of soil are observed
+- Biologically induced **soil-aggregation**?
 
 
 <div class="columns">
 
-<img src="images/defence/feeney_porosity.png" style="max-width: 100%;"></img>
+<img src="images/defence/feeney_porosity.png" style="max-width: 95%;"></img>
 
-<img src="images/csl_paris/feeney_soil_cluster_size.png" style="max-width: 100%;"></img>
-
+<img src="images/csl_paris/feeney_soil_cluster_size.png" style="max-width: 95%;"></img>
 </div>
-
 <span class="caption"><a href="https://www.pnas.org/doi/full/10.1073/pnas.2304663120">Feeney et al 2006</a></span>
 
 ---
@@ -176,7 +173,7 @@ $\implies$ both are a cluster of size 36!
 
 ## Nutrient Maximization
 
-![width:1100](images/csl_paris/nutrientmax_soilboundaries.png)
+![width:1000](images/EPFL_latsis/nutrientmax_soilboundaries.png)
 
 
 ---
@@ -184,7 +181,7 @@ $\implies$ both are a cluster of size 36!
 ## Conclusion
 
 
-![width:900px](images/EPFL_latsis/conclusion_2.png)
+![width:900px](images/EPFL_latsis/conclusion_3.png)
 
 ---
 
@@ -194,14 +191,13 @@ $\\$
 
 <div class="columns">
 
-<img src="images/EPFL_latsis/kunihiko_kaneko.jpg" style="max-height: 20%; "></img>
+<img src="images/EPFL_latsis/kunihiko_kaneko.jpg" style="max-height: 25%; "></img>
 Kunihiko Kaneko
 
-<img src="images/EPFL_latsis/kim_sneppen.jpg" style="max-height: 20%; "></img>
+<img src="images/EPFL_latsis/kim_sneppen.jpg" style="max-height: 25%; "></img>
 Kim Sneppen
 
 </div>
-
 
 
 ---
